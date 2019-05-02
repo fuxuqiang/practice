@@ -1,0 +1,35 @@
+CREATE DATABASE IF NOT EXISTS `personal` CHARACTER SET `utf8mb4` COLLATE `utf8mb4_unicode_ci`;
+USE `personal`;
+
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `phone` BIGINT NOT NULL UNIQUE,
+    `name` VARCHAR(255) NOT NULL DEFAULT '',
+    `password` VARCHAR(255) NOT NULL DEFAULT '',
+    `capital` mediumint UNSIGNED NOT NULL DEFAULT 0,
+    `api_token` VARCHAR(255) NOT NULL,
+    `token_expires` INT UNSIGNED NULL NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS `trade`;
+CREATE TABLE `trade` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `type` TINYINT UNSIGNED NOT NULL,
+    `user_id` TINYINT UNSIGNED NOT NULL,
+    `code` VARCHAR(255) NOT NULL,
+    `price` SMALLINT UNSIGNED NULL NULL,
+    `num` TINYINT UNSIGNED NOT NULL,
+    `date` DATE NOT NULL,
+    `note` VARCHAR(255) NOT NULL,
+    FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+);
+
+DROP TABLE IF EXISTS `position`;
+CREATE TABLE `position` (
+    `code` VARCHAR(255) NOT NULL,
+    `user_id` TINYINT UNSIGNED NOT NULL,
+    `num` TINYINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`code`,`user_id`)
+);
