@@ -9,8 +9,8 @@ CREATE TABLE `user` (
     `password` VARCHAR(255) NOT NULL DEFAULT '',
     `capital` mediumint UNSIGNED NOT NULL DEFAULT 0,
     `api_token` VARCHAR(255) NOT NULL,
-    `token_expires` INT UNSIGNED NULL NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `token_expires` TIMESTAMP NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 DROP TABLE IF EXISTS `trade`;
@@ -32,4 +32,40 @@ CREATE TABLE `position` (
     `user_id` TINYINT UNSIGNED NOT NULL,
     `num` TINYINT UNSIGNED NOT NULL,
     PRIMARY KEY (`code`,`user_id`)
+);
+
+DROP TABLE IF EXISTS `admin`;
+CREATE TABLE `admin` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `phone` BIGINT NOT NULL UNIQUE,
+    `name` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL DEFAULT '',
+    `role_id` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `api_token` VARCHAR(255) NOT NULL,
+    `token_expires` TIMESTAMP NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS `role`;
+CREATE TABLE `role` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL
+);
+
+DROP TABLE IF EXISTS `route`;
+CREATE TABLE `route` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `method` VARCHAR(5) NOT NULL,
+    `route` VARCHAR(255) NOT NULL,
+    `resource` VARCHAR(255) NOT NULL,
+    `action` VARCHAR(255) NOT NULL
+);
+
+DROP TABLE IF EXISTS `role_route`;
+CREATE TABLE `role_route` (
+    `role_id` TINYINT UNSIGNED,
+    `route_id` TINYINT UNSIGNED,
+    PRIMARY KEY (`role_id`,`route_id`)
+    FOREIGN KEY `role_id` REFERENCES `role` (`id`),
+    FOREIGN KEY `route_id` REFERENCES `route` (`id`)
 );

@@ -1,10 +1,5 @@
 <?php
 
-function json(array $data)
-{
-    die(json_encode($data));
-}
-
 function checkInput(array $params = [])
 {
     ($input = $_REQUEST) || parse_str(file_get_contents('php://input'), $input);
@@ -30,4 +25,11 @@ function response($code)
 {
     http_response_code($code);
     die;
+}
+
+function auth($boundUser = null)
+{
+    static $user;
+    $boundUser && $user = $boundUser;
+    return $user;
 }

@@ -1,29 +1,27 @@
 <?php
+namespace controller;
 
-namespace index\controllers;
-
-use index\Mysql;
-use index\models\User as UserModel;
+use src\Mysql;
 
 class User
 {
     /**
      * 设置密码
      */
-    public function setPassword(UserModel $user)
+    public function setPassword()
     {
         $input = checkInput(['password']);
         if (!preg_match('/^(?!\d+$)(?![a-zA-Z]+$)[\dA-Za-z]{6,}$/', $input['password'])) {
             return ['error' => '密码长度至少为6位，由数字和字母组成'];
         }
-        $user->update(['password' => password_hash($input['password'], PASSWORD_DEFAULT)]);
+        user()->update(['password' => password_hash($input['password'], PASSWORD_DEFAULT)]);
         return ['msg' => '修改成功'];
     }
 
     /**
      * 修改名称
      */
-    public function update(UserModel $user)
+    public function update()
     {
         $input = array_filter(checkInput(), function ($key) {
             return in_array($key, ['name', 'capital']);
@@ -31,14 +29,14 @@ class User
         if (!is_int($input['capital'] + 0)) {
             return ['error' => '资产须为数字'];
         }
-        $user->update($input);
+        user()->update($input);
         return ['msg' => '修改成功'];
     }
 
     /**
      * 交易
      */
-    public function trade(UserModel $user)
+    public function trade()
     {
         checkInput(['type', 'code', 'price', 'num', 'date']);
         if (!is_int($_POST['price'] + 0)) {
@@ -47,6 +45,8 @@ class User
         if (!is_int($_POST['num'] + 0)) {
             return ['error' => '数量须为数字'];
         }
+
+        $user = user();
 
         $total = $_POST['price'] * $_POST['num'] * 100;
         $fee = round($total/5000);
@@ -98,10 +98,22 @@ class User
     /**
      * 交易记录
      */
-    public function getTrades(UserModel $user)
+    public function getTrades()
     {
         return [
-            'data' => Mysql::query('SELECT * FROM `trade` WHERE `user_id`=?', 'i', [$user->id])->fetch_all(MYSQLI_ASSOC)
+            'data' => Mysql::query('SELECT * FROM `trade` WHERE `user_id`=?', 'i', [user()->id])->fetch_all(MYSQLI_ASSOC)
         ];
+    }
+
+    /**
+     * 修改交易备注
+     */
+    public function updateTradeNote()
+    {
+        $input = checkInput(['id', 'note']);
+        Mysql::query(
+            'UPDATE `trade` SET `note`=? WHERE `id`=? AND `user_id`=?', 'sii', [$input['note'], $input['id'], auth()->id]
+        );
+        return ['msg' => '修改成功'];
     }
 }

@@ -1,9 +1,9 @@
 <?php
+namespace controller;
 
-namespace index\controllers;
-
-use index\Mysql;
-use index\models\User;
+use src\Mysql;
+use model\User;
+use model\Register;
 
 class Auth
 {
@@ -29,19 +29,19 @@ class Auth
         if ($_POST['code'] != redis()->get($_POST['phone'])) {
             return ['error' => '验证码错误'];
         }
-        return User::add($_POST['phone']);
+        return Register::handle('user', $_POST['phone']);
     }
 
     /**
-     * 登录
+     * 用户登录
      */
-    public function login()
+    public function userLogin()
     {
         checkInput(['phone']);
         if (empty($_POST['password']) && empty($_POST['code'])) {
             return ['error' => '参数错误'];
         }
-        if (! $row = Mysql::query('SELECT `id`,`password` FROM `user` WHERE `phone`=?', 's', [$_POST['phone']])->fetch_assoc()) {
+        if (! $row = Mysql::query('SELECT `id`,`password` FROM `user` WHERE `phone`=?', 'i', [$_POST['phone']])->fetch_assoc()) {
             return User::add($_POST['phone']);
         }
         if (isset($_POST['code'])) {
@@ -52,7 +52,16 @@ class Auth
             return ['error' => '密码错误'];
         }
         $token = uniqid();
-        (new User($row['id']))->update(['api_token' => $token, 'token_expires' => $_SERVER['REQUEST_TIME'] + 864000]);
+        (new User($row['id']))->update(['api_token' => $token, 'token_expires' => date('Y-m-d H:i:s', strtotime('1 hour'))]);
         return ['data' => $token];
+    }
+
+    /**
+     * 创建管理员
+     */
+    public function createAdmin()
+    {
+        checkInput(['phone', 'password']);
+        return Register::handle('admin', $_POST['phone']);
     }
 }

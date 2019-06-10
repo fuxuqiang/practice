@@ -1,7 +1,5 @@
 <?php
 
-use index\models\User;
-
 // 允许跨域访问的域名
 header('Access-Control-Allow-Origin: http://127.0.0.1');
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
@@ -11,60 +9,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 // 加载助手函数
 require __DIR__.'/helpers.php';
-// 设置报错提示
+
+// 设置不同环境的报错提示
 file_exists(__DIR__.'/.dev') || set_error_handler(function () { response(500); });
-
-// 路由
-$routes = require __DIR__.'/route.php';
-array_walk_recursive($routes, function (&$val) {
-    $val = '/index/controllers/'.$val;
-});
-
-// PATH_INFO
-$pathInfo = isset($_SERVER['PATH_INFO']) ? ltrim($_SERVER['PATH_INFO'], '/') : '';
 
 // 注册自动加载
 spl_autoload_register(function ($class) {
-    require __DIR__.strtr($class, ['\\' => '/', 'index' => '']).'.php';
+    require __DIR__.'/'.str_replace('\\', '/', $class).'.php';
 });
 
+// 加载路由定义
+require __DIR__.'/route.php';
+// 匹配路由
+$pathInfo = isset($_SERVER['PATH_INFO']) ? ltrim($_SERVER['PATH_INFO'], '/') : '';
+($route = \src\Route::$routes[$_SERVER['REQUEST_METHOD']][$pathInfo] ?? false) || response(404);
 // 判断路由是否需要认证
-foreach ($routes as $key => $value) {
-    $route = $value[$_SERVER['REQUEST_METHOD']][$pathInfo] ?? false;
-    if ($route) {
-        if ($key == 'auth') {
-            if (function_exists('getallheaders')) {
-                $authHeader = getallheaders()['Authorization'] ?? false;
-            } else {
-                $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? false;
-            }
-            if (
-                $authHeader
-                && $row = \index\Mysql::query('SELECT `id` FROM `user` WHERE `api_token`=? AND `token_expires`>UNIX_TIMESTAMP()', 's', [substr($authHeader, 7)])->fetch_row()
-            ) {
-                $user = new User($row[0]);
-            } else {
-                response(401);
-            }
-        }
-        break;
-    }
+if (is_array($route)) {
+    call_user_func([$route[1], 'handle']);
+    $route = $route[0];
 }
-
-$route || response(404);
-
-$pos = strrpos($route, '/');
-$controller = str_replace('/', '\\', substr($route, 0, $pos));
-$object = new $controller;
-$method = new ReflectionMethod($object, substr($route, $pos + 1));
-
-if (isset($user) && ($params = $method->getParameters()) && $params[0]->getClass()->name == User::class) {
-    $response = $method->invokeArgs($object, [$user]);
-} else {
-    $response = $method->invoke($object);
-}
-
+// 分发到控制器
+$dispatch = explode('@', $route);
+$controller = '\\controller\\'.$dispatch[0];
+$response = call_user_func([new $controller, $dispatch[1]]);
+// 响应
 if (!is_null($response)) {
     header('Content-Type: application/json');
-    json($response);
+    echo json_encode($response);
 }

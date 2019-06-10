@@ -1,6 +1,6 @@
 <?php
 
-namespace index;
+namespace src;
 
 class Mysql
 {

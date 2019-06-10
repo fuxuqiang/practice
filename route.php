@@ -1,26 +1,31 @@
 <?php
 
-return [
-    'unauth' => [
-        'POST' => [
-            'auth/sendCode' => 'Auth/sendCode',
-            'register' => 'Auth/register',
-            'login' => 'Auth/login'
-        ],
-        'GET' => [
-            'analyze' => 'Analyze/index'
-        ]
-    ],
-    'auth' => [
-        'PUT' => [
-            'user/setPassword' => 'User/setPassword',
-            'user/update' => 'User/update'
-        ],
-        'POST' => [
-            'user/trade' => 'User/trade'
-        ],
-        'GET' => [
-            'user/trades' => 'User/getTrades'
-        ]
+use src\Route;
+
+Route::add([
+    'POST' => [
+        'auth/sendCode' => 'Auth@sendCode',
+        'register' => 'Auth@register',
+        'login' => 'Auth@userLogin'
     ]
-];
+]);
+
+Route::auth(\auth\User::class)->add([
+    'PUT' => [
+        'user/setPassword' => 'User@setPassword',
+        'user/update' => 'User@update',
+        'user/updateTradeNote' => 'User@updateTradeNote'
+    ],
+    'POST' => [
+        'user/trade' => 'User@trade'
+    ],
+    'GET' => [
+        'user/trades' => 'User@getTrades'
+    ]
+]);
+
+Route::prefix('admin')->add([
+    'POST' => [
+        'login' => 'Auth@adminLogin'
+    ]
+]);
