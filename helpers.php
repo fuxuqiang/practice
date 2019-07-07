@@ -1,13 +1,8 @@
 <?php
 
-function checkInput(array $params = [])
+function input()
 {
     ($input = $_REQUEST) || parse_str(file_get_contents('php://input'), $input);
-    foreach ($params as $param) {
-        if (!isset($input[$param])) {
-            json(['error' => '参数错误']);
-        }
-    }
     return $input;
 }
 
@@ -21,15 +16,15 @@ function redis()
     return $redis;
 }
 
-function response($code)
+function response(int $code, string $msg = '')
 {
     http_response_code($code);
-    die;
+    die($msg);
 }
 
-function auth($boundUser = null)
+function auth(\src\Mysql $user = null)
 {
-    static $user;
-    $boundUser && $user = $boundUser;
-    return $user;
+    static $boundUser;
+    $user && $boundUser = $user;
+    return $boundUser;
 }

@@ -9,7 +9,7 @@ CREATE TABLE `user` (
     `password` VARCHAR(255) NOT NULL DEFAULT '',
     `capital` mediumint UNSIGNED NOT NULL DEFAULT 0,
     `api_token` VARCHAR(255) NOT NULL,
-    `token_expires` TIMESTAMP NOT NULL,
+    `token_expires` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -22,8 +22,7 @@ CREATE TABLE `trade` (
     `price` SMALLINT UNSIGNED NULL NULL,
     `num` TINYINT UNSIGNED NOT NULL,
     `date` DATE NOT NULL,
-    `note` VARCHAR(255) NOT NULL,
-    FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+    `note` VARCHAR(255) NOT NULL
 );
 
 DROP TABLE IF EXISTS `position`;
@@ -34,6 +33,13 @@ CREATE TABLE `position` (
     PRIMARY KEY (`code`,`user_id`)
 );
 
+DROP TABLE IF EXISTS `role`;
+CREATE TABLE `role` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `is_super` TINYINT NOT NULL
+);
+
 DROP TABLE IF EXISTS `admin`;
 CREATE TABLE `admin` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -42,15 +48,12 @@ CREATE TABLE `admin` (
     `password` VARCHAR(255) NOT NULL DEFAULT '',
     `role_id` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `api_token` VARCHAR(255) NOT NULL,
-    `token_expires` TIMESTAMP NOT NULL,
+    `token_expires` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS `role`;
-CREATE TABLE `role` (
-    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(255) NOT NULL
-);
+INSERT `role` (`name`,`is_super`) VALUE ('超级管理员',1);
+INSERT `admin` (`phone`,`name`,`role_id`,`api_token`,`token_expires`) VALUE (18005661486,'',1,'',NOW())
 
 DROP TABLE IF EXISTS `route`;
 CREATE TABLE `route` (

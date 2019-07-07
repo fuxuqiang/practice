@@ -3,9 +3,9 @@ namespace model;
 
 use src\Mysql;
 
-class Register 
+class Auth 
 {
-    public static function handle($table, $phone)
+    public static function register($table, $phone)
     {
         $mysqli = Mysql::handler();
         $mysqli->begin_transaction();
@@ -17,7 +17,7 @@ class Register
             }
             $token = uniqid();
             Mysql::query(
-                'INSERT `'.$table.'` (`phone`,`api_token`,`token_expires`) VALUE (?,?,TIMESTAMPADD(HOUR,1,NOW()))',
+                'INSERT `'.$table.'` (`phone`,`api_token`) VALUE (?,?,TIMESTAMPADD(HOUR,1)',
                 'is',
                 [$phone, $token]
             );
@@ -27,5 +27,13 @@ class Register
             $mysqli->rollback();
             return ['error' => $e->getMessage()];
         }
+    }
+
+    public static function getToken($table, $id)
+    {
+        $token = uniqid();
+        Mysql::table($table)->id($id)
+            ->update(['api_token' => $token, 'token_expires' => date('Y-m-d H:i:s', strtotime('2 hour'))]);
+        return $token;
     }
 }

@@ -4,6 +4,13 @@ namespace src;
 
 class Mysql
 {
+    private $table, $id;
+    
+    private function __construct(string $table)
+    {
+        $this->table = $table;
+    }
+
     public static function handler()
     {
         static $mysqli;
@@ -29,5 +36,28 @@ class Mysql
         $rst = $stmt->get_result() ?: true;
         $stmt->close();
         return $rst;
+    }
+
+    public static function table(string $table)
+    {
+        return new self($table);
+    }
+
+    public function id(int $id)
+    {
+        $this->id = $id;
+        return $this;
+    }
+
+    public function update(array $data)
+    {
+        $sql = 'UPDATE `'.$this->table.'` SET ';
+        $types = '';
+        foreach ($data as $key => $value) {
+            $types .= 's';
+            $sql .= '`'.$key.'`=?,';
+        }
+        $sql = rtrim($sql, ',').' WHERE `id`='.$this->id;
+        return self::query($sql, $types, $data);
     }
 }

@@ -18,20 +18,33 @@ spl_autoload_register(function ($class) {
     require __DIR__.'/'.str_replace('\\', '/', $class).'.php';
 });
 
-// 加载路由定义
+// 解析路由
 require __DIR__.'/route.php';
-// 匹配路由
 $pathInfo = isset($_SERVER['PATH_INFO']) ? ltrim($_SERVER['PATH_INFO'], '/') : '';
 ($route = \src\Route::$routes[$_SERVER['REQUEST_METHOD']][$pathInfo] ?? false) || response(404);
-// 判断路由是否需要认证
 if (is_array($route)) {
-    call_user_func([$route[1], 'handle']);
+    ($model = call_user_func([$route[1], 'handle'])) || response(401);
+    auth($model);
     $route = $route[0];
 }
-// 分发到控制器
+
+// 定位控制器方法
 $dispatch = explode('@', $route);
-$controller = '\\controller\\'.$dispatch[0];
-$response = call_user_func([new $controller, $dispatch[1]]);
+$controller = '\controller\\'.$dispatch[0].'Controller';
+$method = new ReflectionMethod($controller, $dispatch[1]);
+// 解析方法参数
+$input = input();
+$args = [];
+foreach ($method->getParameters() as $param) {
+    if (($paramName = $param->getName()) && isset($input[$paramName])) {
+        $args[] = $input[$paramName];
+    } else {
+        response(400, file_exists(__DIR__.'/.dev') ? '缺少参数：'.$paramName : '');
+    }
+}
+// 调用控制器方法
+$response = $method->invokeArgs(new $controller, $args);
+
 // 响应
 if (!is_null($response)) {
     header('Content-Type: application/json');

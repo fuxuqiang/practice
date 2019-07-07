@@ -17,13 +17,13 @@ class Route
         }
     }
 
-    public function _auth($auth)
+    public function _auth(\src\Auth $auth)
     {
         $this->auth = $auth;
         return $this;
     }
 
-    public function _prefix($prefix)
+    public function _prefix(string $prefix)
     {
         $this->prefix = $prefix;
         return $this;
