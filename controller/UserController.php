@@ -23,7 +23,7 @@ class UserController
     /**
      * 交易
      */
-    public function trade(int $type, $code, int $price, int $num, $date)
+    public function trade(int $type, $code, int $price, int $num, $date, $note = '')
     {
         $user = user();
 
@@ -57,16 +57,19 @@ class UserController
                 $capital += $total - $fee - round($total/1000);
                 $num = -$num;
             }
-            Mysql::query(
-                'INSERT `trade` (`user_id`,`type`,`code`,`price`,`num`,`date`,`note`) VALUE (?,?,?,?,?,?,?)',
-                'iisiiss',
-                [$user->id, $type, $code, $price, $num, $date, $note ?? '']
-            );
-            Mysql::query(
-                'REPLACE `position` (`code`,`user_id`,`num`) VALUE (?,?,?)',
-                'sii',
-                [$code, $user->id, ($positionNum ? $positionNum[0] : 0) + $num]
-            );
+            Mysql::table('trade')->insert([
+                'user_id' => $user->id,
+                'type' => $type,
+                'code' => $code,
+                'price' => $price,
+                'num' => $num,
+                'note' => $note
+            ]);
+            Mysql::table('position')->replace([
+                'code' => $code,
+                'user_id' => $user->id,
+                'num' => ($positionNum ? $positionNum[0] : 0) + $num
+            ]);
             $user->update(['capital' => $capital]);
             $mysqli->commit();
             return ['msg' => '交易成功'];

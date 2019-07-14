@@ -17,7 +17,7 @@ class AuthController
         }
         $code = mt_rand(1000, 9999);
         if (true/* todo 发送验证码到手机 */) {
-            redis()->setex($phone, 99, $code);
+            redis()->setex($phone, 999, $code);
         }
         return ['msg' => '发送成功'];
     }
@@ -30,7 +30,7 @@ class AuthController
         if ($code != redis()->get($phone)) {
             return ['error' => '验证码错误'];
         }
-        return Auth::register('user', $phone);
+        return Auth::register('user', ['phone' => $phone]);
     }
 
     /**
@@ -41,17 +41,17 @@ class AuthController
         if (empty($_POST['password']) && empty($_POST['code'])) {
             return ['error' => '参数错误'];
         }
-        if (! $row = Mysql::query('SELECT `id`,`password` FROM `user` WHERE `phone`=?', 'i', [$phone])->fetch_assoc()) {
-            return Auth::register($table, $phone);
+        if (! $user = Mysql::query('SELECT `id`,`password` FROM `user` WHERE `phone`=?', 'i', [$phone])->fetch_object()) {
+            return Auth::register($table, ['phone' => $phone]);
         }
         if (isset($_POST['code'])) {
             if ($_POST['code'] != redis()->get($phone)) {
                 return ['error' => '验证码错误'];
             }
-        } elseif (!password_verify($_POST['password'], $row['password'])) {
+        } elseif (!password_verify($_POST['password'], $user->password)) {
             return ['error' => '密码错误'];
         }
-        return ['data' => Auth::getToken('user', $row['id'])];
+        return ['data' => Auth::getToken('user', $user->id)];
     }
 
     /**
@@ -63,29 +63,29 @@ class AuthController
             if (empty($_POST['password'])) {
                 return ['error' => '参数错误'];
             }
-            if (! $row = Mysql::query(
+            if (! $admin = Mysql::query(
                 'SELECT `a`.`id`,`a`.`password`,`r`.`is_super` FROM `admin` `a`
                 LEFT JOIN `role` `r` ON `r`.`id`=`a`.`role_id` WHERE `a`.`phone`=?',
                 'i',
                 [$phone]
-            )->fetch_assoc()) {
+            )->fetch_object()) {
                 return ['error' => '用户不存在']; 
             }
-            if ($row['is_super']) {
+            if ($admin->is_super) {
                 return ['error' => '请输入验证码'];
             }
-            if (!password_verify($_POST['password'], $row['password'])) {
+            if (!password_verify($_POST['password'], $admin->password)) {
                 return ['error' => '密码错误'];
             }
         } else {
-            if (! $row = Mysql::query('SELECT `id`,`password` FROM `admin` WHERE `phone`=?', 'i', [$phone])->fetch_assoc()) {
+            if (! $admin = Mysql::query('SELECT `id`,`password` FROM `admin` WHERE `phone`=?', 'i', [$phone])->fetch_object()) {
                 return ['error' => '用户不存在'];
             }
             if ($_POST['code'] != redis()->get($phone)) {
                 return ['error' => '验证码错误'];
             }    
         }
-        return ['data' => Auth::getToken('admin', $row['id'])];
+        return ['data' => Auth::getToken('admin', $admin->id)];
     }
 
     /**

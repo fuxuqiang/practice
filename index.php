@@ -11,7 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 require __DIR__.'/helpers.php';
 
 // 设置不同环境的报错提示
-file_exists(__DIR__.'/.dev') || set_error_handler(function () { response(500); });
+file_exists(__DIR__.'/.dev') || set_error_handler(function () {
+    ob_start();
+    debug_print_backtrace();
+    file_put_contents(__DIR__.'/log/error.log', "\n".ob_get_clean(), FILE_APPEND | LOCK_EX);
+    response(500);
+});
 
 // 注册自动加载
 spl_autoload_register(function ($class) {

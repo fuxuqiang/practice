@@ -4,9 +4,9 @@ namespace src;
 
 class Mysql
 {
-    private $table, $id;
+    private $table, $data;
     
-    private function __construct(string $table)
+    public function __construct(string $table)
     {
         $this->table = $table;
     }
@@ -45,19 +45,32 @@ class Mysql
 
     public function id(int $id)
     {
-        $this->id = $id;
+        $this->data['id'] = $id;
         return $this;
     }
 
-    public function update(array $data)
+    public function __set($name, $value)
     {
-        $sql = 'UPDATE `'.$this->table.'` SET ';
+        $this->data[$name] = $value;
+    }
+
+    public function __get($name)
+    {
+        return $this->data[$name] ?? null;
+    }
+
+    public function __call($name, $args)
+    {
+        if (!in_array($name, ['update', 'insert', 'replace'])) {
+            trigger_error('调用未定义的方法'.self::class.'::'.$name.'()', E_USER_ERROR);
+        }
+        $sql = $name.' `'.$this->table.'` SET ';
         $types = '';
-        foreach ($data as $key => $value) {
+        foreach ($args[0] as $key => $value) {
             $types .= 's';
             $sql .= '`'.$key.'`=?,';
         }
-        $sql = rtrim($sql, ',').' WHERE `id`='.$this->id;
-        return self::query($sql, $types, $data);
+        $sql = rtrim($sql, ',').($name == 'update' && isset($this->data['id']) ? ' WHERE `id`='.$this->data['id'] : '');
+        return self::query($sql, $types, $args[0]);
     }
 }

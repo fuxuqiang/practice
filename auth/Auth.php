@@ -12,10 +12,16 @@ class Auth implements \src\Auth
 
     public function handle()
     {
-        return isset($_SERVER['HTTP_AUTHORIZATION'])
-            && ($row = \src\Mysql::query(
-                'SELECT `id` FROM `'.$this->table.'` WHERE `api_token`=? AND `token_expires`>NOW()', 's',
-                [substr($_SERVER['HTTP_AUTHORIZATION'], 7)]
-            )->fetch_row()) ? \src\Mysql::table($this->table)->id($row[0]) : false;
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            $field = '`id`'.($this->table == 'admin' ? ',`role_id`' : '');
+            if ($model = \src\Mysql::query(
+                    'SELECT '.$field.' FROM `'.$this->table.'` WHERE `api_token`=? AND `token_expires`>NOW()',
+                    's',
+                    [substr($_SERVER['HTTP_AUTHORIZATION'], 7)]
+                )->fetch_object(\src\Mysql::class, [$this->table])) {
+                return $model;
+            }
+        }
+        return false;
     }
 }

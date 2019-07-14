@@ -29,13 +29,13 @@ class Route
         return $this;
     }
 
-    public function __call($name, $arguments)
+    public function __call($name, $args)
     {
-        return call_user_func_array([$this, '_'.$name], $arguments);
+        return call_user_func_array([$this, '_'.$name], $args);
     }
 
-    public static function __callStatic($name, $arguments)
+    public static function __callStatic($name, $args)
     {
-        return call_user_func_array([new self, '_'.$name], $arguments);
+        return call_user_func_array([new self, '_'.$name], $args);
     }
 }
