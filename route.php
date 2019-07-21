@@ -11,7 +11,7 @@ Route::add([
     ]
 ]);
 
-Route::prefix('user')->auth(new Auth('user'))->add([
+Route::prefix('user')->auth(\auth\User::class)->add([
     'PUT' => [
         'setPassword' => 'Auth@setPassword',
         'update' => 'User@update',
@@ -24,7 +24,7 @@ Route::prefix('user')->auth(new Auth('user'))->add([
 
 Route::prefix('admin')->add(['POST' => ['login' => 'Auth@adminLogin']]);
 
-Route::prefix('admin')->auth(new Auth('admin'))->add([
+Route::prefix('admin')->auth(\auth\Admin::class)->add([
     'PUT' => [
         'setPassword' => 'Auth@setPassword',
         'changePhone' => 'Auth@changePhone',

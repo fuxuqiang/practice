@@ -6,17 +6,11 @@ class Mysql
 {
     public $mysqli, $table;
     
-    private $where, $param;
+    private $where, $param, $columns;
 
     public function __construct(\mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
-    }
-
-    public function table($table)
-    {
-        $this->table = $table;
-        return $this;
     }
 
     public function query($sql, $types = '', array $vars = [])
@@ -36,19 +30,16 @@ class Mysql
         return $rst;
     }
 
-    public function __call($name, $args)
+    public function table($table)
     {
-        if (!in_array($name, ['update', 'insert', 'replace'])) {
-            trigger_error('调用未定义的方法'.self::class.'::'.$name.'()');
-        }
-        $sql = $name.' `'.$this->table.'` SET ';
-        $types = '';
-        foreach ($args[0] as $key => $value) {
-            $types .= 's';
-            $sql .= '`'.$key.'`=?,';
-        }
-        $sql = rtrim($sql, ',').($name == 'update' ? $this->where : '');
-        return $this->query($sql, $types, $args[0]);
+        $this->table = $table;
+        return $this;
+    }
+
+    public function select(...$columns)
+    {
+        $this->columns = $columns;
+        return $this;
     }
 
     public function where($column, $val)
@@ -64,9 +55,26 @@ class Mysql
         $sql = 'SELECT %s FROM `'.$this->table.'`'.$this->where;
         return [
             'data' => $this->query(
-                    sprintf($sql, '*').' LIMIT '.($page - 1) * $perPage.','.$perPage
+                    sprintf($sql, $this->columns ? implode(',', array_map(function ($val) {
+                        return '`'.$val.'`';
+                    }, $this->columns)) : '*').' LIMIT '.($page - 1) * $perPage.','.$perPage
                 )->fetch_all(MYSQLI_ASSOC),
             'total' => $this->query(sprintf($sql, 'COUNT(*)'))->fetch_row()[0]
         ];
+    }
+
+    public function __call($name, $args)
+    {
+        if (!in_array($name, ['update', 'insert', 'replace'])) {
+            trigger_error('调用未定义的方法'.self::class.'::'.$name.'()');
+        }
+        $sql = $name.' `'.$this->table.'` SET ';
+        $types = '';
+        foreach ($args[0] as $key => $value) {
+            $types .= 's';
+            $sql .= '`'.$key.'`=?,';
+        }
+        $sql = rtrim($sql, ',').($name == 'update' ? $this->where : '');
+        return $this->query($sql, $types, $args[0]);
     }
 }

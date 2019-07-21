@@ -58,9 +58,9 @@ INSERT `admin` (`phone`,`name`,`role_id`,`api_token`,`token_expires`) VALUE (180
 DROP TABLE IF EXISTS `route`;
 CREATE TABLE `route` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `method` VARCHAR(5) NOT NULL,
-    `route` VARCHAR(255) NOT NULL,
-    `resource` VARCHAR(255) NOT NULL,
+    `method` VARCHAR(255) NOT NULL,
+    `uri` VARCHAR(255) NOT NULL,
+    `auth` VARCHAR(255) NOT NULL DEFAULT '',
     `action` VARCHAR(255) NOT NULL
 );
 

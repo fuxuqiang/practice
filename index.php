@@ -21,7 +21,7 @@ if (!file_exists(__DIR__.'/.dev')) {
         logError(ob_get_clean());
     });
     register_shutdown_function(function () {
-        ($error = error_get_last()) && $error['type'] == E_ERROR && logError($error['message']);
+        ($error = error_get_last()) && logError($error['message']);
     });
 }
 
@@ -40,7 +40,9 @@ require __DIR__.'/route.php';
 $pathInfo = isset($_SERVER['PATH_INFO']) ? ltrim($_SERVER['PATH_INFO'], '/') : '';
 ($route = \src\Route::$routes[$_SERVER['REQUEST_METHOD']][$pathInfo] ?? false) || response(404);
 if (is_array($route)) {
-    ($model = $route[1]->handle()) || response(401);
+    ($model = $route[1]::handle(isset($_SERVER['HTTP_AUTHORIZATION']) ?
+        substr($_SERVER['HTTP_AUTHORIZATION'], 7) : false))
+    || response(401);
     auth($model);
     $route = $route[0];
 }

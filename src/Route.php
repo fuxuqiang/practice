@@ -17,7 +17,7 @@ class Route
         }
     }
 
-    public function _auth(\src\Auth $auth)
+    public function _auth($auth)
     {
         $this->auth = $auth;
         return $this;

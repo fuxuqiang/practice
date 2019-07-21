@@ -8,7 +8,10 @@ class AdminController
     public function index($perPage)
     {
         if (auth()->isSuper()) {
-            return ['data' => mysql('admin')->paginate($perPage)];
+            return [
+                'data' => mysql('admin')
+                    ->select('id', 'phone', 'name', 'role_id', 'created_at')->paginate($perPage)
+            ];
         } else {
             response(401);
         }
