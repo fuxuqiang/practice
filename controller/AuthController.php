@@ -27,10 +27,8 @@ class AuthController
      */
     public function register(int $phone, int $code)
     {
-        if ($code != redis()->get($phone)) {
-            return ['error' => '验证码错误'];
-        }
-        return Auth::register('user', ['phone' => $phone]);
+        validateCode($phone, $code);
+        return Auth::addUser($phone);
     }
 
     /**
@@ -41,13 +39,11 @@ class AuthController
         if (empty($_POST['password']) && empty($_POST['code'])) {
             return ['error' => '参数错误'];
         }
-        if (! $user = Mysql::query('SELECT `id`,`password` FROM `user` WHERE `phone`=?', 'i', [$phone])->fetch_object()) {
-            return Auth::register($table, ['phone' => $phone]);
+        if (! $user = mysql()->query('SELECT `id`,`password` FROM `user` WHERE `phone`=?', 'i', [$phone])->fetch_object()) {
+            return Auth::addUser($phone);
         }
         if (isset($_POST['code'])) {
-            if ($_POST['code'] != redis()->get($phone)) {
-                return ['error' => '验证码错误'];
-            }
+            validateCode($phone, $_POST['code']);
         } elseif (!password_verify($_POST['password'], $user->password)) {
             return ['error' => '密码错误'];
         }
@@ -63,27 +59,25 @@ class AuthController
             if (empty($_POST['password'])) {
                 return ['error' => '参数错误'];
             }
-            if (! $admin = Mysql::query(
-                'SELECT `a`.`id`,`a`.`password`,`r`.`is_super` FROM `admin` `a`
+            if (! $admin = mysql()->query(
+                'SELECT `a`.`id`,`a`.`password`,`r`.`pid` FROM `admin` `a`
                 LEFT JOIN `role` `r` ON `r`.`id`=`a`.`role_id` WHERE `a`.`phone`=?',
                 'i',
                 [$phone]
             )->fetch_object()) {
                 return ['error' => '用户不存在']; 
             }
-            if ($admin->is_super) {
+            if (!$admin->pid) {
                 return ['error' => '请输入验证码'];
             }
             if (!password_verify($_POST['password'], $admin->password)) {
                 return ['error' => '密码错误'];
             }
         } else {
-            if (! $admin = Mysql::query('SELECT `id`,`password` FROM `admin` WHERE `phone`=?', 'i', [$phone])->fetch_object()) {
+            if (! $admin = mysql()->query('SELECT `id`,`password` FROM `admin` WHERE `phone`=?', 'i', [$phone])->fetch_object()) {
                 return ['error' => '用户不存在'];
             }
-            if ($_POST['code'] != redis()->get($phone)) {
-                return ['error' => '验证码错误'];
-            }    
+            validateCode($phone, $_POST['code']);  
         }
         return ['data' => Auth::getToken('admin', $admin->id)];
     }
@@ -98,5 +92,17 @@ class AuthController
         }
         auth()->update(['password' => password_hash($password, PASSWORD_DEFAULT)]);
         return ['msg' => '修改成功'];
+    }
+
+    /**
+     * 换绑手机
+     */
+    public function changePhone(int $phone, int $code)
+    {
+        validateCode($phone, $code);
+        $auth = auth();
+        return Auth::registerPhone($auth->table, $phone, function () use ($auth, $phone) {
+            $auth->update(['phone' => $phone]);
+        }, ['msg' => '换绑成功']);
     }
 }

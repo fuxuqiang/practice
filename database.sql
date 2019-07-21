@@ -37,7 +37,7 @@ DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
-    `is_super` TINYINT NOT NULL
+    `pid` TINYINT NOT NULL
 );
 
 DROP TABLE IF EXISTS `admin`;
@@ -52,7 +52,7 @@ CREATE TABLE `admin` (
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT `role` (`name`,`is_super`) VALUE ('超级管理员',1);
+INSERT `role` (`name`,`pid`) VALUE ('超级管理员',0);
 INSERT `admin` (`phone`,`name`,`role_id`,`api_token`,`token_expires`) VALUE (18005661486,'',1,'',NOW())
 
 DROP TABLE IF EXISTS `route`;

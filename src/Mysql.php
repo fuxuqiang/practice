@@ -4,65 +4,42 @@ namespace src;
 
 class Mysql
 {
-    private $table, $data;
+    public $mysqli, $table;
     
-    public function __construct(string $table)
+    private $where, $param;
+
+    public function __construct(\mysqli $mysqli)
+    {
+        $this->mysqli = $mysqli;
+    }
+
+    public function table($table)
     {
         $this->table = $table;
+        return $this;
     }
 
-    public static function handler()
+    public function query($sql, $types = '', array $vars = [])
     {
-        static $mysqli;
-        $mysqli || $mysqli = new \mysqli('127.0.0.1', 'guest', 'eb', 'personal');
-        return $mysqli;
-    }
-
-    public static function query(string $sql, string $types, array $bounds)
-    {
-        $mysqli = self::handler();
-        if ($stmt = $mysqli->prepare($sql)) {
-            $params = [&$types];
-            foreach ($bounds as $key => $bound) {
-                $params[] = &$bounds[$key];
+        if ($stmt = $this->mysqli->prepare($sql)) {
+            if ($this->param) {
+                $types .= 's';
+                $vars = array_merge($vars, [$this->param]);    
             }
-            call_user_func_array([$stmt, 'bind_param'], $params);
-            if (!$stmt->execute()) {
-                trigger_error($mysqli->error, E_USER_ERROR);
-            }
+            $types && $stmt->bind_param($types, ...array_values($vars));
+            $stmt->execute() || trigger_error($this->mysqli->error);
         } else {
-            trigger_error($mysqli->error, E_USER_ERROR);
+            trigger_error($this->mysqli->error);
         }
         $rst = $stmt->get_result() ?: true;
         $stmt->close();
         return $rst;
     }
 
-    public static function table(string $table)
-    {
-        return new self($table);
-    }
-
-    public function id(int $id)
-    {
-        $this->data['id'] = $id;
-        return $this;
-    }
-
-    public function __set($name, $value)
-    {
-        $this->data[$name] = $value;
-    }
-
-    public function __get($name)
-    {
-        return $this->data[$name] ?? null;
-    }
-
     public function __call($name, $args)
     {
         if (!in_array($name, ['update', 'insert', 'replace'])) {
-            trigger_error('调用未定义的方法'.self::class.'::'.$name.'()', E_USER_ERROR);
+            trigger_error('调用未定义的方法'.self::class.'::'.$name.'()');
         }
         $sql = $name.' `'.$this->table.'` SET ';
         $types = '';
@@ -70,7 +47,26 @@ class Mysql
             $types .= 's';
             $sql .= '`'.$key.'`=?,';
         }
-        $sql = rtrim($sql, ',').($name == 'update' && isset($this->data['id']) ? ' WHERE `id`='.$this->data['id'] : '');
-        return self::query($sql, $types, $args[0]);
+        $sql = rtrim($sql, ',').($name == 'update' ? $this->where : '');
+        return $this->query($sql, $types, $args[0]);
+    }
+
+    public function where($column, $val)
+    {
+        $this->where = ' WHERE `'.$column.'`=?';
+        $this->param = $val;
+        return $this;
+    }
+
+    public function paginate($perPage)
+    {
+        $page = input()['page'] ?? 1;
+        $sql = 'SELECT %s FROM `'.$this->table.'`'.$this->where;
+        return [
+            'data' => $this->query(
+                    sprintf($sql, '*').' LIMIT '.($page - 1) * $perPage.','.$perPage
+                )->fetch_all(MYSQLI_ASSOC),
+            'total' => $this->query(sprintf($sql, 'COUNT(*)'))->fetch_row()[0]
+        ];
     }
 }

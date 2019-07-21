@@ -32,14 +32,16 @@ class UserController
         $fee = $fee > 500 ? $fee : 500;
         $type = $type == 1 ? 1 : 2;
 
-        $mysqli = Mysql::handler();
+        $mysql = mysql();
+
+        $mysqli = $mysql->mysqli;
         $mysqli->begin_transaction();
         
         try {
-            $capital = Mysql::query(
+            $capital = $mysql->query(
                 'SELECT `capital` FROM `user` WHERE `id`=? FOR UPDATE', 'i', [$user->id]
             )->fetch_row()[0];
-            $positionNum = Mysql::query(
+            $positionNum = $mysql->query(
                 'SELECT `num` FROM `position` WHERE `code`=? AND `user_id`=? FOR UPDATE',
                 'si',
                 [$code, $user->id]
@@ -57,15 +59,16 @@ class UserController
                 $capital += $total - $fee - round($total/1000);
                 $num = -$num;
             }
-            Mysql::table('trade')->insert([
+            mysql('trade')->insert([
                 'user_id' => $user->id,
                 'type' => $type,
                 'code' => $code,
                 'price' => $price,
                 'num' => $num,
+                'date' => $date,
                 'note' => $note
             ]);
-            Mysql::table('position')->replace([
+            mysql('position')->replace([
                 'code' => $code,
                 'user_id' => $user->id,
                 'num' => ($positionNum ? $positionNum[0] : 0) + $num
@@ -82,10 +85,10 @@ class UserController
     /**
      * 交易记录
      */
-    public function getTrades()
+    public function getTrades(int $perPage)
     {
         return [
-            'data' => Mysql::query('SELECT * FROM `trade` WHERE `user_id`=?', 'i', [auth()->id])->fetch_all(MYSQLI_ASSOC)
+            'data' => mysql('trade')->where('user_id', auth()->id)->paginate($perPage)
         ];
     }
 
@@ -94,7 +97,7 @@ class UserController
      */
     public function updateTradeNote(int $id, $note)
     {
-        Mysql::query('UPDATE `trade` SET `note`=? WHERE `id`=? AND `user_id`=?', 'sii', [$note, $id, auth()->id]);
+        mysql()->query('UPDATE `trade` SET `note`=? WHERE `id`=? AND `user_id`=?', 'sii', [$note, $id, auth()->id]);
         return ['msg' => '修改成功'];
     }
 }

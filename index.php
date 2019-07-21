@@ -1,34 +1,46 @@
 <?php
 
-// 允许跨域访问的域名
-header('Access-Control-Allow-Origin: http://127.0.0.1');
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    header('Access-Control-Allow-Headers: Authorization');
-    die;
-}
-
 // 加载助手函数
 require __DIR__.'/helpers.php';
 
-// 设置不同环境的报错提示
-file_exists(__DIR__.'/.dev') || set_error_handler(function () {
-    ob_start();
-    debug_print_backtrace();
-    file_put_contents(__DIR__.'/log/error.log', "\n".ob_get_clean(), FILE_APPEND | LOCK_EX);
-    response(500);
-});
+// 是否允许跨域
+if ($cors = config('cors')) {
+    header('Access-Control-Allow-Origin: '.$cors);
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        header('Access-Control-Allow-Headers: Authorization');
+        die;
+    }
+}
+
+// 报错处理
+if (!file_exists(__DIR__.'/.dev')) {
+    ini_set('display_errors', 0);
+    set_error_handler(function () {
+        ob_start();
+        debug_print_backtrace();
+        logError(ob_get_clean());
+    });
+    register_shutdown_function(function () {
+        ($error = error_get_last()) && $error['type'] == E_ERROR && logError($error['message']);
+    });
+}
 
 // 注册自动加载
 spl_autoload_register(function ($class) {
     require __DIR__.'/'.str_replace('\\', '/', $class).'.php';
 });
 
+// 定义模型的数据库连接
+\src\Model::$connector = function ($model) {
+    return mysql($model->table);
+};
+
 // 解析路由
 require __DIR__.'/route.php';
 $pathInfo = isset($_SERVER['PATH_INFO']) ? ltrim($_SERVER['PATH_INFO'], '/') : '';
 ($route = \src\Route::$routes[$_SERVER['REQUEST_METHOD']][$pathInfo] ?? false) || response(404);
 if (is_array($route)) {
-    ($model = call_user_func([$route[1], 'handle'])) || response(401);
+    ($model = $route[1]->handle()) || response(401);
     auth($model);
     $route = $route[0];
 }

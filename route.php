@@ -11,19 +11,25 @@ Route::add([
     ]
 ]);
 
-Route::auth(new Auth('user'))->add([
+Route::prefix('user')->auth(new Auth('user'))->add([
     'PUT' => [
-        'user/setPassword' => 'Auth@setPassword',
-        'user/update' => 'User@update',
-        'user/updateTradeNote' => 'User@updateTradeNote'
+        'setPassword' => 'Auth@setPassword',
+        'update' => 'User@update',
+        'updateTradeNote' => 'User@updateTradeNote',
+        'changePhone' => 'Auth@changePhone'
     ],
-    'POST' => ['user/trade' => 'User@trade'],
-    'GET' => ['user/trades' => 'User@getTrades']
+    'POST' => ['trade' => 'User@trade'],
+    'GET' => ['trades' => 'User@getTrades']
 ]);
 
 Route::prefix('admin')->add(['POST' => ['login' => 'Auth@adminLogin']]);
 
 Route::prefix('admin')->auth(new Auth('admin'))->add([
-    'PUT' => ['setPassword' => 'Auth@setPassword'],
-    'POST' => ['createAdmin' => 'Admin@create']
+    'PUT' => [
+        'setPassword' => 'Auth@setPassword',
+        'changePhone' => 'Auth@changePhone',
+        'updateProfile' => 'Admin@update'
+    ],
+    'POST' => ['createAdmin' => 'Admin@create'],
+    'GET' => ['admins' => 'Admin@index']
 ]);
