@@ -32,7 +32,7 @@ spl_autoload_register(function ($class) {
 
 // 定义模型的数据库连接
 \src\Model::$connector = function ($model) {
-    return mysql($model->table);
+    return mysql($model->getTable());
 };
 
 // 解析路由

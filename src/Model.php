@@ -3,15 +3,18 @@ namespace src;
 
 class Model
 {
-    public $table;
-
     public static $connector;
 
-    private $data;
+    private $table, $data;
 
     public function __construct($table = null)
     {
         $this->table = $table ?? strtolower(basename(__CLASS__));
+    }
+
+    public function getTable()
+    {
+        return $this->table;
     }
 
     public function __set($name, $value)

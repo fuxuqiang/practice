@@ -49,7 +49,8 @@ CREATE TABLE `admin` (
     `role_id` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `api_token` VARCHAR(255) NOT NULL,
     `token_expires` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP
 );
 
 INSERT `role` (`name`,`pid`) VALUE ('超级管理员',0);
@@ -60,8 +61,9 @@ CREATE TABLE `route` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `method` VARCHAR(255) NOT NULL,
     `uri` VARCHAR(255) NOT NULL,
-    `auth` VARCHAR(255) NOT NULL DEFAULT '',
-    `action` VARCHAR(255) NOT NULL
+    `resource` VARCHAR(255) NOT NULL,
+    `action` VARCHAR(255) NOT NULL,
+    UNIQUE (`method`,`uri`)
 );
 
 DROP TABLE IF EXISTS `role_route`;
@@ -69,6 +71,4 @@ CREATE TABLE `role_route` (
     `role_id` TINYINT UNSIGNED,
     `route_id` TINYINT UNSIGNED,
     PRIMARY KEY (`role_id`,`route_id`)
-    FOREIGN KEY `role_id` REFERENCES `role` (`id`),
-    FOREIGN KEY `route_id` REFERENCES `route` (`id`)
 );

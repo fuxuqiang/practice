@@ -74,7 +74,7 @@ class AuthController
                 return ['error' => '密码错误'];
             }
         } else {
-            if (! $admin = mysql()->query('SELECT `id`,`password` FROM `admin` WHERE `phone`=?', 'i', [$phone])->fetch_object()) {
+            if (! $admin = mysql()->query('SELECT `id` FROM `admin` WHERE `phone`=?', 'i', [$phone])->fetch_object()) {
                 return ['error' => '用户不存在'];
             }
             validateCode($phone, $_POST['code']);  
