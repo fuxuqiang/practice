@@ -5,11 +5,11 @@ use src\Mysql;
 
 class AdminController 
 {
-    public function index(int $page = 1, int $perPage = 5)
+    public function index(int $page = 1, int $per_page = 5)
     {
         return [
             'data' => mysql('admin')->select('id', 'phone', 'name', 'role_id', 'created_at')
-                ->whereNull('deleted_at')->paginate($page, $perPage)
+                ->with(['role' => ['id', 'name']])->whereNull('deleted_at')->paginate($page, $per_page)
         ];
     }
 
@@ -26,9 +26,15 @@ class AdminController
         return ['msg' => '修改成功'];
     }
 
-    public function delete($id)
+    public function delete(int $id)
     {
         mysql('admin')->where('id', $id)->update(['deleted_at' => timestamp()]);
         return ['msg' => '删除成功'];
+    }
+
+    public function setRole(int $id, int $role_id)
+    {
+        mysql('admin')->where('id', $id)->update(['role_id' => $role_id]);
+        return ['msg' => '设置成功'];
     }
 }

@@ -28,7 +28,8 @@ Route::prefix('admin')->auth(\auth\Admin::class)->add([
     'PUT' => [
         'setPassword' => 'Auth@setPassword',
         'changePhone' => 'Auth@changePhone',
-        'updateProfile' => 'Admin@update'
+        'updateProfile' => 'Admin@update',
+        'setRole' => 'Admin@setRole',
     ],
     'POST' => [
         'createAdmin' => 'Admin@create',

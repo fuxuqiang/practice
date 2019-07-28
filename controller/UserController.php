@@ -85,10 +85,17 @@ class UserController
     /**
      * 交易记录
      */
-    public function getTrades(int $page = 1, int $perPage = 5)
+    public function getTrades(int $page = 1, int $per_page = 5)
     {
+        $input = input();
+        $query = mysql('trade');
+        $cond = [];
+        isset($input['type']) && $cond[] = ['type', '=', $input['type']];
+        isset($input['code']) && $cond[] = ['code', '=', $input['code']];
+        isset($input['start']) && $cond[] = ['date', '>', $input['start']];
+        isset($input['end']) && $cond[] = ['date', '<', $input['end']];
         return [
-            'data' => mysql('trade')->where('user_id', auth()->id)->paginate($page, $perPage)
+            'data' => $query->where($cond)->paginate($page, $per_page)
         ];
     }
 
