@@ -85,10 +85,10 @@ class UserController
     /**
      * 交易记录
      */
-    public function getTrades(int $perPage)
+    public function getTrades(int $page = 1, int $perPage = 5)
     {
         return [
-            'data' => mysql('trade')->where('user_id', auth()->id)->paginate($perPage)
+            'data' => mysql('trade')->where('user_id', auth()->id)->paginate($page, $perPage)
         ];
     }
 

@@ -5,7 +5,7 @@ class Admin implements \src\Auth
 {
     public static function handle($token)
     {
-        if ($token && $admin = mysql()->query(
+        if ($admin = mysql()->query(
                 'SELECT `id`,`role_id` FROM `admin` WHERE `api_token`=? AND `token_expires`>NOW()',
                 's',
                 [$token]

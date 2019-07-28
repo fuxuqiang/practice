@@ -4,15 +4,18 @@ namespace src;
 
 class Mysql
 {
-    public $mysqli, $table;
+    public $mysqli;
     
-    private $where, $param, $columns;
+    private $table, $param, $cols, $conds = [];
 
     public function __construct(\mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
     }
 
+    /**
+     * 执行查询
+     */
     public function query($sql, $types = '', array $vars = [])
     {
         if ($stmt = $this->mysqli->prepare($sql)) {
@@ -30,39 +33,62 @@ class Mysql
         return $rst;
     }
 
-    public function table($table)
+    /**
+     * 设置表名
+     */
+    public function from($table)
     {
         $this->table = $table;
         return $this;
     }
 
-    public function select(...$columns)
+    /**
+     * 设置查询列
+     */
+    public function select(...$cols)
     {
-        $this->columns = $columns;
+        $this->cols = $cols;
         return $this;
     }
 
-    public function where($column, $val)
+    /**
+     * 设置 WHERE {COLUMN}={VALUE} 条件
+     */
+    public function where($col, $val)
     {
-        $this->where = ' WHERE `'.$column.'`=?';
+        $this->conds[] = '`'.$col.'`=?';
         $this->param = $val;
         return $this;
     }
 
-    public function paginate($perPage)
+    /**
+     * 设置 WHERE {COLOMN} IS NULL条件
+     */
+    public function whereNull($col)
     {
-        $page = input()['page'] ?? 1;
-        $sql = 'SELECT %s FROM `'.$this->table.'`'.$this->where;
+        $this->conds[] = '`'.$col.'` IS NULL';
+        return $this;
+    }
+
+    /**
+     * 分页查询
+     */
+    public function paginate($page, $perPage)
+    {
+        $sql = 'SELECT %s FROM `'.$this->table.'`'.$this->getWhere();
         return [
             'data' => $this->query(
-                    sprintf($sql, $this->columns ? implode(',', array_map(function ($val) {
+                    sprintf($sql, $this->cols ? implode(',', array_map(function ($val) {
                         return '`'.$val.'`';
-                    }, $this->columns)) : '*').' LIMIT '.($page - 1) * $perPage.','.$perPage
+                    }, $this->cols)) : '*').' LIMIT '.($page - 1) * $perPage.','.$perPage
                 )->fetch_all(MYSQLI_ASSOC),
             'total' => $this->query(sprintf($sql, 'COUNT(*)'))->fetch_row()[0]
         ];
     }
 
+    /**
+     * update,insert,replace方法
+     */
     public function __call($name, $args)
     {
         if (!in_array($name, ['update', 'insert', 'replace'])) {
@@ -74,7 +100,15 @@ class Mysql
             $types .= 's';
             $sql .= '`'.$key.'`=?,';
         }
-        $sql = rtrim($sql, ',').($name == 'update' ? $this->where : '');
+        $sql = rtrim($sql, ',').($name == 'update' ? $this->getWhere() : '');
         return $this->query($sql, $types, $args[0]);
+    }
+
+    /**
+     * 获取WHERE子句
+     */
+    private function getWhere()
+    {
+        return $this->conds ? ' WHERE '.implode(' AND ', $this->conds) : '';
     }
 }

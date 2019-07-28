@@ -30,6 +30,15 @@ Route::prefix('admin')->auth(\auth\Admin::class)->add([
         'changePhone' => 'Auth@changePhone',
         'updateProfile' => 'Admin@update'
     ],
-    'POST' => ['createAdmin' => 'Admin@create'],
-    'GET' => ['admins' => 'Admin@index']
+    'POST' => [
+        'createAdmin' => 'Admin@create',
+        'route' => 'Route@create',
+        'role' => 'Role@create',
+    ],
+    'GET' => [
+        'admins' => 'Admin@index',
+        'routes' => 'Route@index',
+        'roles' => 'Role@index',
+    ],
+    'DELETE' => ['admin' => 'Admin@delete'],
 ]);

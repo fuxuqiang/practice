@@ -101,7 +101,7 @@ class AuthController
     {
         validateCode($phone, $code);
         $auth = auth();
-        return Auth::registerPhone($auth->table, $phone, function () use ($auth, $phone) {
+        return Auth::registerPhone($auth->getTable(), $phone, function () use ($auth, $phone) {
             $auth->update(['phone' => $phone]);
         }, ['msg' => '换绑成功']);
     }

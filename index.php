@@ -40,9 +40,11 @@ require __DIR__.'/route.php';
 $pathInfo = isset($_SERVER['PATH_INFO']) ? ltrim($_SERVER['PATH_INFO'], '/') : '';
 ($route = \src\Route::$routes[$_SERVER['REQUEST_METHOD']][$pathInfo] ?? false) || response(404);
 if (is_array($route)) {
-    ($model = $route[1]::handle(isset($_SERVER['HTTP_AUTHORIZATION']) ?
-        substr($_SERVER['HTTP_AUTHORIZATION'], 7) : false))
-    || response(401);
+    if (isset($_SERVER['HTTP_AUTHORIZATION'])
+        && strpos($_SERVER['HTTP_AUTHORIZATION'], 'Bearer ') === 0) {
+        $model = $route[1]::handle(substr($_SERVER['HTTP_AUTHORIZATION'], 7));
+    }
+    empty($model) && response(401);
     auth($model);
     $route = $route[0];
 }
@@ -57,6 +59,8 @@ $args = [];
 foreach ($method->getParameters() as $param) {
     if (($paramName = $param->getName()) && isset($input[$paramName])) {
         $args[] = $input[$paramName];
+    } elseif ($param->isDefaultValueAvailable()) {
+        $args[] = $param->getDefaultValue();
     } else {
         response(400, file_exists(__DIR__.'/.dev') ? '缺少参数：'.$paramName : '');
     }

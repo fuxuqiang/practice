@@ -75,7 +75,7 @@ function mysql($table = null)
         $mysqli = new mysqli($config['host'], $config['user'], $config['pwd'], $config['name']);
     }
     $mysql = new \src\Mysql($mysqli);
-    return $table ? $mysql->table($table) : $mysql;
+    return $table ? $mysql->from($table) : $mysql;
 }
 
 /**

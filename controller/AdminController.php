@@ -5,11 +5,11 @@ use src\Mysql;
 
 class AdminController 
 {
-    public function index($perPage)
+    public function index(int $page = 1, int $perPage = 5)
     {
         return [
-            'data' => mysql('admin')
-                ->select('id', 'phone', 'name', 'role_id', 'created_at')->paginate($perPage)
+            'data' => mysql('admin')->select('id', 'phone', 'name', 'role_id', 'created_at')
+                ->whereNull('deleted_at')->paginate($page, $perPage)
         ];
     }
 
@@ -24,5 +24,11 @@ class AdminController
     {
         auth()->update(['name' => $name]);
         return ['msg' => '修改成功'];
+    }
+
+    public function delete($id)
+    {
+        mysql('admin')->where('id', $id)->update(['deleted_at' => timestamp()]);
+        return ['msg' => '删除成功'];
     }
 }
