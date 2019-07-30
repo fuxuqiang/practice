@@ -7,8 +7,13 @@ class AdminController
 {
     public function index(int $page = 1, int $per_page = 5)
     {
+        $input = input();
+        $query = mysql('admin');
+        $cond = [];
+        isset($input['name']) && $cond[] = ['name', 'LIKE', '%'.$input['name'].'%'];
+        isset($input['role_id']) && $cond[] = ['role_id', '=', $input['role_id']];
         return [
-            'data' => mysql('admin')->select('id', 'phone', 'name', 'role_id', 'created_at')
+            'data' => $query->select('id', 'phone', 'name', 'role_id', 'created_at')->where($cond)
                 ->with(['role' => ['id', 'name']])->whereNull('deleted_at')->paginate($page, $per_page)
         ];
     }

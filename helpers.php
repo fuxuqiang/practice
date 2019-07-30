@@ -5,7 +5,8 @@
  */
 function input()
 {
-    ($input = $_REQUEST) || parse_str(file_get_contents('php://input'), $input);
+    static $input;
+    $input || ($input = $_REQUEST) || parse_str(file_get_contents('php://input'), $input);
     return $input;
 }
 

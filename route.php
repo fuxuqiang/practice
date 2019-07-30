@@ -13,10 +13,10 @@ Route::add([
 
 Route::prefix('user')->auth(\auth\User::class)->add([
     'PUT' => [
-        'setPassword' => 'Auth@setPassword',
+        'password' => 'Auth@setPassword',
         'update' => 'User@update',
-        'updateTradeNote' => 'User@updateTradeNote',
-        'changePhone' => 'Auth@changePhone'
+        'tradeNote' => 'User@updateTradeNote',
+        'phone' => 'Auth@changePhone'
     ],
     'POST' => ['trade' => 'User@trade'],
     'GET' => ['trades' => 'User@getTrades']
@@ -26,13 +26,13 @@ Route::prefix('admin')->add(['POST' => ['login' => 'Auth@adminLogin']]);
 
 Route::prefix('admin')->auth(\auth\Admin::class)->add([
     'PUT' => [
-        'setPassword' => 'Auth@setPassword',
-        'changePhone' => 'Auth@changePhone',
-        'updateProfile' => 'Admin@update',
-        'setRole' => 'Admin@setRole',
+        'password' => 'Auth@setPassword',
+        'phone' => 'Auth@changePhone',
+        'adminName' => 'Admin@update',
+        'adminRole' => 'Admin@setRole',
     ],
     'POST' => [
-        'createAdmin' => 'Admin@create',
+        'admin' => 'Admin@create',
         'route' => 'Route@create',
         'role' => 'Role@create',
     ],

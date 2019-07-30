@@ -24,9 +24,9 @@ class Mysql
                 $vars = array_merge($vars, $this->params);
             }
             $types && $stmt->bind_param($types, ...array_values($vars));
-            $stmt->execute() || trigger_error($this->mysqli->error);
+            $stmt->execute() || trigger_error($this->mysqli->error, E_USER_ERROR);
         } else {
-            trigger_error($this->mysqli->error);
+            trigger_error($this->mysqli->error, E_USER_ERROR);
         }
         $rst = $stmt->get_result() ?: true;
         $stmt->close();
@@ -67,7 +67,7 @@ class Mysql
     {
         if (is_array($col)) {
             foreach ($col as $item) {
-                $this->cond[] = '`'.$item[0].'`'.$item[1].'?';
+                $this->cond[] = '`'.$item[0].'` '.$item[1].' ?';
                 $this->params[] = $item[2];
             }
         } else {
@@ -96,12 +96,11 @@ class Mysql
             sprintf($sql, $this->cols ? $this->cols($this->cols) : '*')
             .' LIMIT '.($page - 1) * $perPage.','.$perPage
         )->fetch_all(MYSQLI_ASSOC);
-        if ($this->relation && $table = key($this->relation)) {
-            $foreignKeysVal = array_column($data, $table.'_id');
-            $cols = $this->relation[$table];
+        if ($this->relation && ($table = key($this->relation))
+            && $foreignKeysVal = array_column($data, $table.'_id')) {
             $relationData = array_column(
                 $this->query(
-                    'SELECT '.$this->cols($cols).' FROM `'.$table.'`
+                    'SELECT '.$this->cols($this->relation[$table]).' FROM `'.$table.'`
                     WHERE `id` IN ('.implode(',', $foreignKeysVal).')'
                 )->fetch_all(MYSQLI_ASSOC),
                 null,
@@ -124,16 +123,16 @@ class Mysql
     public function __call($name, $args)
     {
         if (!in_array($name, ['update', 'insert', 'replace'])) {
-            trigger_error('调用未定义的方法'.self::class.'::'.$name.'()');
+            trigger_error('调用未定义的方法'.self::class.'::'.$name.'()', E_USER_ERROR);
         }
-        $sql = $name.' `'.$this->table.'` SET ';
-        $types = '';
-        foreach ($args[0] as $key => $value) {
-            $types .= 's';
-            $sql .= '`'.$key.'`=?,';
-        }
-        $sql = rtrim($sql, ',').($name == 'update' ? $this->getWhere() : '');
-        return $this->query($sql, $types, $args[0]);
+        return $this->query(
+            $name.' `'.$this->table.'` SET '.$this->implode(
+                array_keys($args[0]), function ($val) {
+                    return '`'.$val.'`=?';
+                }).($name == 'update' ? $this->getWhere() : ''),
+            str_repeat('s', count($args[0])),
+            $args[0]
+        );
     }
 
     /**
@@ -147,10 +146,18 @@ class Mysql
     /**
      * 获取查询列
      */
-    public function cols(array $cols)
+    private function cols(array $cols)
     {
-        return implode(',', array_map(function ($val) {
+        return $this->implode($cols, function ($val) {
             return '`'.$val.'`';
-        }, $cols));
+        });
+    }
+
+    /**
+     * 为数组的每个元素应用回调函数后用,连接成字符串
+     */
+    private function implode(array $arr, callable $callback)
+    {
+        return implode(',', array_map($callback, $arr));
     }
 }

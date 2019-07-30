@@ -104,7 +104,8 @@ class UserController
      */
     public function updateTradeNote(int $id, $note)
     {
-        mysql()->query('UPDATE `trade` SET `note`=? WHERE `id`=? AND `user_id`=?', 'sii', [$note, $id, auth()->id]);
+        mysql('trade')->where([['id', '=', $id], ['user_id', '=', auth()->id]])
+            ->update(['note' => $note]);
         return ['msg' => '修改成功'];
     }
 }
