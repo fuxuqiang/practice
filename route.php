@@ -1,7 +1,6 @@
 <?php
 
 use src\Route;
-use auth\Auth;
 
 Route::add([
     'POST' => [
@@ -30,6 +29,7 @@ Route::prefix('admin')->auth(\auth\Admin::class)->add([
         'phone' => 'Auth@changePhone',
         'adminName' => 'Admin@update',
         'adminRole' => 'Admin@setRole',
+        'role' => 'Role@update',
     ],
     'POST' => [
         'admin' => 'Admin@create',

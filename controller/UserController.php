@@ -1,8 +1,6 @@
 <?php
 namespace controller;
 
-use src\Mysql;
-
 class UserController
 {
     /**
@@ -10,9 +8,7 @@ class UserController
      */
     public function update()
     {
-        $input = array_filter(input(), function ($key) {
-            return in_array($key, ['name', 'capital']);
-        },  ARRAY_FILTER_USE_KEY);
+        $input = input(['name', 'capital']);
         if (isset($input['capital']) && !is_int($input['capital'] + 0)) {
             return ['error' => '资产须为数字'];
         }
@@ -88,14 +84,13 @@ class UserController
     public function getTrades(int $page = 1, int $per_page = 5)
     {
         $input = input();
-        $query = mysql('trade');
         $cond = [];
         isset($input['type']) && $cond[] = ['type', '=', $input['type']];
         isset($input['code']) && $cond[] = ['code', '=', $input['code']];
         isset($input['start']) && $cond[] = ['date', '>', $input['start']];
         isset($input['end']) && $cond[] = ['date', '<', $input['end']];
         return [
-            'data' => $query->where($cond)->paginate($page, $per_page)
+            'data' => mysql('trade')->where($cond)->paginate($page, $per_page)
         ];
     }
 

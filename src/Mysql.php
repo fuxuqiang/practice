@@ -93,14 +93,14 @@ class Mysql
     {
         $sql = 'SELECT %s FROM `'.$this->table.'`'.$this->getWhere();
         $data = $this->query(
-            sprintf($sql, $this->cols ? $this->cols($this->cols) : '*')
+            sprintf($sql, $this->cols ? $this->gather($this->cols, '`%s`') : '*')
             .' LIMIT '.($page - 1) * $perPage.','.$perPage
         )->fetch_all(MYSQLI_ASSOC);
         if ($this->relation && ($table = key($this->relation))
             && $foreignKeysVal = array_column($data, $table.'_id')) {
             $relationData = array_column(
                 $this->query(
-                    'SELECT '.$this->cols($this->relation[$table]).' FROM `'.$table.'`
+                    'SELECT '.$this->gather($this->relation[$table], '`%s`').' FROM `'.$table.'`
                     WHERE `id` IN ('.implode(',', $foreignKeysVal).')'
                 )->fetch_all(MYSQLI_ASSOC),
                 null,
@@ -126,10 +126,8 @@ class Mysql
             trigger_error('调用未定义的方法'.self::class.'::'.$name.'()', E_USER_ERROR);
         }
         return $this->query(
-            $name.' `'.$this->table.'` SET '.$this->implode(
-                array_keys($args[0]), function ($val) {
-                    return '`'.$val.'`=?';
-                }).($name == 'update' ? $this->getWhere() : ''),
+            $name.' `'.$this->table.'` SET '.$this->gather(array_keys($args[0]), '`%s`=?')
+            .($name == 'update' ? $this->getWhere() : ''),
             str_repeat('s', count($args[0])),
             $args[0]
         );
@@ -144,20 +142,12 @@ class Mysql
     }
 
     /**
-     * 获取查询列
+     * 格式化数组元素后用,连接成字符串
      */
-    private function cols(array $cols)
+    private function gather(array $arr, $format)
     {
-        return $this->implode($cols, function ($val) {
-            return '`'.$val.'`';
-        });
-    }
-
-    /**
-     * 为数组的每个元素应用回调函数后用,连接成字符串
-     */
-    private function implode(array $arr, callable $callback)
-    {
-        return implode(',', array_map($callback, $arr));
+        return implode(',', array_map(function ($val) use ($format) {
+            return sprintf($format, $val);
+        }, $arr));
     }
 }

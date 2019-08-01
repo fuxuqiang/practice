@@ -1,8 +1,6 @@
 <?php
 namespace controller;
 
-use src\Mysql;
-use model\User;
 use model\Auth;
 
 class AuthController

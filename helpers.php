@@ -3,11 +3,11 @@
 /**
  * 获取请求参数
  */
-function input()
+function input(array $names = [])
 {
     static $input;
     $input || ($input = $_REQUEST) || parse_str(file_get_contents('php://input'), $input);
-    return $input;
+    return $names ? array_intersect_key($input, array_flip($names)) : $input;
 }
 
 /**
@@ -28,10 +28,10 @@ function redis()
 /**
  * 响应状态码并结束执行
  */
-function response($code, $msg = '')
+function response($code, $msg = null)
 {
     http_response_code($code);
-    die($msg);
+    die($msg ?: json_encode(['error' => $msg]));
 }
 
 /**
@@ -58,11 +58,11 @@ function logError($content)
 /**
  * 获取配置
  */
-function config($key)
+function config($name)
 {
     static $config;
     $config || $config = require __DIR__.'/config.php';
-    return $config[$key] ?? null;
+    return $config[$name] ?? null;
 }
 
 /**
@@ -91,6 +91,13 @@ function timestamp($time = null)
 function validateCode(int $phone, int $code)
 {
     if ($code != redis()->get($phone)) {
-        die(json_encode(['error' => '验证码错误']));
+        response(200, '验证码错误');
+    }
+}
+
+function validateRoleId($roleId)
+{
+    if(! mysql()->query('SELECT `id` FROM `role` WHERE `id`=?', 'i', [$roleId])->num_rows) {
+        response(400);
     }
 }
