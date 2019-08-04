@@ -1,5 +1,5 @@
 <?php
-namespace controller;
+namespace app\controller;
 
 class AdminController 
 {
@@ -9,10 +9,8 @@ class AdminController
         $cond = [];
         isset($input['name']) && $cond[] = ['name', 'LIKE', '%'.$input['name'].'%'];
         isset($input['role_id']) && $cond[] = ['role_id', '=', $input['role_id']];
-        return [
-            'data' => mysql('admin')->select('id', 'phone', 'name', 'role_id', 'created_at')->where($cond)
-                ->with(['role' => ['id', 'name']])->whereNull('deleted_at')->paginate($page, $per_page)
-        ];
+        return mysql('admin')->select('id', 'phone', 'name', 'role_id', 'created_at')->where($cond)
+                ->with(['role' => ['id', 'name']])->whereNull('deleted_at')->paginate($page, $per_page);
     }
 
     public function create(int $phone, int $role_id = 0, $name = '')

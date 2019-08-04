@@ -10,7 +10,7 @@ Route::add([
     ]
 ]);
 
-Route::prefix('user')->auth(\auth\User::class)->add([
+Route::prefix('user')->auth(\app\auth\User::class)->add([
     'PUT' => [
         'password' => 'Auth@setPassword',
         'update' => 'User@update',
@@ -23,7 +23,7 @@ Route::prefix('user')->auth(\auth\User::class)->add([
 
 Route::prefix('admin')->add(['POST' => ['login' => 'Auth@adminLogin']]);
 
-Route::prefix('admin')->auth(\auth\Admin::class)->add([
+Route::prefix('admin')->auth(\app\auth\Admin::class)->add([
     'PUT' => [
         'password' => 'Auth@setPassword',
         'phone' => 'Auth@changePhone',
@@ -41,5 +41,8 @@ Route::prefix('admin')->auth(\auth\Admin::class)->add([
         'routes' => 'Route@index',
         'roles' => 'Role@index',
     ],
-    'DELETE' => ['admin' => 'Admin@delete'],
+    'DELETE' => [
+        'admin' => 'Admin@delete',
+        'role' => 'Role@delete',
+    ],
 ]);

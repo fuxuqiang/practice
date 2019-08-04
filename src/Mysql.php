@@ -6,7 +6,7 @@ class Mysql
 {
     public $mysqli;
     
-    private $table, $params, $cols, $relation, $cond;
+    private $table, $cols, $relation, $cond, $params = [];
 
     public function __construct(\mysqli $mysqli)
     {
@@ -61,7 +61,7 @@ class Mysql
     }
 
     /**
-     * 设置WHERE条件
+     * 添加WHERE条件
      */
     public function where($col, $val = null)
     {
@@ -78,7 +78,7 @@ class Mysql
     }
 
     /**
-     * 设置 WHERE {COLOMN} IS NULL 条件
+     * 添加 WHERE {COLUMN} IS NULL 条件
      */
     public function whereNull($col)
     {
@@ -87,22 +87,44 @@ class Mysql
     }
 
     /**
+     * 添加 WHERE {COLUMN} IN 条件
+     */
+    public function whereIn($col, array $vals)
+    {
+        $this->cond[] = '`'.$col.'` IN ('.rtrim(str_repeat('?,', count($vals)), ',').')';
+        $this->params = array_merge($this->params, $vals);
+        return $this;
+    }
+
+    /**
+     * 获取查询结果集
+     */
+    public function get()
+    {
+        return $this->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * 数据是否存在
+     */
+    public function exists()
+    {
+        return $this->query($this->getDqlSql($this->cols ? null : '`id`').' LIMIT 1')->num_rows;
+    }
+
+    /**
      * 分页查询
      */
     public function paginate($page, $perPage)
     {
-        $sql = 'SELECT %s FROM `'.$this->table.'`'.$this->getWhere();
         $data = $this->query(
-            sprintf($sql, $this->cols ? $this->gather($this->cols, '`%s`') : '*')
-            .' LIMIT '.($page - 1) * $perPage.','.$perPage
+            $this->getDqlSql().' LIMIT '.($page - 1) * $perPage.','.$perPage
         )->fetch_all(MYSQLI_ASSOC);
         if ($this->relation && ($table = key($this->relation))
             && $foreignKeysVal = array_column($data, $table.'_id')) {
             $relationData = array_column(
-                $this->query(
-                    'SELECT '.$this->gather($this->relation[$table], '`%s`').' FROM `'.$table.'`
-                    WHERE `id` IN ('.implode(',', $foreignKeysVal).')'
-                )->fetch_all(MYSQLI_ASSOC),
+                (new self($this->mysqli))->select(...$this->relation[$table])
+                ->from($table)->whereIn('id', $foreignKeysVal)->get(),
                 null,
                 'id'
             );
@@ -113,7 +135,7 @@ class Mysql
         }
         return [
             'data' => $data,
-            'total' => $this->query(sprintf($sql, 'COUNT(*)'))->fetch_row()[0]
+            'total' => $this->query($this->getDqlSql('COUNT(*)'))->fetch_row()[0]
         ];
     }
 
@@ -149,5 +171,18 @@ class Mysql
         return implode(',', array_map(function ($val) use ($format) {
             return sprintf($format, $val);
         }, $arr));
+    }
+
+    /**
+     * 获取查询sql
+     */
+    private function getDqlSql($cols = null)
+    {
+        return sprintf(
+            'SELECT %s FROM %s %s',
+            $cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'),
+            '`'.$this->table.'`',
+            $this->getWhere()
+        );
     }
 }

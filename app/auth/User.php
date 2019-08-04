@@ -1,5 +1,5 @@
 <?php
-namespace auth;
+namespace app\auth;
 
 class User implements \src\Auth
 {

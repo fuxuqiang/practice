@@ -1,5 +1,5 @@
 <?php
-namespace auth;
+namespace app\auth;
 
 class Admin implements \src\Auth
 {
@@ -14,11 +14,9 @@ class Admin implements \src\Auth
                     'SELECT `id` FROM `route` WHERE `method`=? AND `uri`=?',
                     'ss',
                     [$_SERVER['REQUEST_METHOD'], ltrim($_SERVER['PATH_INFO'], '/')]
-                )->fetch_row()) && !mysql()->query(
-                    'SELECT `route_id` FROM `role_route` WHERE `role_id`=? AND `route_id`=?',
-                    'ii',
-                    [$admin->role_id, $route[0]]
-                )->num_rows) {
+                )->fetch_row()) && ! mysql('role_route')->where([
+                        ['role_id', '=', $admin->role_id], ['route_id', '=', $route[0]]]
+                    )->select('route_id')->exists()) {
                 return false;
             }
             return $admin;

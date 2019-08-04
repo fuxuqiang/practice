@@ -3,13 +3,18 @@ namespace src;
 
 class Model
 {
-    public static $connector;
+    private static $connector;
 
     private $table, $data;
 
+    public static function setConnector(callable $connector)
+    {
+        self::$connector = $connector;
+    }
+
     public function __construct($table = null)
     {
-        $this->table = $table ?? strtolower(basename(__CLASS__));
+        $this->table = $table ?: strtolower(basename(str_replace('\\', '/', static::class)));
     }
 
     public function getTable()

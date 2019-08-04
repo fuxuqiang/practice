@@ -2,6 +2,7 @@
 
 // 加载助手函数
 require __DIR__.'/helpers.php';
+require __DIR__.'/app/helpers.php';
 
 // 是否允许跨域
 if ($cors = config('cors')) {
@@ -31,12 +32,12 @@ spl_autoload_register(function ($class) {
 });
 
 // 定义模型的数据库连接
-\src\Model::$connector = function ($model) {
+\src\Model::setConnector(function ($model) {
     return mysql($model->getTable())->where('id', $model->id);
-};
+});
 
 // 解析路由
-require __DIR__.'/route.php';
+require __DIR__.'/app/route.php';
 $pathInfo = isset($_SERVER['PATH_INFO']) ? ltrim($_SERVER['PATH_INFO'], '/') : '';
 $route = \src\Route::$routes[$_SERVER['REQUEST_METHOD']][$pathInfo] ?? response(404);
 if (is_array($route)) {
@@ -51,7 +52,7 @@ if (is_array($route)) {
 
 // 定位控制器方法
 $dispatch = explode('@', $route);
-$controller = '\controller\\'.$dispatch[0].'Controller';
+$controller = '\app\controller\\'.$dispatch[0].'Controller';
 $method = new ReflectionMethod($controller, $dispatch[1]);
 // 解析方法参数
 $input = input();

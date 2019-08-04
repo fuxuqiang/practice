@@ -31,7 +31,7 @@ function redis()
 function response($code, $msg = null)
 {
     http_response_code($code);
-    die($msg ?: json_encode(['error' => $msg]));
+    die($msg ? json_encode(['error' => $msg]) : '');
 }
 
 /**
@@ -61,7 +61,7 @@ function logError($content)
 function config($name)
 {
     static $config;
-    $config || $config = require __DIR__.'/config.php';
+    $config || $config = require __DIR__.'/app/config.php';
     return $config[$name] ?? null;
 }
 
@@ -85,19 +85,4 @@ function mysql($table = null)
 function timestamp($time = null)
 {
     return date('Y-m-d H:i:s', $time ? strtotime($time) : time());
-}
-
-
-function validateCode(int $phone, int $code)
-{
-    if ($code != redis()->get($phone)) {
-        response(200, '验证码错误');
-    }
-}
-
-function validateRoleId($roleId)
-{
-    if(! mysql()->query('SELECT `id` FROM `role` WHERE `id`=?', 'i', [$roleId])->num_rows) {
-        response(400);
-    }
 }

@@ -1,7 +1,5 @@
 <?php
-namespace model;
-
-use src\Mysql;
+namespace app\model;
 
 class Auth 
 {

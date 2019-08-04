@@ -66,6 +66,15 @@ CREATE TABLE `route` (
     UNIQUE (`method`,`uri`)
 );
 
+INSERT `route` VALUES
+(NULL,'GET','admin/admins','管理员','列表'),
+(NULL,'POST','admin/create','管理员','创建'),
+(NULL,'DELETE','admin/admin','管理员','删除'),
+(NULL,'PUT','admin/setRole','管理员','修改角色'),
+(NULL,'POST','admin/role','角色','创建'),
+(NULL,'PUT','admin/role','角色','修改'),
+(NULL,'DELETE','admin/role','角色','删除');
+
 DROP TABLE IF EXISTS `role_route`;
 CREATE TABLE `role_route` (
     `role_id` TINYINT UNSIGNED,
