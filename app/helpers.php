@@ -7,7 +7,7 @@ function validateCode(int $phone, int $code)
 
 function validateRoleId($roleId)
 {
-    mysql('role')->where('id', $roleId)->exists() || response(400, '角色不存在');
+    mysql('role')->exists('id', $roleId) || response(400, '角色不存在');
 }
 
 function inSubs($id, array $data, $aid)

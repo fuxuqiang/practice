@@ -32,8 +32,8 @@ class Model
         return $this->data[$name] ?? null;
     }
 
-    public function __call($name, $args)
+    public function update(array $data)
     {
-        return call_user_func(self::$connector, $this)->$name(...$args);
+        return call_user_func(self::$connector, $this)->update($data);
     }
 }

@@ -17,7 +17,7 @@ class RoleController
 
     public function update(int $id)
     {
-        $roles = mysql('role')->select('id', 'pid')->get();
+        $roles = mysql('role')->get('id', 'pid');
         $ids = array_column($roles, 'id');
         if (!in_array($id, $ids)) {
             return ['error' => '操作的角色不存在'];
@@ -37,16 +37,21 @@ class RoleController
 
     public function delete(int $id)
     {
-        if (mysql('role')->where('pid', $id)->exists()) {
+        if (mysql('role')->exists('pid', $id)) {
             return ['error' => '存在子级角色'];
         }
-        if (mysq('admin')->where('role_id', $id)->exists()) {
+        if (mysq('admin')->exists('role_id', $id)) {
             return ['error' => '存在该角色的用户'];
         }
-        if (mysql('role_route')->select('route_id')->where('role_id', $id)->exists()) {
+        if (mysql('role_route')->exists('role_id', $id)) {
             return ['error' => '该角色的权限未清空'];
         }
         mysql()->query('DELETE FROM `role` WHERE `id`=?', 'i', [$id]);
         return ['msg' => '删除成功'];
+    }
+
+    public function addRoute(int $role_id, int $route_id)
+    {
+        
     }
 }

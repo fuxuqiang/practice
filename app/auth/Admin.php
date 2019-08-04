@@ -14,9 +14,8 @@ class Admin implements \src\Auth
                     'SELECT `id` FROM `route` WHERE `method`=? AND `uri`=?',
                     'ss',
                     [$_SERVER['REQUEST_METHOD'], ltrim($_SERVER['PATH_INFO'], '/')]
-                )->fetch_row()) && ! mysql('role_route')->where([
-                        ['role_id', '=', $admin->role_id], ['route_id', '=', $route[0]]]
-                    )->select('route_id')->exists()) {
+                )->fetch_row()) && ! mysql('role_route')->where('role_id', $admin->role_id)
+                    ->exists('route_id', $route[0])) {
                 return false;
             }
             return $admin;

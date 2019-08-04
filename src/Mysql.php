@@ -99,17 +99,17 @@ class Mysql
     /**
      * 获取查询结果集
      */
-    public function get()
+    public function get(...$cols)
     {
-        return $this->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
+        return $this->select(...$cols)->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
     }
 
     /**
      * 数据是否存在
      */
-    public function exists()
+    public function exists($col, $val)
     {
-        return $this->query($this->getDqlSql($this->cols ? null : '`id`').' LIMIT 1')->num_rows;
+        return $this->where($col, $val)->query($this->getDqlSql('`'.$col.'`').' LIMIT 1')->num_rows;
     }
 
     /**
@@ -123,8 +123,8 @@ class Mysql
         if ($this->relation && ($table = key($this->relation))
             && $foreignKeysVal = array_column($data, $table.'_id')) {
             $relationData = array_column(
-                (new self($this->mysqli))->select(...$this->relation[$table])
-                ->from($table)->whereIn('id', $foreignKeysVal)->get(),
+                (new self($this->mysqli))->from($table)
+                ->whereIn('id', $foreignKeysVal)->get(...$this->relation[$table]),
                 null,
                 'id'
             );

@@ -3,8 +3,10 @@ namespace app\controller;
 
 class RouteController
 {
-    public function index(int $page = 1, int $per_page = 5)
+    public function index(int $page = 1, int $per_page = 5, $resource = false)
     {
-        return mysql('route')->paginate($page, $per_page);
+        $query = mysql('route');
+        $resource && $query->where([['resource', 'like', '%'.$resource.'%']]);
+        return $query->paginate($page, $per_page);
     }
 }
