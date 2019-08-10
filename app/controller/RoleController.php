@@ -8,7 +8,7 @@ class RoleController
      */
     public function index()
     {
-        return ['data' => mysql('role')->get()];
+        return ['data' => mysql('role')->all()];
     }
 
     /**
@@ -26,7 +26,7 @@ class RoleController
      */
     public function update(int $id)
     {
-        $roles = mysql('role')->get(['id', 'pid']);
+        $roles = mysql('role')->all(['id', 'pid']);
         $ids = array_column($roles, 'id');
         if (!in_array($id, $ids)) {
             return ['error' => '操作的角色不存在'];

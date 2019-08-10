@@ -6,7 +6,7 @@ class Mysql
 {
     public $mysqli;
     
-    private $table, $cols, $relation, $cond, $params = [];
+    private $table, $cols, $relation, $cond, $limit = '', $params = [];
 
     public function __construct(\mysqli $mysqli)
     {
@@ -96,12 +96,30 @@ class Mysql
     }
 
     /**
+     * 执行本实例的查询
+     */
+    public function get()
+    {
+        return $this->query($this->getDqlSql());
+    }
+
+    /**
      * 获取查询结果集
      */
-    public function get(...$cols)
+    public function all(...$cols)
     {
         $cols && $this->cols = $cols;
-        return $this->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
+        $data = $this->query($this->getDqlSql().$this->limit)->fetch_all(MYSQLI_ASSOC);
+        if ($this->relation && ($table = key($this->relation))
+            && $foreignKeysVal = array_column($data, $table.'_id')) {
+            $relationData = (new self($this->mysqli))->cols(...$this->relation[$table])
+                ->from($table)->whereIn('id', $foreignKeysVal)->col(null, 'id');
+            $data = array_map(function ($item) use ($table, $relationData) {
+                $item[$table] = $relationData[$item[$table.'_id']];
+                return $item;
+            }, $data);
+        }
+        return $data;
     }
 
     /**
@@ -109,7 +127,7 @@ class Mysql
      */
     public function col($col, $idx = null)
     {
-        return array_column($col ? $this->get($col) : $this->get(), $col, $idx);
+        return array_column($col ? $this->all($col) : $this->all(), $col, $idx);
     }
 
     /**
@@ -125,20 +143,9 @@ class Mysql
      */
     public function paginate($page, $perPage)
     {
-        $data = $this->query(
-            $this->getDqlSql().' LIMIT '.($page - 1) * $perPage.','.$perPage
-        )->fetch_all(MYSQLI_ASSOC);
-        if ($this->relation && ($table = key($this->relation))
-            && $foreignKeysVal = array_column($data, $table.'_id')) {
-            $relationData = (new self($this->mysqli))->cols(...$this->relation[$table])
-                ->from($table)->whereIn('id', $foreignKeysVal)->col(null, 'id');
-            $data = array_map(function ($item) use ($table, $relationData) {
-                $item[$table] = $relationData[$item[$table.'_id']];
-                return $item;
-            }, $data);
-        }
+        $this->limit = ' LIMIT '.($page - 1) * $perPage.','.$perPage;
         return [
-            'data' => $data,
+            'data' => $this->all(),
             'total' => $this->query($this->getDqlSql('COUNT(*)'))->fetch_row()[0]
         ];
     }
