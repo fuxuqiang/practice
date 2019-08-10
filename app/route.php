@@ -35,6 +35,7 @@ Route::prefix('admin')->auth(\app\auth\Admin::class)->add([
         'admin' => 'Admin@create',
         'route' => 'Route@create',
         'role' => 'Role@create',
+        'saveAccess' => 'Role@saveRoute',
     ],
     'GET' => [
         'admins' => 'Admin@index',

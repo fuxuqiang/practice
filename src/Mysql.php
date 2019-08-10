@@ -16,14 +16,13 @@ class Mysql
     /**
      * 执行查询
      */
-    public function query($sql, $types = '', array $vars = [])
+    public function query($sql, array $vars = [])
     {
         if ($stmt = $this->mysqli->prepare($sql)) {
-            if ($this->params) {
-                $types .= str_repeat('s', count($this->params));
-                $vars = array_merge($vars, $this->params);
+            if ($types = str_repeat('s', count($vars) + count($this->params))) {
+                $vars = array_merge($vars, $this->params);    
+                $stmt->bind_param($types, ...array_values($vars));
             }
-            $types && $stmt->bind_param($types, ...array_values($vars));
             $stmt->execute() || trigger_error($this->mysqli->error, E_USER_ERROR);
         } else {
             trigger_error($this->mysqli->error, E_USER_ERROR);
@@ -45,7 +44,7 @@ class Mysql
     /**
      * 设置查询列
      */
-    public function select(...$cols)
+    public function cols(...$cols)
     {
         $this->cols = $cols;
         return $this;
@@ -101,7 +100,16 @@ class Mysql
      */
     public function get(...$cols)
     {
-        return $this->select(...$cols)->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
+        $cols && $this->cols = $cols;
+        return $this->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * 获取查询结果的指定列
+     */
+    public function col($col, $idx = null)
+    {
+        return array_column($col ? $this->get($col) : $this->get(), $col, $idx);
     }
 
     /**
@@ -122,12 +130,8 @@ class Mysql
         )->fetch_all(MYSQLI_ASSOC);
         if ($this->relation && ($table = key($this->relation))
             && $foreignKeysVal = array_column($data, $table.'_id')) {
-            $relationData = array_column(
-                (new self($this->mysqli))->from($table)
-                ->whereIn('id', $foreignKeysVal)->get(...$this->relation[$table]),
-                null,
-                'id'
-            );
+            $relationData = (new self($this->mysqli))->cols(...$this->relation[$table])
+                ->from($table)->whereIn('id', $foreignKeysVal)->col(null, 'id');
             $data = array_map(function ($item) use ($table, $relationData) {
                 $item[$table] = $relationData[$item[$table.'_id']];
                 return $item;
@@ -140,19 +144,53 @@ class Mysql
     }
 
     /**
-     * update,insert,replace方法
+     * 执行INSERT语句
      */
-    public function __call($name, $args)
+    public function insert($data)
     {
-        if (!in_array($name, ['update', 'insert', 'replace'])) {
-            trigger_error('调用未定义的方法'.self::class.'::'.$name.'()', E_USER_ERROR);
+        return $this->into('INSERT', $data);
+    }
+
+    /**
+     * 执行REPLACE语句
+     */
+    public function replace($data)
+    {
+        return $this->into('REPLACE', $data);
+    }
+
+    /**
+     * 执行INSERT或REPLACE语句
+     */
+    private function into($action, $data)
+    {
+        if (is_array(reset($data))) {
+            $cols = $this->cols;
+            $val = array_map(function ($item) {
+                return '('.rtrim(str_repeat('?,', count($item)), ',').')';
+            }, $data);
+            $binds = array_reduce($data, function ($carry, $item) {
+                return array_merge($carry, $item);
+            }, []);
+        } else {
+            $cols = array_keys($data);
+            $val = $binds = $data;
         }
         return $this->query(
-            $name.' `'.$this->table.'` SET '.$this->gather(array_keys($args[0]), '`%s`=?')
-            .($name == 'update' ? $this->getWhere() : ''),
-            str_repeat('s', count($args[0])),
-            $args[0]
+            $action.' `'.$this->table.'` ('.implode(',', $cols).') VALUES '.implode(',', $val),
+            $binds
         );
+    }
+
+    /**
+     * 执行UPDATE语句
+     */
+    public function update($data)
+    {
+        return $this->query(
+            $name.' `'.$this->table.'` SET '.$this->gather(array_keys($data), '`%s`=?').$this->getWhere(),
+            $data
+        ); 
     }
 
     /**

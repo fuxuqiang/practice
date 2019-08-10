@@ -13,7 +13,7 @@ class Auth
         try {
             if (
                 mysql()->query(
-                    'SELECT `id` FROM `'.$table.'` WHERE `phone`=? FOR UPDATE', 'i', [$phone]
+                    'SELECT `id` FROM `'.$table.'` WHERE `phone`=? FOR UPDATE', [$phone]
                 )->num_rows
             ) {
                 throw new \Exception('该手机号已注册过');

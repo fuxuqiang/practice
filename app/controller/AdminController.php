@@ -9,7 +9,7 @@ class AdminController
         $cond = [];
         isset($input['name']) && $cond[] = ['name', 'LIKE', '%'.$input['name'].'%'];
         isset($input['role_id']) && $cond[] = ['role_id', '=', $input['role_id']];
-        return mysql('admin')->select('id', 'phone', 'name', 'role_id', 'created_at')->where($cond)
+        return mysql('admin')->cols('id', 'phone', 'name', 'role_id', 'created_at')->where($cond)
                 ->with(['role' => ['id', 'name']])->whereNull('deleted_at')->paginate($page, $per_page);
     }
 

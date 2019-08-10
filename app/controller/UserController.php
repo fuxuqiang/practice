@@ -35,11 +35,10 @@ class UserController
         
         try {
             $capital = $mysql->query(
-                'SELECT `capital` FROM `user` WHERE `id`=? FOR UPDATE', 'i', [$user->id]
+                'SELECT `capital` FROM `user` WHERE `id`=? FOR UPDATE', [$user->id]
             )->fetch_row()[0];
             $positionNum = $mysql->query(
                 'SELECT `num` FROM `position` WHERE `code`=? AND `user_id`=? FOR UPDATE',
-                'si',
                 [$code, $user->id]
             )->fetch_row();
             if ($type == 1) {

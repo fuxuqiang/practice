@@ -3,11 +3,17 @@ namespace app\controller;
 
 class RoleController
 {
+    /**
+     * 列表
+     */
     public function index()
     {
         return ['data' => mysql('role')->get()];
     }
 
+    /**
+     * 添加
+     */
     public function create($name, int $pid)
     {
         validateRoleId($pid);
@@ -15,9 +21,12 @@ class RoleController
         return ['msg' => '添加成功'];
     }
 
+    /**
+     * 更新
+     */
     public function update(int $id)
     {
-        $roles = mysql('role')->get('id', 'pid');
+        $roles = mysql('role')->get(['id', 'pid']);
         $ids = array_column($roles, 'id');
         if (!in_array($id, $ids)) {
             return ['error' => '操作的角色不存在'];
@@ -35,6 +44,9 @@ class RoleController
         return ['msg' => '更新成功'];
     }
 
+    /**
+     * 删除
+     */
     public function delete(int $id)
     {
         if (mysql('role')->exists('pid', $id)) {
@@ -46,12 +58,28 @@ class RoleController
         if (mysql('role_route')->exists('role_id', $id)) {
             return ['error' => '该角色的权限未清空'];
         }
-        mysql()->query('DELETE FROM `role` WHERE `id`=?', 'i', [$id]);
+        mysql()->query('DELETE FROM `role` WHERE `id`=?', [$id]);
         return ['msg' => '删除成功'];
     }
 
-    public function addRoute(int $role_id, int $route_id)
+    /**
+     * 保存路由
+     */
+    public function saveRoute(int $id, array $route_ids)
     {
-        
+        if (!mysql('role')->exists('id', $id)) {
+            return ['error' => '不存在的角色'];
+        }
+        $route_ids = array_unique($route_ids);
+        $routeIds = mysql('route')->whereIn('id', $route_ids)->col('id');
+        if (array_diff($route_ids, $routeIds)) {
+            return ['error' => '存在未定义的路由'];
+        }
+        mysql('role_route')->cols('role_id', 'route_id')->replace(
+            array_map(function ($val) use ($id) {
+                return [$id, $val];
+            }, $routeIds)
+        );
+        return ['msg' => '保存成功'];
     }
 }
