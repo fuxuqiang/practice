@@ -1,7 +1,7 @@
 <?php
 
 // 加载助手函数
-require __DIR__.'/helpers.php';
+require __DIR__.'/app.php';
 require __DIR__.'/app/helpers.php';
 
 // 是否允许跨域
@@ -25,11 +25,6 @@ if (!file_exists(__DIR__.'/.dev')) {
         ($error = error_get_last()) && logError($error['message']);
     });
 }
-
-// 注册自动加载
-spl_autoload_register(function ($class) {
-    require __DIR__.'/'.str_replace('\\', '/', $class).'.php';
-});
 
 // 定义模型的数据库连接
 \src\Model::setConnector(function ($model) {

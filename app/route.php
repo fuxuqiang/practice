@@ -7,7 +7,8 @@ Route::add([
         'auth/sendCode' => 'Auth@sendCode',
         'register' => 'Auth@register',
         'login' => 'Auth@userLogin'
-    ]
+    ],
+    'GET' => ['regions' => 'Region@index']
 ]);
 
 Route::prefix('user')->auth(\app\auth\User::class)->add([
@@ -30,6 +31,7 @@ Route::prefix('admin')->auth(\app\auth\Admin::class)->add([
         'adminName' => 'Admin@update',
         'adminRole' => 'Admin@setRole',
         'role' => 'Role@update',
+        'route' => 'Route@update',
     ],
     'POST' => [
         'admin' => 'Admin@create',
@@ -45,5 +47,6 @@ Route::prefix('admin')->auth(\app\auth\Admin::class)->add([
     'DELETE' => [
         'admin' => 'Admin@delete',
         'role' => 'Role@delete',
+        'route' => 'Route@delete',
     ],
 ]);

@@ -81,3 +81,9 @@ CREATE TABLE `role_route` (
     `route_id` TINYINT UNSIGNED,
     PRIMARY KEY (`role_id`,`route_id`)
 );
+
+DROP TABLE IF EXISTS `region`;
+CREATE TABLE `region` (
+    `code` BIGINT UNSIGNED PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL
+);

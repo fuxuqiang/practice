@@ -90,7 +90,7 @@ class Mysql
      */
     public function whereIn($col, array $vals)
     {
-        $this->cond[] = '`'.$col.'` IN ('.rtrim(str_repeat('?,', count($vals)), ',').')';
+        $this->cond[] = '`'.$col.'` IN '.$this->markers($vals);
         $this->params = array_merge($this->params, $vals);
         return $this;
     }
@@ -173,18 +173,19 @@ class Mysql
     {
         if (is_array(reset($data))) {
             $cols = $this->cols;
-            $val = array_map(function ($item) {
-                return '('.rtrim(str_repeat('?,', count($item)), ',').')';
-            }, $data);
+            $vals = implode(',', array_map(function ($item) {
+                return $this->markers($item);
+            }, $data));
             $binds = array_reduce($data, function ($carry, $item) {
                 return array_merge($carry, $item);
             }, []);
         } else {
             $cols = array_keys($data);
-            $val = $binds = $data;
+            $vals = $this->markers($data);
+            $binds = $data;
         }
         return $this->query(
-            $action.' `'.$this->table.'` ('.implode(',', $cols).') VALUES '.implode(',', $val),
+            $action.' `'.$this->table.'` ('.implode(',', $cols).') VALUES '.$vals,
             $binds
         );
     }
@@ -229,5 +230,13 @@ class Mysql
             '`'.$this->table.'`',
             $this->getWhere()
         );
+    }
+
+    /**
+     * 获取参数数组的绑定标记
+     */
+    private function markers(array $data)
+    {
+        return '('.rtrim(str_repeat('?,', count($data)), ',').')';
     }
 }
