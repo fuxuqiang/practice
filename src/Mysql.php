@@ -6,7 +6,7 @@ class Mysql
 {
     public $mysqli;
     
-    private $table, $cols, $relation, $cond, $limit = '', $params = [];
+    private $table, $cols, $relation, $cond, $limit = '', $lock = '', $params = [];
 
     public function __construct(\mysqli $mysqli)
     {
@@ -96,10 +96,20 @@ class Mysql
     }
 
     /**
+     * 添加 FOR UPDATE 锁
+     */
+    public function lock()
+    {
+        $this->lock = ' FOR UPDATE';
+        return $this;
+    }
+
+    /**
      * 执行本实例的查询
      */
-    public function get()
+    public function get(...$cols)
     {
+        $this->cols = $cols;
         return $this->query($this->getDqlSql());
     }
 
@@ -108,7 +118,7 @@ class Mysql
      */
     public function all(...$cols)
     {
-        $cols && $this->cols = $cols;
+        $this->cols = $cols;
         $data = $this->query($this->getDqlSql().$this->limit)->fetch_all(MYSQLI_ASSOC);
         if ($this->relation && ($table = key($this->relation))
             && $foreignKeysVal = array_column($data, $table.'_id')) {
@@ -224,12 +234,8 @@ class Mysql
      */
     private function getDqlSql($cols = null)
     {
-        return sprintf(
-            'SELECT %s FROM %s %s',
-            $cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'),
-            '`'.$this->table.'`',
-            $this->getWhere()
-        );
+        return 'SELECT '.$cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*')
+            .' FROM `'.$this->table.'` '.$this->getWhere().$this->lock;
     }
 
     /**

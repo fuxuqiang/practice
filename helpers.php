@@ -47,12 +47,12 @@ function auth(\src\Model $user = null)
 /**
  * 记录日志
  */
-function logError($content)
+function logError($content, $die = true)
 {
     file_put_contents(
         __DIR__.'/log/error.log', '['.timestamp()."]\n".$content."\n", FILE_APPEND | LOCK_EX
     );
-    response(500);
+    $die && response(500);
 }
 
 /**

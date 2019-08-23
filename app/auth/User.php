@@ -1,7 +1,7 @@
 <?php
 namespace app\auth;
 
-class User implements \src\Auth
+class User
 {
     public static function handle($token)
     {

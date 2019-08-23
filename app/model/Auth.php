@@ -11,11 +11,7 @@ class Auth
         $mysqli = mysql()->mysqli;
         $mysqli->begin_transaction();
         try {
-            if (
-                mysql()->query(
-                    'SELECT `id` FROM `'.$table.'` WHERE `phone`=? FOR UPDATE', [$phone]
-                )->num_rows
-            ) {
+            if (mysql($table)->lock()->exists('phone', $phone)) {
                 throw new \Exception('该手机号已注册过');
             }
             $callback();

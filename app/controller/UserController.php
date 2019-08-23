@@ -21,7 +21,7 @@ class UserController
      */
     public function trade(int $type, $code, int $price, int $num, $date, $note = '')
     {
-        $user = user();
+        $user = auth();
 
         $total = $price * $num * 100;
         $fee = round($total/5000);
@@ -34,13 +34,10 @@ class UserController
         $mysqli->begin_transaction();
         
         try {
-            $capital = $mysql->query(
-                'SELECT `capital` FROM `user` WHERE `id`=? FOR UPDATE', [$user->id]
-            )->fetch_row()[0];
-            $positionNum = $mysql->query(
-                'SELECT `num` FROM `position` WHERE `code`=? AND `user_id`=? FOR UPDATE',
-                [$code, $user->id]
-            )->fetch_row();
+            $capital = mysql('user')->where('id', $user->id)->fetch_row()[0];
+            $positionNum = mysql('position')->where([
+                ['code', '=', $code], ['user_id', '=', $user->id]
+            ])->get('num')->fetch_row();
             if ($type == 1) {
                 $capital -= $total + $fee;
                 if ($capital < 0) {
@@ -101,5 +98,13 @@ class UserController
         mysql('trade')->where([['id', '=', $id], ['user_id', '=', auth()->id]])
             ->update(['note' => $note]);
         return ['msg' => '修改成功'];
+    }
+
+    /**
+     * 添加地址
+     */
+    public function addAddress(int $code, $address)
+    {
+        
     }
 }

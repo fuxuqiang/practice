@@ -37,7 +37,7 @@ class AuthController
         if (empty($_POST['password']) && empty($_POST['code'])) {
             return ['error' => '参数错误'];
         }
-        if (! $user = mysql('user')->cols('id', 'password')->where('phone', $phone)->get()->fetch_object()) {
+        if (! $user = mysql('user')->where('phone', $phone)->get('id', 'password')->fetch_object()) {
             return Auth::addUser($phone);
         }
         if (isset($_POST['code'])) {
@@ -71,7 +71,7 @@ class AuthController
                 return ['error' => '密码错误'];
             }
         } else {
-            if (! $admin = mysql('admin')->cols('id')->where('phone', $phone)->get()->fetch_object()) {
+            if (! $admin = mysql('admin')->where('phone', $phone)->get('id')->fetch_object()) {
                 return ['error' => '用户不存在'];
             }
             validateCode($phone, $_POST['code']);  
