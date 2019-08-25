@@ -1,0 +1,51 @@
+<?php
+namespace app\controller;
+
+class AddressController
+{
+    public function add(int $code, $address)
+    {
+        if (! mysql('region')->exists('code', $code)) {
+            return ['error' => '行政区不存在'];
+        }
+        mysql('address')->insert(['user_id' => auth()->id, 'code' => $code, 'address' => $address]);
+        return ['msg' => '添加成功'];
+    }
+
+    public function list()
+    {
+        $addresses = mysql('address')->where('user_id', auth()->id)->all();
+        foreach ($addresses as &$address) {
+            $codes[] = $address['codes'][] = substr($address['code'], 0, 2);
+            $codes[] = $address['codes'][] = substr($address['code'], 0, 4);
+            $codes[] = $address['codes'][] = substr($address['code'], 0, 6);
+            $codes[] = $address['codes'][] = substr($address['code'], 0, 9);
+            $codes[] = $address['codes'][] = $address['code'];
+        }
+        $regions = mysql('region')->whereIn('code', $codes)->col('name', 'code');
+        $addresses = array_map(function ($val) use ($regions) {
+            return [
+                'id' => $val['id'],
+                'code' => $val['code'],
+                'address' => implode('', array_only($regions, $val['codes'])).$val['address']
+            ];
+        }, $addresses);
+        return ['data' => $addresses];
+    }
+
+    public function update(int $id)
+    {
+        $input = input(['code', 'address']);
+        if (isset($input['code']) && ! mysql('region')->exists('code', $code)) {
+            return ['error' => '行政区不存在'];
+        }
+        mysql('address')->where(['id' => $id, 'user_id' => auth()->id])->update($input);
+        return ['msg' => '更新成功'];
+    }
+
+    public function del(int $id)
+    {
+        mysql('address')->del($id);
+        return ['msg' => '删除成功'];
+    }
+}

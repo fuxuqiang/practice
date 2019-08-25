@@ -3,17 +3,17 @@ namespace app\controller;
 
 class AdminController 
 {
-    public function index(int $page = 1, int $per_page = 5)
+    public function list(int $page = 1, int $per_page = 5)
     {
         $input = input();
         $cond = [];
         isset($input['name']) && $cond[] = ['name', 'LIKE', '%'.$input['name'].'%'];
-        isset($input['role_id']) && $cond[] = ['role_id', '=', $input['role_id']];
+        isset($input['role_id']) && $cond['role_id'] = $input['role_id'];
         return mysql('admin')->cols('id', 'phone', 'name', 'role_id', 'created_at')->where($cond)
                 ->with(['role' => ['id', 'name']])->whereNull('deleted_at')->paginate($page, $per_page);
     }
 
-    public function create(int $phone, int $role_id = 0, $name = '')
+    public function add(int $phone, int $role_id = 0, $name = '')
     {
         validateRoleId($role_id);
         return \model\Auth::registerPhone('admin', $phone, function () use ($phone, $role_id, $name) {
@@ -27,7 +27,7 @@ class AdminController
         return ['msg' => '修改成功'];
     }
 
-    public function delete(int $id)
+    public function del(int $id)
     {
         mysql('admin')->where('id', $id)->update(['deleted_at' => timestamp()]);
         return ['msg' => '删除成功'];

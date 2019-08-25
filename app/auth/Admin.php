@@ -10,8 +10,8 @@ class Admin
                 [$token]
             )->fetch_object(\src\Model::class, ['admin'])) {
             if (($route = mysql('route')->where([
-                    ['method', '=', $_SERVER['REQUEST_METHOD']],
-                    ['uri', '=', ltrim($_SERVER['PATH_INFO'], '/')]
+                    'method' => $_SERVER['REQUEST_METHOD'],
+                    'uri' => ltrim($_SERVER['PATH_INFO'], '/')
                 ])->get('id')->fetch_row()) && ! mysql('role_route')->where('role_id', $admin->role_id)
                     ->exists('route_id', $route[0])) {
                 return false;

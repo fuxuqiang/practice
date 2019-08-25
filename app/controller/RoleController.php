@@ -6,7 +6,7 @@ class RoleController
     /**
      * 列表
      */
-    public function index()
+    public function list()
     {
         return ['data' => mysql('role')->all()];
     }
@@ -14,7 +14,7 @@ class RoleController
     /**
      * 添加
      */
-    public function create($name, int $pid)
+    public function add($name, int $pid)
     {
         validateRoleId($pid);
         mysql('role')->insert(['name' => $name, 'pid' => $pid]);
@@ -47,7 +47,7 @@ class RoleController
     /**
      * 删除
      */
-    public function delete(int $id)
+    public function del(int $id)
     {
         if (mysql('role')->exists('pid', $id)) {
             return ['error' => '存在子级角色'];
@@ -58,7 +58,7 @@ class RoleController
         if (mysql('role_route')->exists('role_id', $id)) {
             return ['error' => '该角色的权限未清空'];
         }
-        mysql()->query('DELETE FROM `role` WHERE `id`=?', [$id]);
+        mysql('role')->del($id);
         return ['msg' => '删除成功'];
     }
 

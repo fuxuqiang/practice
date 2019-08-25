@@ -3,7 +3,7 @@ namespace app\controller;
 
 class RouteController
 {
-    public function index()
+    public function list()
     {
         return [
             'data' => mysql()->query(
@@ -20,7 +20,7 @@ class RouteController
         return ['msg' => '修改成功'];
     }
 
-    public function delete(int $id)
+    public function del(int $id)
     {
         if (mysql('route')->exists('id', $id)) {
             return ['error' => '不存在的路由'];
@@ -28,7 +28,7 @@ class RouteController
         if (mysql('role_route')->exists('route_id', $id)) {
             return ['error' => '存在已绑定的角色关系'];
         }
-        mysql()->query('DELETE FROM `route` WHERE `id`=?', [$id]);
+        mysql('route')->del($id);
         return ['msg' => '删除成功'];
     }
 }

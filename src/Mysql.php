@@ -65,9 +65,14 @@ class Mysql
     public function where($col, $val = null)
     {
         if (is_array($col)) {
-            foreach ($col as $item) {
-                $this->cond[] = '`'.$item[0].'` '.$item[1].' ?';
-                $this->params[] = $item[2];
+            foreach ($col as $key => $item) {
+                if (is_array($item)) {
+                    $this->cond[] = '`'.$item[0].'` '.$item[1].' ?';
+                    $this->params[] = $item[2];       
+                } else {
+                    $this->cond[] = '`'.$key.'`=?';
+                    $this->params[] = $item;
+                }
             }
         } else {
             $this->cond[] = '`'.$col.'`=?';
@@ -137,7 +142,7 @@ class Mysql
      */
     public function col($col, $idx = null)
     {
-        $this->cols = array_merge([$col], $idx ? [$idx] : []);
+        $this->cols = $col ? array_merge([$col], $idx ? [$idx] : []) : [];
         return array_column($this->all(), $col, $idx);
     }
 
@@ -208,9 +213,17 @@ class Mysql
     public function update($data)
     {
         return $this->query(
-            $name.' `'.$this->table.'` SET '.$this->gather(array_keys($data), '`%s`=?').$this->getWhere(),
+            'UPDATE `'.$this->table.'` SET '.$this->gather(array_keys($data), '`%s`=?').$this->getWhere(),
             $data
         ); 
+    }
+
+    /**
+     * 执行DELETE语句
+     */
+    public function del(int $id)
+    {
+        return $this->query('DELETE FROM `'.$this->table.'` WHERE `id`=?', [$id]);
     }
 
     /**

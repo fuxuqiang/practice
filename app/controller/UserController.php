@@ -35,9 +35,8 @@ class UserController
         
         try {
             $capital = mysql('user')->where('id', $user->id)->get('capital')->fetch_row()[0];
-            $positionNum = mysql('position')->where([
-                ['code', '=', $code], ['user_id', '=', $user->id]
-            ])->get('num')->fetch_row();
+            $positionNum = mysql('position')->where(['code' => $code, 'user_id' => $user->id])
+                ->get('num')->fetch_row();
             if ($type == 1) {
                 $capital -= $total + $fee;
                 if ($capital < 0) {
@@ -81,8 +80,8 @@ class UserController
     {
         $input = input();
         $cond = [];
-        isset($input['type']) && $cond[] = ['type', '=', $input['type']];
-        isset($input['code']) && $cond[] = ['code', '=', $input['code']];
+        isset($input['type']) && $cond['type'] = $input['type'];
+        isset($input['code']) && $cond['code'] = $input['code'];
         isset($input['start']) && $cond[] = ['date', '>', $input['start']];
         isset($input['end']) && $cond[] = ['date', '<', $input['end']];
         return [
@@ -95,43 +94,7 @@ class UserController
      */
     public function updateTradeNote(int $id, $note)
     {
-        mysql('trade')->where([['id', '=', $id], ['user_id', '=', auth()->id]])
-            ->update(['note' => $note]);
+        mysql('trade')->where(['id' => $id, 'user_id' => auth()->id])->update(['note' => $note]);
         return ['msg' => '修改成功'];
-    }
-
-    /**
-     * 添加地址
-     */
-    public function addAddress(int $code, $address)
-    {
-        if (! mysql('region')->exists('code', $code)) {
-            return ['error' => '行政区不存在'];
-        }
-        mysql('address')->insert(['user_id' => auth()->id, 'code' => $code, 'address' => $address]);
-        return ['msg' => '添加成功'];
-    }
-
-    /**
-     * 地址列表
-     */
-    public function addresses()
-    {
-        $addresses = mysql('address')->where('user_id', auth()->id)->all();
-        foreach ($addresses as &$address) {
-            $codes[] = $address['codes'][] = substr($address['code'], 0, 2);
-            $codes[] = $address['codes'][] = substr($address['code'], 0, 4);
-            $codes[] = $address['codes'][] = substr($address['code'], 0, 6);
-            $codes[] = $address['codes'][] = substr($address['code'], 0, 9);
-            $codes[] = $address['codes'][] = $address['code'];
-        }
-        $regions = mysql('region')->whereIn('code', $codes)->col('name', 'code');
-        $addresses = array_map(function ($val) use ($regions) {
-            return [
-                'id' => $val['id'],
-                'address' => implode('', array_only($regions, $val['codes'])).$val['address']
-            ];
-        }, $addresses);
-        return ['data' => $addresses];
     }
 }

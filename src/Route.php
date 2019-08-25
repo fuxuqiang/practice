@@ -30,6 +30,19 @@ class Route
         return $this;
     }
 
+    public function resource($name, array $actions)
+    {
+        $actions = array_intersect($actions, ['add', 'update', 'del', 'list']);
+        $methods = ['add' => 'POST', 'update' => 'PUT', 'del' => 'DELETE', 'list' => 'GET'];
+        foreach ($actions as $action) {
+            $this->add([
+                $methods[$action] => [
+                    $name.($action == 'list' ? 's' : '') => ucfirst($name).'@'.$action
+                ]
+            ]);
+        }
+    }
+
     public function __call($name, $args)
     {
         return $this->$name(...$args);
