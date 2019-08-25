@@ -3,7 +3,7 @@ USE `personal`;
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `id` SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `phone` BIGINT NOT NULL UNIQUE,
     `name` VARCHAR(255) NOT NULL DEFAULT '',
     `password` VARCHAR(255) NOT NULL DEFAULT '',
@@ -67,13 +67,14 @@ CREATE TABLE `route` (
 );
 
 INSERT `route` VALUES
-(NULL,'GET','admin/admins','管理员','列表'),
-(NULL,'POST','admin/create','管理员','创建'),
-(NULL,'DELETE','admin/admin','管理员','删除'),
-(NULL,'PUT','admin/setRole','管理员','修改角色'),
-(NULL,'POST','admin/role','角色','创建'),
-(NULL,'PUT','admin/role','角色','修改'),
-(NULL,'DELETE','admin/role','角色','删除');
+(NULL,'GET','admins','管理员','列表'),
+(NULL,'POST','create','管理员','创建'),
+(NULL,'DELETE','admin','管理员','删除'),
+(NULL,'PUT','setRole','管理员','修改角色'),
+(NULL,'POST','role','角色','创建'),
+(NULL,'PUT','role','角色','修改'),
+(NULL,'DELETE','role','角色','删除'),
+(NULL,'POST','saveAccess','角色','设置权限');
 
 DROP TABLE IF EXISTS `role_route`;
 CREATE TABLE `role_route` (
@@ -91,6 +92,7 @@ CREATE TABLE `region` (
 DROP TABLE IF EXISTS `address`;
 CREATE TABLE `address` (
     `id` SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id` SMALLINT UNSIGNED NOT NULL,
     `code` BIGINT UNSIGNED NOT NULL,
     `address` VARCHAR(255) NOT NULL
-)
+);

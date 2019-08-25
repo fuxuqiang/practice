@@ -109,7 +109,7 @@ class Mysql
      */
     public function get(...$cols)
     {
-        $this->cols = $cols;
+        $this->cols || $this->cols = $cols;
         return $this->query($this->getDqlSql());
     }
 
@@ -118,8 +118,8 @@ class Mysql
      */
     public function all(...$cols)
     {
-        $this->cols = $cols;
-        $data = $this->query($this->getDqlSql().$this->limit)->fetch_all(MYSQLI_ASSOC);
+        $this->cols || $this->cols = $cols;
+        $data = $this->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
         if ($this->relation && ($table = key($this->relation))
             && $foreignKeysVal = array_column($data, $table.'_id')) {
             $relationData = (new self($this->mysqli))->cols(...$this->relation[$table])
@@ -137,7 +137,8 @@ class Mysql
      */
     public function col($col, $idx = null)
     {
-        return array_column($col ? $this->all($col) : $this->all(), $col, $idx);
+        $this->cols = array_merge([$col], $idx ? [$idx] : []);
+        return array_column($this->all(), $col, $idx);
     }
 
     /**
@@ -145,7 +146,8 @@ class Mysql
      */
     public function exists($col, $val)
     {
-        return $this->where($col, $val)->query($this->getDqlSql('`'.$col.'`').' LIMIT 1')->num_rows;
+        $this->limit = 'LIMIT 1';
+        return $this->where($col, $val)->query($this->getDqlSql('`'.$col.'`'))->num_rows;
     }
 
     /**
@@ -153,7 +155,7 @@ class Mysql
      */
     public function paginate($page, $perPage)
     {
-        $this->limit = ' LIMIT '.($page - 1) * $perPage.','.$perPage;
+        $this->limit = 'LIMIT '.($page - 1) * $perPage.','.$perPage;
         return [
             'data' => $this->all(),
             'total' => $this->query($this->getDqlSql('COUNT(*)'))->fetch_row()[0]
@@ -234,8 +236,8 @@ class Mysql
      */
     private function getDqlSql($cols = null)
     {
-        return 'SELECT '.$cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*')
-            .' FROM `'.$this->table.'` '.$this->getWhere().$this->lock;
+        return 'SELECT '.($cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
+            .' FROM `'.$this->table.'` '.$this->getWhere().' '.$this->limit.$this->lock;
     }
 
     /**

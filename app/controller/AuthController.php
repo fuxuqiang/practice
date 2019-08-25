@@ -1,7 +1,7 @@
 <?php
 namespace app\controller;
 
-use model\Auth;
+use app\model\Auth;
 
 class AuthController
 {
@@ -15,7 +15,7 @@ class AuthController
         }
         $code = mt_rand(1000, 9999);
         if (true/* todo 发送验证码到手机 */) {
-            redis()->setex($phone, 999, $code);
+            redis()->setex($phone, 99, $code);
         }
         return ['msg' => '发送成功'];
     }

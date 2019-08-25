@@ -3,11 +3,14 @@ namespace app\controller;
 
 class RouteController
 {
-    public function index(int $page = 1, int $per_page = 5, $resource = false)
+    public function index()
     {
-        $query = mysql('route');
-        $resource && $query->where([['resource', 'like', '%'.$resource.'%']]);
-        return $query->paginate($page, $per_page);
+        return [
+            'data' => mysql()->query(
+                    'SELECT `id`,`method`,CONCAT("admin/",`uri`) AS `uri`,`resource`,`action`
+                    FROM `route`'
+                )->fetch_all(MYSQLI_ASSOC)
+        ];
     }
 
     public function update(int $id)

@@ -5,32 +5,42 @@ class Register
 {
     public function handle()
     {
-        $letters = array_merge(range('a', 'z'), range('A', 'Z'));
+        $phones = $this->request(function ($mh) {
+            for ($i=0; $i < 20; $i++) { 
+                $phone = mt_rand(13000000000, 19999999999);
+                $phones[] = $phone;
+                $this->addCurl($mh, 'http://stock.test/auth/sendCode', ['phone' => $phone]);
+            }
+            return $phones;
+        });
 
-        $inputs = array_merge($letters, range(0, 9), ['_']);
+        $this->request(function ($mh) use ($phones) {
+            foreach ($phones as $phone) {
+                $this->addCurl($mh, 'http://stock.test/register', [
+                    'phone' => $phone,
+                    'code' => redis()->get($phone)
+                ]);
+            }
+        });
+    }
 
+    private function request(callable $callback)
+    {
         $mh = curl_multi_init();
-
-        for ($i=0; $i < 10; $i++) { 
-            $ch = curl_init('http://auth.test/register');
-
-            $name = $letters[mt_rand(0, 51)];
-            for ($j=0; $j < mt_rand(0, 3); $j++) { 
-                $name .= $inputs[mt_rand(0, 62)];
-            }
-            $password = '';
-            for ($k=0; $k < mt_rand(6, 9); $k++) { 
-                $password .= $inputs[mt_rand(0, 62)];
-            }
-            curl_setopt($ch, CURLOPT_POSTFIELDS, compact('name', 'password'));
-
-            curl_multi_add_handle($mh, $ch);
-        }
-
+        $rst = $callback($mh);
         $active = null;
         do {
             curl_multi_exec($mh, $active);
-            usleep(100000);
+            usleep(10000);
         } while ($active);
+        return $rst;
+    }
+
+    private function addCurl($mh, $url, $params)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_multi_add_handle($mh, $ch);
     }
 }

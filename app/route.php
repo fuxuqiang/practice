@@ -18,8 +18,11 @@ Route::prefix('user')->auth(\app\auth\User::class)->add([
         'tradeNote' => 'User@updateTradeNote',
         'phone' => 'Auth@changePhone'
     ],
-    'POST' => ['trade' => 'User@trade'],
-    'GET' => ['trades' => 'User@getTrades']
+    'POST' => ['trade' => 'User@trade', 'address' => 'User@addAddress'],
+    'GET' => [
+        'trades' => 'User@getTrades',
+        'addresses' => 'User@addresses'
+    ]
 ]);
 
 Route::prefix('admin')->add(['POST' => ['login' => 'Auth@adminLogin']]);

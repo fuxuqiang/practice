@@ -34,7 +34,7 @@ class UserController
         $mysqli->begin_transaction();
         
         try {
-            $capital = mysql('user')->where('id', $user->id)->fetch_row()[0];
+            $capital = mysql('user')->where('id', $user->id)->get('capital')->fetch_row()[0];
             $positionNum = mysql('position')->where([
                 ['code', '=', $code], ['user_id', '=', $user->id]
             ])->get('num')->fetch_row();
@@ -105,6 +105,33 @@ class UserController
      */
     public function addAddress(int $code, $address)
     {
-        
+        if (! mysql('region')->exists('code', $code)) {
+            return ['error' => '行政区不存在'];
+        }
+        mysql('address')->insert(['user_id' => auth()->id, 'code' => $code, 'address' => $address]);
+        return ['msg' => '添加成功'];
+    }
+
+    /**
+     * 地址列表
+     */
+    public function addresses()
+    {
+        $addresses = mysql('address')->where('user_id', auth()->id)->all();
+        foreach ($addresses as &$address) {
+            $codes[] = $address['codes'][] = substr($address['code'], 0, 2);
+            $codes[] = $address['codes'][] = substr($address['code'], 0, 4);
+            $codes[] = $address['codes'][] = substr($address['code'], 0, 6);
+            $codes[] = $address['codes'][] = substr($address['code'], 0, 9);
+            $codes[] = $address['codes'][] = $address['code'];
+        }
+        $regions = mysql('region')->whereIn('code', $codes)->col('name', 'code');
+        $addresses = array_map(function ($val) use ($regions) {
+            return [
+                'id' => $val['id'],
+                'address' => implode('', array_only($regions, $val['codes'])).$val['address']
+            ];
+        }, $addresses);
+        return ['data' => $addresses];
     }
 }
