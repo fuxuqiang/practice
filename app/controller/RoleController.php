@@ -70,7 +70,6 @@ class RoleController
         if (!mysql('role')->exists('id', $id)) {
             return ['error' => '不存在的角色'];
         }
-        $route_ids = array_unique($route_ids);
         $routeIds = mysql('route')->whereIn('id', $route_ids)->col('id');
         if (array_diff($route_ids, $routeIds)) {
             return ['error' => '存在未定义的路由'];

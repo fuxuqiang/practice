@@ -28,9 +28,7 @@ class UserController
         $fee = $fee > 500 ? $fee : 500;
         $type = $type == 1 ? 1 : 2;
 
-        $mysql = mysql();
-
-        $mysqli = $mysql->mysqli;
+        $mysqli = mysql()->handler();
         $mysqli->begin_transaction();
         
         try {

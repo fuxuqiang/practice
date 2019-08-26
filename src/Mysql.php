@@ -4,13 +4,57 @@ namespace src;
 
 class Mysql
 {
-    public $mysqli;
+    /**
+     * @var mysqli
+     */
+    private $mysqli,
+
+    /**
+     * @var string
+     */
+    $table,
+
+    /**
+     * @var array
+     */
+    $cols,
     
-    private $table, $cols, $relation, $cond, $limit = '', $lock = '', $params = [];
+    /**
+     * @var array
+     */
+    $relation,
+    
+    /**
+     * @var array
+     */
+    $cond,
+    
+    /**
+     * @var string
+     */
+    $limit = '',
+    
+    /**
+     * @var string
+     */
+    $lock = '',
+
+    /**
+     * @var array
+     */
+    $params = [];
 
     public function __construct(\mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
+    }
+
+    /**
+     * 获取mysqli实例
+     */
+    public function handler()
+    {
+        return $this->mysqli;
     }
 
     /**
