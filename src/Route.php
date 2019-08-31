@@ -11,7 +11,7 @@ class Route
     {
         foreach ($routes as $method => $group) {
             foreach ($group as $uri => $action) {
-                $_group[$this->prefix ? $this->prefix.'/'.$uri : $uri] = $this->auth ?
+                $_group[$this->prefix ? rtrim($this->prefix.'/'.$uri, '/') : $uri] = $this->auth ?
                     [$action, $this->auth] : $action;
             }
             self::$routes[$method] = array_merge(self::$routes[$method] ?? [], $_group);

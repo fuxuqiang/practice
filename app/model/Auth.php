@@ -8,7 +8,7 @@ class Auth
      */
     public static function registerPhone($table, $phone, callable $callback, $msg)
     {
-        $mysqli = mysql()->mysqli;
+        $mysqli = mysql()->handler();
         $mysqli->begin_transaction();
         try {
             if (mysql($table)->lock()->exists('phone', $phone)) {

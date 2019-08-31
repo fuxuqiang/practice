@@ -5,7 +5,7 @@ namespace src;
 class Mysql
 {
     /**
-     * @var mysqli
+     * @var \mysqli
      */
     private $mysqli,
 
@@ -32,18 +32,21 @@ class Mysql
     /**
      * @var string
      */
-    $limit = '',
+    $limit,
     
     /**
      * @var string
      */
-    $lock = '',
+    $lock,
 
     /**
      * @var array
      */
     $params = [];
 
+    /**
+     * @param \mysqli
+     */
     public function __construct(\mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
@@ -163,6 +166,15 @@ class Mysql
     }
 
     /**
+     * 获取查询结果首行单个列的值
+     */
+    public function val($col)
+    {
+        $row = $this->get($col)->fetch_row();
+        return $row ? $row[0] : null;
+    }
+
+    /**
      * 获取查询结果集
      */
     public function all(...$cols)
@@ -186,7 +198,7 @@ class Mysql
      */
     public function col($col, $idx = null)
     {
-        $this->cols = $col ? array_merge([$col], $idx ? [$idx] : []) : [];
+        $col && $this->cols = $idx ? [$col, $idx] : [$col];
         return array_column($this->all(), $col, $idx);
     }
 
@@ -234,7 +246,7 @@ class Mysql
     {
         if (is_array(reset($data))) {
             $cols = $this->cols;
-            $vals = implode(',', array_map(function ($item) {
+            $markers = implode(',', array_map(function ($item) {
                 return $this->markers($item);
             }, $data));
             $binds = array_reduce($data, function ($carry, $item) {
@@ -242,11 +254,11 @@ class Mysql
             }, []);
         } else {
             $cols = array_keys($data);
-            $vals = $this->markers($data);
+            $markers = $this->markers($data);
             $binds = $data;
         }
         return $this->query(
-            $action.' `'.$this->table.'` ('.implode(',', $cols).') VALUES '.$vals,
+            $action.' `'.$this->table.'` ('.implode(',', $cols).') VALUES '.$markers,
             $binds
         );
     }
