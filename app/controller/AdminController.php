@@ -3,21 +3,26 @@ namespace app\controller;
 
 class AdminController 
 {
-    public function list(int $page = 1, int $per_page = 5)
+    public function list()
     {
         $input = input();
         $cond = [];
         isset($input['name']) && $cond[] = ['name', 'LIKE', '%'.$input['name'].'%'];
         isset($input['role_id']) && $cond['role_id'] = $input['role_id'];
-        return mysql('admin')->cols('id', 'phone', 'name', 'role_id', 'created_at')->where($cond)
-                ->with(['role' => ['id', 'name']])->whereNull('deleted_at')->paginate($page, $per_page);
+        return mysql('admin')->cols('id', 'phone', 'name', 'role_id', 'joined_at')->where($cond)
+                ->with(['role' => ['id', 'name']])->paginate(...pageParams());
     }
 
-    public function add(int $phone, int $role_id = 0, $name = '')
+    public function add($phone, $role_id, $name = '')
     {
-        validateRoleId($role_id);
-        return \model\Auth::registerPhone('admin', $phone, function () use ($phone, $role_id, $name) {
-                mysql('admin')->insert(['phone' => $phone, 'role_id' => $role_id, 'name' => $name]);
+        validate(['phone' => 'phone', 'role_id' => 'exists:role,id']);
+        return \app\model\Auth::registerPhone('admin', $phone, function () use ($phone, $role_id, $name) {
+                mysql('admin')->insert([
+                    'phone' => $phone,
+                    'role_id' => $role_id,
+                    'name' => $name,
+                    'joined_at' => date('Y-m-d')
+                ]);
             }, ['msg' => '添加成功']);
     }
 
@@ -27,15 +32,15 @@ class AdminController
         return ['msg' => '修改成功'];
     }
 
-    public function del(int $id)
+    public function del($id)
     {
-        mysql('admin')->where('id', $id)->update(['deleted_at' => timestamp()]);
+        mysql('admin')->del($id);
         return ['msg' => '删除成功'];
     }
 
-    public function setRole(int $id, int $role_id)
+    public function setRole($id, $role_id)
     {
-        validateRoleId($role_id);
+        validate(['role_id' => 'exists:role,id']);
         mysql('admin')->where('id', $id)->update(['role_id' => $role_id]);
         return ['msg' => '设置成功'];
     }

@@ -16,7 +16,7 @@ $route = Route::prefix('user')->auth(\app\auth\User::class);
 $route->add([
     'PUT' => [
         'password' => 'Auth@setPassword',
-        'update' => 'User@update',
+        '' => 'User@update',
         'tradeNote' => 'User@updateTradeNote',
         'phone' => 'Auth@changePhone'
     ],
@@ -40,11 +40,10 @@ $route->add([
         'adminName' => 'Admin@update',
         'adminRole' => 'Admin@setRole',
     ],
-    'POST' => [
-        'saveAccess' => 'Role@saveRoute',
-    ]
+    'POST' => ['saveAccess' => 'Role@saveRoutes'],
+    'GET' => ['routes' => 'Role@listRoutes'],
 ]);
 
 $route->resource('role', ['add', 'update', 'del', 'list']);
-$route->resource('route', ['add', 'update', 'del', 'list']);
 $route->resource('admin', ['add', 'del', 'list']);
+$route->resource('sku', ['add', 'list', 'update', 'del']);

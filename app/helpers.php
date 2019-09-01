@@ -1,13 +1,8 @@
 <?php
 
-function validateCode(int $phone, int $code)
+function validateCode($phone, $code)
 {
     ($code != redis()->get($phone)) && response(200, '验证码错误');
-}
-
-function validateRoleId($roleId)
-{
-    mysql('role')->exists('id', $roleId) || response(400, '角色不存在');
 }
 
 function inSubs($id, array $data, $aid)

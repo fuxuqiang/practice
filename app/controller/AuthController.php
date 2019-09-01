@@ -8,13 +8,10 @@ class AuthController
     /**
      * 发送验证码
      */
-    public function sendCode(int $phone)
+    public function sendCode($phone)
     {
-        if (!preg_match('/1[3-9]\d{9}/', $phone)) {
-            return ['error' => '手机格式错误'];
-        }
-        $code = mt_rand(1000, 9999);
         if (true/* todo 发送验证码到手机 */) {
+            $code = mt_rand(1000, 9999);
             redis()->setex($phone, 99, $code);
         }
         return ['msg' => '发送成功'];
@@ -23,7 +20,7 @@ class AuthController
     /**
      * 用户注册
      */
-    public function register(int $phone, int $code)
+    public function register($phone, $code)
     {
         validateCode($phone, $code);
         return Auth::addUser($phone);
@@ -32,7 +29,7 @@ class AuthController
     /**
      * 用户登录
      */
-    public function userLogin(int $phone)
+    public function userLogin($phone)
     {
         if (empty($_POST['password']) && empty($_POST['code'])) {
             return ['error' => '参数错误'];
@@ -51,7 +48,7 @@ class AuthController
     /**
      * 管理员登录
      */
-    public function adminLogin(int $phone)
+    public function adminLogin($phone)
     {
         if (empty($_POST['code'])) {
             if (empty($_POST['password'])) {
@@ -94,7 +91,7 @@ class AuthController
     /**
      * 换绑手机
      */
-    public function changePhone(int $phone, int $code)
+    public function changePhone($phone, $code)
     {
         validateCode($phone, $code);
         $auth = auth();

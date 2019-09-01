@@ -16,11 +16,10 @@ CREATE TABLE `user` (
 DROP TABLE IF EXISTS `trade`;
 CREATE TABLE `trade` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `type` TINYINT UNSIGNED NOT NULL,
     `user_id` TINYINT UNSIGNED NOT NULL,
     `code` VARCHAR(255) NOT NULL,
     `price` SMALLINT UNSIGNED NULL NULL,
-    `num` TINYINT UNSIGNED NOT NULL,
+    `num` TINYINT NOT NULL,
     `date` DATE NOT NULL,
     `note` VARCHAR(255) NOT NULL
 );
@@ -47,14 +46,15 @@ CREATE TABLE `admin` (
     `name` VARCHAR(255) NOT NULL DEFAULT '',
     `password` VARCHAR(255) NOT NULL DEFAULT '',
     `role_id` TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    `api_token` VARCHAR(255) NOT NULL,
+    `api_token` VARCHAR(255) NOT NULL DEFAULT '',
     `token_expires` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `deleted_at` TIMESTAMP
+    `joined_at` DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `quitted_at` DATE
 );
 
 INSERT `role` (`name`,`pid`) VALUE ('超级管理员',0);
-INSERT `admin` (`phone`,`name`,`role_id`,`api_token`,`token_expires`) VALUE (18005661486,'',1,'',NOW())
+INSERT `admin` (`phone`,`name`,`role_id`,`api_token`,`token_expires`,`joined_at`)
+VALUE (18005661486,'',1,'',CURRENT_DATE);
 
 DROP TABLE IF EXISTS `route`;
 CREATE TABLE `route` (
@@ -95,4 +95,12 @@ CREATE TABLE `address` (
     `user_id` SMALLINT UNSIGNED NOT NULL,
     `code` BIGINT UNSIGNED NOT NULL,
     `address` VARCHAR(255) NOT NULL
+);
+
+DROP TABLE IF EXISTS `sku`;
+CREATE TABLE `sku` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `price` SMALLINT UNSIGNED NOT NULL,
+    `num` TINYINT UNSIGNED NOT NULL
 );

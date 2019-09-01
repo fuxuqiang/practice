@@ -3,11 +3,9 @@ namespace app\controller;
 
 class AddressController
 {
-    public function add(int $code, $address)
+    public function add($code, $address)
     {
-        if (! mysql('region')->exists('code', $code)) {
-            return ['error' => '行政区不存在'];
-        }
+        validate(['code' => 'exists:region,code']);
         mysql('address')->insert(['user_id' => auth()->id, 'code' => $code, 'address' => $address]);
         return ['msg' => '添加成功'];
     }
@@ -33,7 +31,7 @@ class AddressController
         return ['data' => $addresses];
     }
 
-    public function update(int $id)
+    public function update($id)
     {
         $input = input(['code', 'address']);
         if (isset($input['code']) && ! mysql('region')->exists('code', $code)) {
@@ -43,7 +41,7 @@ class AddressController
         return ['msg' => '更新成功'];
     }
 
-    public function del(int $id)
+    public function del($id)
     {
         mysql('address')->del($id);
         return ['msg' => '删除成功'];

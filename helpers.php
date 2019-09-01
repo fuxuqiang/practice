@@ -31,7 +31,7 @@ function redis()
 function response($code, $msg = null)
 {
     http_response_code($code);
-    die($msg ? json_encode(['error' => $msg]) : '');
+    die($msg ?: '');
 }
 
 /**
@@ -93,4 +93,22 @@ function timestamp($time = null)
 function array_only(array $arr, array $keys)
 {
     return array_intersect_key($arr, array_flip($keys));
+}
+
+/**
+ * 获取分页参数
+ */
+function pageParams()
+{
+    $input = input(['page', 'per_page']);
+    return [$input['page'] ?? 1, $input['per_page'] ?? 5];
+}
+
+/**
+ * 验证请求参数
+ */
+function validate(array $rules)
+{
+    $validator = new \src\Validator(input());
+    ($rst = $validator->handle($rules)) && response(400, '无效的'.$rst);
 }

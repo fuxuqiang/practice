@@ -14,9 +14,9 @@ class RoleController
     /**
      * 添加
      */
-    public function add($name, int $pid)
+    public function add($name, $pid)
     {
-        validateRoleId($pid);
+        validate(['pid' => 'exists:role,id']);
         mysql('role')->insert(['name' => $name, 'pid' => $pid]);
         return ['msg' => '添加成功'];
     }
@@ -24,7 +24,7 @@ class RoleController
     /**
      * 更新
      */
-    public function update(int $id)
+    public function update($id)
     {
         $roles = mysql('role')->all(['id', 'pid']);
         $ids = array_column($roles, 'id');
@@ -47,7 +47,7 @@ class RoleController
     /**
      * 删除
      */
-    public function del(int $id)
+    public function del($id)
     {
         if (mysql('role')->exists('pid', $id)) {
             return ['error' => '存在子级角色'];
@@ -63,13 +63,24 @@ class RoleController
     }
 
     /**
+     * 路由列表
+     */
+    public function listRoutes()
+    {
+        return [
+            'data' => mysql()->query(
+                    'SELECT `id`,`method`,CONCAT("admin/",`uri`) AS `uri`,`resource`,`action`
+                    FROM `route`'
+                )->fetch_all(MYSQLI_ASSOC)
+        ];
+    }
+
+    /**
      * 保存路由
      */
-    public function saveRoute(int $id, array $route_ids)
+    public function saveRoutes($id, $route_ids)
     {
-        if (!mysql('role')->exists('id', $id)) {
-            return ['error' => '不存在的角色'];
-        }
+        validate(['id' => 'exists:role,id', 'route_ids' => 'array']);
         $routeIds = mysql('route')->whereIn('id', $route_ids)->col('id');
         if (array_diff($route_ids, $routeIds)) {
             return ['error' => '存在未定义的路由'];
