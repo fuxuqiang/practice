@@ -15,15 +15,14 @@ class AdminController
 
     public function add($phone, $role_id, $name = '')
     {
-        validate(['phone' => 'phone', 'role_id' => 'exists:role,id']);
-        return \app\model\Auth::registerPhone('admin', $phone, function () use ($phone, $role_id, $name) {
-                mysql('admin')->insert([
-                    'phone' => $phone,
-                    'role_id' => $role_id,
-                    'name' => $name,
-                    'joined_at' => date('Y-m-d')
-                ]);
-            }, ['msg' => '添加成功']);
+        validate(['phone' => 'unique:admin,phone', 'role_id' => 'exists:role,id']);
+        mysql('admin')->insert([
+            'phone' => $phone,
+            'role_id' => $role_id,
+            'name' => $name,
+            'joined_at' => date('Y-m-d')
+        ]);
+        return ['msg' => '添加成功'];
     }
 
     public function update($name)

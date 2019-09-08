@@ -109,6 +109,8 @@ function pageParams()
  */
 function validate(array $rules)
 {
-    $validator = new \src\Validator(input());
+    $validator = new \src\Validator(input(), function ($val, $table, $col) {
+        return mysql($table)->exists($col, $val);
+    });
     ($rst = $validator->handle($rules)) && response(400, '无效的'.$rst);
 }

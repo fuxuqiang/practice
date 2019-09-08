@@ -5,7 +5,6 @@ use src\Route;
 Route::add([
     'POST' => [
         'auth/sendCode' => 'Auth@sendCode',
-        'register' => 'Auth@register',
         'login' => 'Auth@userLogin'
     ],
     'GET' => ['regions' => 'Region@list']

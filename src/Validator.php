@@ -3,11 +3,12 @@ namespace src;
 
 class Validator
 {
-    private $input;
+    private $input, $exists;
 
-    public function __construct(array $input)
+    public function __construct(array $input, callable $exists)
     {
         $this->input = $input;
+        $this->exists = $exists;
     }
 
     public function handle($paramsRules)
@@ -16,9 +17,7 @@ class Validator
             'phone' => function ($phone) {
                     return preg_match('/1[2-9]\d{9}/', $phone);
                 },
-            'exists' => function ($val, $table, $col) {
-                    return mysql($table)->exists($col, $val);
-                },
+            'exists' => $this->exists,
             'array' => 'is_array',
             'min' => function ($val, $min) {
                     return $val >= $min;
@@ -28,6 +27,9 @@ class Validator
                 },
             'nq' => function ($val, $diff) {
                     return $val != $diff;
+                },
+            'unique' => function (...$args) {
+                    return !call_user_func($this->exists, ...$args);
                 }
         ];
         foreach ($paramsRules as $param => $ruleItem) {

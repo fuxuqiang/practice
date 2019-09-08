@@ -18,15 +18,6 @@ class AuthController
     }
 
     /**
-     * 用户注册
-     */
-    public function register($phone, $code)
-    {
-        validateCode($phone, $code);
-        return Auth::addUser($phone);
-    }
-
-    /**
      * 用户登录
      */
     public function userLogin($phone)
@@ -35,7 +26,13 @@ class AuthController
             return ['error' => '参数错误'];
         }
         if (! $user = mysql('user')->where('phone', $phone)->get('id', 'password')->fetch_object()) {
-            return Auth::addUser($phone);
+            $token = uniqid();
+            mysql('user')->insert([
+                'phone' => $phone,
+                'api_token' => $token,
+                'token_expires' => timestamp('2 hour')
+            ]);
+            return ['data' => $token, 'msg' => '注册成功'];
         }
         if (isset($_POST['code'])) {
             validateCode($phone, $_POST['code']);
@@ -71,7 +68,7 @@ class AuthController
             if (! $admin = mysql('admin')->where('phone', $phone)->get('id')->fetch_object()) {
                 return ['error' => '用户不存在'];
             }
-            validateCode($phone, $_POST['code']);  
+            validateCode($phone, $_POST['code']);
         }
         return ['data' => Auth::getToken('admin', $admin->id)];
     }
@@ -93,10 +90,9 @@ class AuthController
      */
     public function changePhone($phone, $code)
     {
+        validate(['phone' => 'unique:user,phone']);
         validateCode($phone, $code);
-        $auth = auth();
-        return Auth::registerPhone($auth->getTable(), $phone, function () use ($auth, $phone) {
-            $auth->update(['phone' => $phone]);
-        }, ['msg' => '换绑成功']);
+        auth()->update(['phone' => $phone]);
+        return ['msg' => '换绑成功'];
     }
 }
