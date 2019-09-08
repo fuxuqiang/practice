@@ -34,7 +34,7 @@ if (!file_exists(__DIR__.'/.dev')) {
 // 解析路由
 require __DIR__.'/app/route.php';
 $pathInfo = isset($_SERVER['PATH_INFO']) ? ltrim($_SERVER['PATH_INFO'], '/') : '';
-$route = \src\Route::$routes[$_SERVER['REQUEST_METHOD']][$pathInfo] ?? response(404);
+$route = \src\Route::get($_SERVER['REQUEST_METHOD'], $pathInfo) ?: response(404);
 if (is_array($route)) {
     if (isset($_SERVER['HTTP_AUTHORIZATION'])
         && strpos($_SERVER['HTTP_AUTHORIZATION'], 'Bearer ') === 0) {

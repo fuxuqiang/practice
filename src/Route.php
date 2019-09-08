@@ -3,7 +3,7 @@ namespace src;
 
 class Route
 {
-    public static $routes = [];
+    private static $routes = [];
 
     private $auth, $prefix;
 
@@ -30,7 +30,7 @@ class Route
         return $this;
     }
 
-    public function resource($name, array $actions)
+    private function resource($name, array $actions)
     {
         $actions = array_intersect($actions, ['add', 'update', 'del', 'list']);
         $methods = ['add' => 'POST', 'update' => 'PUT', 'del' => 'DELETE', 'list' => 'GET'];
@@ -41,6 +41,11 @@ class Route
                 ]
             ]);
         }
+    }
+
+    public static function get($method, $uri)
+    {
+        return self::$routes[$method][$uri] ?? null;
     }
 
     public function __call($name, $args)

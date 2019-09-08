@@ -29,7 +29,6 @@ class UserController
 
         $mysqli = mysql()->handler();
         $mysqli->begin_transaction();
-        
         try {
             $capital = mysql('user')->where('id', $user->id)->val('capital');
             $positionNum = mysql('position')

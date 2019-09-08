@@ -9,7 +9,7 @@ CREATE TABLE `user` (
     `password` VARCHAR(255) NOT NULL DEFAULT '',
     `capital` mediumint UNSIGNED NOT NULL DEFAULT 0,
     `api_token` VARCHAR(255) NOT NULL,
-    `token_expires` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `token_expires` TIMESTAMP NOT NULL DEFAULT,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE `admin` (
     `role_id` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `api_token` VARCHAR(255) NOT NULL DEFAULT '',
     `token_expires` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `joined_at` DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `joined_at` DATE NOT NULL,
     `quitted_at` DATE
 );
 
