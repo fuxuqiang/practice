@@ -82,9 +82,6 @@ class RoleController
     {
         validate(['id' => 'exists:role,id', 'route_ids' => 'array']);
         $routeIds = mysql('route')->whereIn('id', $route_ids)->col('id');
-        if (array_diff($route_ids, $routeIds)) {
-            return ['error' => '存在未定义的路由'];
-        }
         mysql('role_route')->cols('role_id', 'route_id')->replace(
             array_map(function ($val) use ($id) {
                 return [$id, $val];

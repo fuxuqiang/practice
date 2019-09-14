@@ -25,7 +25,7 @@ class AddressController
             return [
                 'id' => $val['id'],
                 'code' => $val['code'],
-                'address' => implode('', array_only($regions, $val['codes'])).$val['address']
+                'address' => implode('', arrayOnly($regions, $val['codes'])).$val['address']
             ];
         }, $addresses);
         return ['data' => $addresses];

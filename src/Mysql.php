@@ -42,7 +42,12 @@ class Mysql
     /**
      * @var array
      */
-    $params = [];
+    $params = [],
+
+    /**
+     * @var mysqli_stmt
+     */
+    $stmt;
 
     /**
      * @param \mysqli
@@ -65,17 +70,16 @@ class Mysql
      */
     public function query($sql, array $vars = [])
     {
-        if ($stmt = $this->mysqli->prepare($sql)) {
+        if ($this->stmt = $this->mysqli->prepare($sql)) {
             if ($types = str_repeat('s', count($vars) + count($this->params))) {
                 $vars = array_merge($vars, $this->params);    
-                $stmt->bind_param($types, ...array_values($vars));
+                $this->stmt->bind_param($types, ...array_values($vars));
             }
-            $stmt->execute() || trigger_error($this->mysqli->error, E_USER_ERROR);
+            $this->stmt->execute() || trigger_error($this->mysqli->error, E_USER_ERROR);
         } else {
             trigger_error($this->mysqli->error, E_USER_ERROR);
         }
-        $rst = $stmt->get_result() ?: true;
-        $stmt->close();
+        $rst = $this->stmt->get_result() ?: true;
         return $rst;
     }
 
@@ -109,7 +113,7 @@ class Mysql
     /**
      * 添加WHERE条件
      */
-    public function where($col, $val = null)
+    public function where($col, $operator = null, $val = null)
     {
         if (is_array($col)) {
             foreach ($col as $key => $item) {
@@ -117,12 +121,15 @@ class Mysql
                     $this->cond[] = '`'.$item[0].'` '.$item[1].' ?';
                     $this->params[] = $item[2];       
                 } else {
-                    $this->cond[] = '`'.$key.'`=?';
-                    $this->params[] = $item;
+                    $this->where($key, $item);
                 }
             }
         } else {
-            $this->cond[] = '`'.$col.'`=?';
+            if (is_null($val)) {
+                $val = $operator;
+                $operator = '=';
+            }
+            $this->cond[] = '`'.$col.'`'.$operator.'?';
             $this->params[] = $val;
         }
         return $this;
@@ -157,12 +164,12 @@ class Mysql
     }
 
     /**
-     * 执行本实例的查询
+     * 返回查询结果首行对象
      */
     public function get(...$cols)
     {
         $this->cols || $this->cols = $cols;
-        return $this->query($this->getDqlSql());
+        return $this->query($this->getDqlSql())->fetch_object();
     }
 
     /**
@@ -228,7 +235,8 @@ class Mysql
      */
     public function insert($data)
     {
-        return $this->into('INSERT', $data);
+        $this->into('INSERT', $data);
+        return $this->stmt->insert_id;
     }
 
     /**

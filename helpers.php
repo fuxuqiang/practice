@@ -6,8 +6,16 @@
 function input(array $names = [])
 {
     static $input;
-    $input || ($input = $_REQUEST) || parse_str(file_get_contents('php://input'), $input);
-    return $names ? array_only($input, $names) : $input;
+    if (!$input) {
+        if (! $input = $_REQUEST) {
+            if ($_SERVER['CONTENT_TYPE'] == 'application/json') {
+                $input = json_decode(file_get_contents('php://input'), true);
+            } else {
+                parse_str(file_get_contents('php://input'), $input);
+            }
+        }
+    }
+    return $names ? arrayOnly($input, $names) : $input;
 }
 
 /**
@@ -90,7 +98,7 @@ function timestamp($time = null)
 /**
  * 获取数组中指定键的子集
  */
-function array_only(array $arr, array $keys)
+function arrayOnly(array $arr, array $keys)
 {
     return array_intersect_key($arr, array_flip($keys));
 }

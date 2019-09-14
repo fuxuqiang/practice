@@ -25,7 +25,7 @@ class AuthController
         if (empty($_POST['password']) && empty($_POST['code'])) {
             return ['error' => '参数错误'];
         }
-        if (! $user = mysql('user')->where('phone', $phone)->get('id', 'password')->fetch_object()) {
+        if (! $user = mysql('user')->where('phone', $phone)->get('id', 'password')) {
             $token = uniqid();
             mysql('user')->insert([
                 'phone' => $phone,
@@ -65,7 +65,7 @@ class AuthController
                 return ['error' => '密码错误'];
             }
         } else {
-            if (! $admin = mysql('admin')->where('phone', $phone)->get('id')->fetch_object()) {
+            if (! $admin = mysql('admin')->where('phone', $phone)->get('id')) {
                 return ['error' => '用户不存在'];
             }
             validateCode($phone, $_POST['code']);
