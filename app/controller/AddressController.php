@@ -13,12 +13,10 @@ class AddressController
     public function list()
     {
         $addresses = mysql('address')->where('user_id', auth()->id)->all();
+        $codes = [];
         foreach ($addresses as &$address) {
-            $codes[] = $address['codes'][] = substr($address['code'], 0, 2);
-            $codes[] = $address['codes'][] = substr($address['code'], 0, 4);
-            $codes[] = $address['codes'][] = substr($address['code'], 0, 6);
-            $codes[] = $address['codes'][] = substr($address['code'], 0, 9);
-            $codes[] = $address['codes'][] = $address['code'];
+            $address['codes'] = \app\model\Region::getAllCode($address['code']);
+            $codes = array_merge($codes, $address['codes']);
         }
         $regions = mysql('region')->whereIn('code', $codes)->col('name', 'code');
         $addresses = array_map(function ($val) use ($regions) {
