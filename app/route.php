@@ -4,13 +4,20 @@ use src\Route;
 
 Route::add([
     'POST' => [
-        'auth/sendCode' => 'Auth@sendCode',
+        'sendCode' => 'Auth@sendCode',
         'login' => 'Auth@userLogin'
     ],
     'GET' => ['regions' => 'Region@list']
 ]);
 
-$route = Route::prefix('user')->auth(\app\auth\User::class);
+$route = Route::auth(\app\auth\User::class);
+
+$route->add([
+    'POST' => ['order' => 'Order@add'],
+    'GET' => ['order' => 'Order@info']
+]);
+
+$route = $route->prefix('user');
 
 $route->add([
     'PUT' => [

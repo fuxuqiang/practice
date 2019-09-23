@@ -1,18 +1,19 @@
 <?php
 namespace app\controller;
 
-use app\model\Auth;
+use src\Request;
+use src\jwt\JWT;
 
 class AuthController
 {
     /**
      * 发送验证码
      */
-    public function sendCode($phone)
+    public function sendCode($phone, \Redis $redis)
     {
         if (true/* todo 发送验证码到手机 */) {
             $code = mt_rand(1000, 9999);
-            redis()->setex($phone, 99, $code);
+            $redis->setex($phone, 99, $code);
         }
         return ['msg' => '发送成功'];
     }
@@ -20,32 +21,30 @@ class AuthController
     /**
      * 用户登录
      */
-    public function userLogin($phone)
+    public function userLogin($phone, JWT $jwt)
     {
         if (empty($_POST['password']) && empty($_POST['code'])) {
             return ['error' => '参数错误'];
         }
-        if (! $user = mysql('user')->where('phone', $phone)->get('id', 'password')) {
-            $token = uniqid();
-            mysql('user')->insert([
-                'phone' => $phone,
-                'api_token' => $token,
-                'token_expires' => timestamp('2 hour')
-            ]);
-            return ['data' => $token, 'msg' => '注册成功'];
+        if (! $user = mysql('user')->cols('id', 'password')
+            ->where('phone', $phone)->get()) {
+            return [
+                'data' => $jwt->encode(mysql('user')->insert(['phone' => $phone])),
+                'msg' => '注册成功'
+            ];
         }
         if (isset($_POST['code'])) {
             validateCode($phone, $_POST['code']);
         } elseif (!password_verify($_POST['password'], $user->password)) {
             return ['error' => '密码错误'];
         }
-        return ['data' => Auth::getToken('user', $user->id)];
+        return ['data' => $jwt->encode($user->id)];
     }
 
     /**
      * 管理员登录
      */
-    public function adminLogin($phone)
+    public function adminLogin($phone, JWT $jwt)
     {
         if (empty($_POST['code'])) {
             if (empty($_POST['password'])) {
@@ -65,18 +64,18 @@ class AuthController
                 return ['error' => '密码错误'];
             }
         } else {
-            if (! $admin = mysql('admin')->where('phone', $phone)->get('id')) {
+            if (! $admin = mysql('admin')->cols('id')->where('phone', $phone)->get()) {
                 return ['error' => '用户不存在'];
             }
             validateCode($phone, $_POST['code']);
         }
-        return ['data' => Auth::getToken('admin', $admin->id)];
+        return ['data' => $jwt->encode($admin->id)];
     }
 
     /**
      * 设置密码
      */
-    public function setPassword($password)
+    public function setPassword($password, Request $request)
     {
         if (!preg_match('/^(?!\d+$)(?![a-zA-Z]+$)[\dA-Za-z]{6,}$/', $password)) {
             return ['error' => '密码长度至少为6位，由数字和字母组成'];
@@ -88,11 +87,12 @@ class AuthController
     /**
      * 换绑手机
      */
-    public function changePhone($phone, $code)
+    public function changePhone(Request $request, $code)
     {
-        validate(['phone' => 'unique:user,phone']);
+        $request->validate(['phone' => 'unique:user,phone']);
+        $phone = $request->phone;
         validateCode($phone, $code);
-        auth()->update(['phone' => $phone]);
+        $request->user()->update(['phone' => $phone]);
         return ['msg' => '换绑成功'];
     }
 }

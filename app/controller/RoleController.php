@@ -1,6 +1,8 @@
 <?php
 namespace app\controller;
 
+use src\Request;
+
 class RoleController
 {
     /**
@@ -14,10 +16,10 @@ class RoleController
     /**
      * 添加
      */
-    public function add($name, $pid)
+    public function add($name, Request $request)
     {
-        validate(['pid' => 'exists:role,id']);
-        mysql('role')->insert(['name' => $name, 'pid' => $pid]);
+        $request->validate(['pid' => 'exists:role,id']);
+        mysql('role')->insert(['name' => $name, 'pid' => $request->pid]);
         return ['msg' => '添加成功'];
     }
 
@@ -78,10 +80,10 @@ class RoleController
     /**
      * 保存路由
      */
-    public function saveRoutes($id, $route_ids)
+    public function saveRoutes(Request $request, $id)
     {
-        validate(['id' => 'exists:role,id', 'route_ids' => 'array']);
-        $routeIds = mysql('route')->whereIn('id', $route_ids)->col('id');
+        $request->validate(['id' => 'exists:role,id', 'route_ids' => 'array']);
+        $routeIds = mysql('route')->whereIn('id', $request->route_ids)->col('id');
         mysql('role_route')->cols('role_id', 'route_id')->replace(
             array_map(function ($val) use ($id) {
                 return [$id, $val];

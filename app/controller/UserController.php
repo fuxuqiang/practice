@@ -1,27 +1,29 @@
 <?php
 namespace app\controller;
 
+use src\Request;
+
 class UserController
 {
     /**
      * 修改名称
      */
-    public function update()
+    public function update(Request $request)
     {
-        $input = input(['name', 'capital']);
-        isset($input['capital']) && validate(['capital' => 'posInt']);
-        auth()->update($input);
+        $input = $request->get('name', 'capital');
+        isset($input['capital']) && $request->validate(['capital' => 'posInt']);
+        $request->user()->update($input);
         return ['msg' => '修改成功'];
     }
 
     /**
      * 交易
      */
-    public function trade($code, $price, $num, $date, $note = '')
+    public function trade($code, $price, $num, $date, $note = '', Request $request)
     {
-        validate(['price' => 'int|min:1', 'num' => 'int|nq:0']);
+        $request->validate(['price' => 'int|min:1', 'num' => 'int|nq:0']);
 
-        $user = auth();
+        $user = $request->user();
 
         $total = $price * $num * 100;
         $fee = round($total/5000);
@@ -69,25 +71,26 @@ class UserController
     /**
      * 交易记录
      */
-    public function getTrades()
+    public function getTrades(Request $request)
     {
-        $input = input();
+        $input = $request->get();
         $cond = [];
         isset($input['type']) && $cond['type'] = $input['type'];
         isset($input['code']) && $cond['code'] = $input['code'];
         isset($input['start']) && $cond[] = ['date', '>', $input['start']];
         isset($input['end']) && $cond[] = ['date', '<', $input['end']];
         return [
-            'data' => mysql('trade')->where($cond)->paginate(...pageParams())
+            'data' => mysql('trade')->where($cond)->paginate(...$request->pageParams())
         ];
     }
 
     /**
      * 修改交易备注
      */
-    public function updateTradeNote($id, $note)
+    public function updateTradeNote($id, $note, Request $request)
     {
-        mysql('trade')->where(['id' => $id, 'user_id' => auth()->id])->update(['note' => $note]);
+        mysql('trade')->where(['id' => $id, 'user_id' => $request->user()->id])
+            ->update(['note' => $note]);
         return ['msg' => '修改成功'];
     }
 }

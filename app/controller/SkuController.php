@@ -1,24 +1,26 @@
 <?php
 namespace app\controller;
 
+use src\Request;
+
 class SkuController
 {
-    public function add($name, $price, $num)
+    public function add($name, Request $request)
     {
-        validate(['price' => 'int|min:0', 'num' => 'int|min:0']);
-        mysql('sku')->insert(['name' => $name, 'price' => $price, 'num' => $num]);
+        $request->validate(['price' => 'int|min:0', 'num' => 'int|min:0']);
+        mysql('sku')->insert(['name' => $name, 'price' => $request->price, 'num' => $request->num]);
         return ['msg' => '添加成功'];
     }
 
-    public function list()
+    public function list(Request $request)
     {
-        return mysql('sku')->paginate(...pageParams());
+        return mysql('sku')->paginate(...$request->pageParams());
     }
 
-    public function update($id)
+    public function update($id, Request $request)
     {
-        validate(['price' => 'int|min:0', 'num' => 'int|min:0']);
-        $input = input(['name', 'price', 'num']);
+        $request->validate(['price' => 'int|min:0', 'num' => 'int|min:0']);
+        $input = $request->get('name', 'price', 'num');
         mysql('sku')->where('id', $id)->update($input);
         return ['msg' => '更新成功'];
     }

@@ -1,18 +1,24 @@
 <?php
 namespace app\controller;
 
+use src\Request;
+
 class AddressController
 {
-    public function add($code, $address)
+    public function add(Request $request, $address)
     {
-        validate(['code' => 'exists:region,code']);
-        mysql('address')->insert(['user_id' => auth()->id, 'code' => $code, 'address' => $address]);
+        $request->validate(['code' => 'exists:region,code']);
+        mysql('address')->insert([
+            'user_id' => $request->user()->id,
+            'code' => $request->code,
+            'address' => $address
+        ]);
         return ['msg' => '添加成功'];
     }
 
-    public function list()
+    public function list(Request $request)
     {
-        $addresses = mysql('address')->where('user_id', auth()->id)->all();
+        $addresses = mysql('address')->where('user_id', $request->user()->id)->all();
         $codes = [];
         foreach ($addresses as &$address) {
             $address['codes'] = \app\model\Region::getAllCode($address['code']);
@@ -23,19 +29,19 @@ class AddressController
             return [
                 'id' => $val['id'],
                 'code' => $val['code'],
-                'address' => implode('', arrayOnly($regions, $val['codes'])).$val['address']
+                'address' => implode('', (new \src\Arr($regions))->get($val['codes'])).$val['address']
             ];
         }, $addresses);
         return ['data' => $addresses];
     }
 
-    public function update($id)
+    public function update($id, Request $request)
     {
-        $input = input(['code', 'address']);
+        $input = $request->get('code', 'address');
         if (isset($input['code']) && ! mysql('region')->exists('code', $code)) {
             return ['error' => '行政区不存在'];
         }
-        mysql('address')->where(['id' => $id, 'user_id' => auth()->id])->update($input);
+        mysql('address')->where(['id' => $id, 'user_id' => $request->user()->id])->update($input);
         return ['msg' => '更新成功'];
     }
 

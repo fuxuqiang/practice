@@ -7,9 +7,7 @@ CREATE TABLE `user` (
     `phone` BIGINT NOT NULL UNIQUE,
     `name` VARCHAR(255) NOT NULL DEFAULT '',
     `password` VARCHAR(255) NOT NULL DEFAULT '',
-    `capital` mediumint UNSIGNED NOT NULL DEFAULT 0,
-    `api_token` VARCHAR(255) NOT NULL,
-    `token_expires` TIMESTAMP NOT NULL DEFAULT,
+    `capital` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -46,8 +44,6 @@ CREATE TABLE `admin` (
     `name` VARCHAR(255) NOT NULL DEFAULT '',
     `password` VARCHAR(255) NOT NULL DEFAULT '',
     `role_id` TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    `api_token` VARCHAR(255) NOT NULL DEFAULT '',
-    `token_expires` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `joined_at` DATE NOT NULL,
     `quitted_at` DATE
 );
@@ -63,7 +59,7 @@ CREATE TABLE `route` (
     `uri` VARCHAR(255) NOT NULL,
     `resource` VARCHAR(255) NOT NULL,
     `action` VARCHAR(255) NOT NULL,
-    UNIQUE (`method`,`uri`)
+    UNIQUE(`method`,`uri`)
 );
 
 INSERT `route` VALUES
@@ -103,4 +99,24 @@ CREATE TABLE `sku` (
     `name` VARCHAR(255) NOT NULL,
     `price` SMALLINT UNSIGNED NOT NULL,
     `num` TINYINT UNSIGNED NOT NULL
+);
+
+DROP TABLE IF EXISTS `order`;
+CREATE TABLE `order` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `user_id` SMALLINT UNSIGNED NOT NULL,
+    `region_code` BIGINT UNSIGNED NOT NULL,
+    `address` VARCHAR(255) NOT NULL,
+    `status` TINYINT NOT NULL DEFAULT 0,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS `order_sku`;
+CREATE TABLE `order_sku` (
+    `order_id` TINYINT UNSIGNED NOT NULL,
+    `sku_id` TINYINT UNSIGNED NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `price` SMALLINT UNSIGNED NOT NULL,
+    `num` TINYINT UNSIGNED NOT NULL,
+    UNIQUE(`order_id`,`sku_id`)
 );

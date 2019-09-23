@@ -2,7 +2,7 @@
 
 function validateCode($phone, $code)
 {
-    ($code != redis()->get($phone)) && response(200, '验证码错误');
+    ($code != \src\Container::get('Redis')->get($phone)) && response(200, '验证码错误');
 }
 
 function inSubs($id, array $data, $aid)

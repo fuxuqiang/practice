@@ -1,7 +1,7 @@
 <?php
 namespace src;
 
-class Model
+class Model extends Arr
 {
     /**
      * @var callable
@@ -11,12 +11,7 @@ class Model
     /**
      * @var string
      */
-    private $table,
-    
-    /**
-     * @var array
-     */
-    $data;
+    private $table;
 
     /**
      * 设置获取数据库操作类的方法
@@ -48,14 +43,6 @@ class Model
     public function __set($name, $value)
     {
         $this->data[$name] = $value;
-    }
-
-    /**
-     * 获取模型字段
-     */
-    public function __get($name)
-    {
-        return $this->data[$name] ?? null;
     }
 
     /**

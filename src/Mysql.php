@@ -5,10 +5,15 @@ namespace src;
 class Mysql
 {
     /**
-     * @var \mysqli
+     * @var mysqli
      */
-    private $mysqli,
+    private $mysqli;
 
+    /**
+     * @var mysqli_stmt
+     */
+    private $stmt,
+    
     /**
      * @var string
      */
@@ -42,15 +47,10 @@ class Mysql
     /**
      * @var array
      */
-    $params = [],
+    $params = [];
 
     /**
-     * @var mysqli_stmt
-     */
-    $stmt;
-
-    /**
-     * @param \mysqli
+     * @param mysqli
      */
     public function __construct(\mysqli $mysqli)
     {
@@ -67,6 +67,7 @@ class Mysql
 
     /**
      * 执行查询
+     * @return mysqli_result
      */
     public function query($sql, array $vars = [])
     {
@@ -117,11 +118,10 @@ class Mysql
     {
         if (is_array($col)) {
             foreach ($col as $key => $item) {
-                if (is_array($item)) {
-                    $this->cond[] = '`'.$item[0].'` '.$item[1].' ?';
-                    $this->params[] = $item[2];       
+                if (is_array($item)) {   
+                    $this->setWhere($item[0], $item[1], $item[2]);
                 } else {
-                    $this->where($key, $item);
+                    $this->setWhere($key, '=', $item);
                 }
             }
         } else {
@@ -129,10 +129,18 @@ class Mysql
                 $val = $operator;
                 $operator = '=';
             }
-            $this->cond[] = '`'.$col.'`'.$operator.'?';
-            $this->params[] = $val;
+            $this->setWhere($col, $operator, $val);
         }
         return $this;
+    }
+
+    /**
+     * 设置WHERE条件
+     */
+    private function setWhere($col, $operator, $val)
+    {
+        $this->cond[] = '`'.$col.'`'.$operator.'?';
+        $this->params[] = $val;
     }
 
     /**
@@ -166,10 +174,10 @@ class Mysql
     /**
      * 返回查询结果首行对象
      */
-    public function get(...$cols)
+    public function get($class = null, $params = [])
     {
-        $this->cols || $this->cols = $cols;
-        return $this->query($this->getDqlSql())->fetch_object();
+        $stmt = $this->query($this->getDqlSql());
+        return $class ? $stmt->fetch_object($class, $params) : $stmt->fetch_object();
     }
 
     /**
@@ -177,7 +185,7 @@ class Mysql
      */
     public function val($col)
     {
-        $row = $this->get($col)->fetch_row();
+        $row = $this->query($this->getDqlSql())->fetch_row();
         return $row ? $row[0] : null;
     }
 

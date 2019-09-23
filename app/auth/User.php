@@ -1,14 +1,12 @@
 <?php
 namespace app\auth;
 
-class User
+class User implements \src\jwt\Auth
 {
-    public static function handle($token)
+    public static function handle($token, $jwt)
     {
-        return ($user = mysql()->query(
-                'SELECT `id` FROM `user` WHERE `api_token`=? AND `token_expires`>NOW()',
-                [$token]
-            )->fetch_object(\src\Model::class, ['user'])) ?
-            $user : false;
+        if ($id = $jwt->decode($token)) {
+            return mysql('user')->cols('id')->where('id', $id)->get('src\Model', ['user']);
+        }
     }
 }
