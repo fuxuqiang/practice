@@ -2,7 +2,7 @@
 
 use src\Container;
 
-// 加载助手函数
+// 加载公共文件
 require __DIR__.'/app.php';
 require __DIR__.'/app/helpers.php';
 
@@ -29,9 +29,9 @@ if (!file_exists(__DIR__.'/.dev')) {
 }
 
 // 注册JWT、Redis类
-Container::bind('src\jwt\JWT', function () {
+Container::bind('src\JWT', function () {
     $config = config('jwt');
-    return new \src\jwt\JWT($config['id'], $config['exp']);
+    return new \src\JWT($config['id'], $config['exp']);
 });
 Container::bind('Redis', function () {
     $redis = new Redis;
@@ -56,14 +56,13 @@ try {
     // 验证token
     if (is_array($route)) {
         if (isset($_SERVER['HTTP_AUTHORIZATION'])
-            && strpos($_SERVER['HTTP_AUTHORIZATION'], 'Bearer ') === 0) {
-            $user = $route[1]::handle(
-                substr($_SERVER['HTTP_AUTHORIZATION'], 7),
-                Container::get('src\jwt\JWT')
-            );
+            && strpos($_SERVER['HTTP_AUTHORIZATION'], 'Bearer ') === 0
+            && ($id = Container::get('src\JWT')->decode(substr($_SERVER['HTTP_AUTHORIZATION'], 7)))
+            && $user = $route[1]::handle($id)) {
+            $route = $route[0];
+        } else {
+            response(401);
         }
-        empty($user) && response(401);
-        $route = $route[0];
     }
 
     // 实例化请求类
@@ -91,7 +90,8 @@ try {
         }
     }
     // 调用控制器方法
-    $response = $method->invokeArgs(new $controller, $args);    
+    $response = $method->invokeArgs(new $controller, $args);
+
 } catch (Exception $e) {
     response(400, $e->getMessage());
 }

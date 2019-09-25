@@ -1,12 +1,10 @@
 <?php
 namespace app\auth;
 
-class User implements \src\jwt\Auth
+class User
 {
-    public static function handle($token, $jwt)
+    public static function handle($id)
     {
-        if ($id = $jwt->decode($token)) {
-            return mysql('user')->cols('id')->where('id', $id)->get('src\Model', ['user']);
-        }
+        return mysql('user')->cols('id')->where('id', $id)->get('src\Model', ['user']);
     }
 }

@@ -2,7 +2,7 @@
 namespace app\controller;
 
 use src\Request;
-use src\jwt\JWT;
+use src\JWT;
 
 class AuthController
 {

@@ -75,7 +75,6 @@ class UserController
     {
         $input = $request->get();
         $cond = [];
-        isset($input['type']) && $cond['type'] = $input['type'];
         isset($input['code']) && $cond['code'] = $input['code'];
         isset($input['start']) && $cond[] = ['date', '>', $input['start']];
         isset($input['end']) && $cond[] = ['date', '<', $input['end']];

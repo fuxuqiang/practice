@@ -1,12 +1,11 @@
 <?php
 namespace app\auth;
 
-class Admin implements \src\jwt\Auth
+class Admin
 {
-    public static function handle($token, $jwt)
+    public static function handle($id)
     {
-        if (($id = $jwt->decode($token))
-            && ($admin = mysql('admin')->cols('id', 'role_id')->where('id', $id)->get('src\Model', ['admin']))
+        if (($admin = mysql('admin')->cols('id', 'role_id')->where('id', $id)->get('src\Model', ['admin']))
             && (!($routeId = mysql('route')->where([
                     'method' => $_SERVER['REQUEST_METHOD'],
                     'uri' => ltrim($_SERVER['PATH_INFO'], '/')

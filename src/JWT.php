@@ -1,5 +1,5 @@
 <?php
-namespace src\jwt;
+namespace src;
 
 class JWT
 {
