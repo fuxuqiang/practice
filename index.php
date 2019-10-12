@@ -11,7 +11,7 @@ if ($cors = config('cors')) {
     header('Access-Control-Allow-Origin: '.$cors);
     if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
         header('Access-Control-Allow-Headers: Authorization');
-        die;
+        exit;
     }
 }
 
@@ -28,17 +28,10 @@ if (!file_exists(__DIR__.'/.dev')) {
     });
 }
 
-// 注册JWT、Redis类
+// 注册JWT类
 Container::bind('src\JWT', function () {
     $config = config('jwt');
     return new \src\JWT($config['id'], $config['exp']);
-});
-Container::bind('Redis', function () {
-    $redis = new Redis;
-    $config = config('redis');
-    $redis->connect($config['host']);
-    // $redis->auth($config['pwd']);
-    return $redis;
 });
 
 // 定义模型的数据库连接
@@ -68,7 +61,7 @@ try {
     // 实例化请求类
     $request = new \src\Request($user, function ($val, $table, $col) {
         return mysql($table)->exists($col, $val);
-    });
+    }, config('per_page'));
     Container::instance('src\Request', $request);
 
     // 定位控制器方法

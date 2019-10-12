@@ -45,6 +45,11 @@ class Mysql
     $lock,
 
     /**
+     * @var string
+     */
+    $order,
+
+    /**
      * @var array
      */
     $params = [];
@@ -168,6 +173,16 @@ class Mysql
     public function lock()
     {
         $this->lock = ' FOR UPDATE';
+        return $this;
+    }
+
+    /**
+     * ORDER BY RAND()
+     */
+    public function rand($limit)
+    {
+        $this->order = ' ORDER BY RAND()';
+        $this->limit = 'LIMIT '.$limit;
         return $this;
     }
 
@@ -322,7 +337,7 @@ class Mysql
     private function getDqlSql($cols = null)
     {
         return 'SELECT '.($cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
-            .' FROM `'.$this->table.'` '.$this->getWhere().' '.$this->limit.$this->lock;
+            .' FROM `'.$this->table.'` '.$this->getWhere().$this->order.' '.$this->limit.$this->lock;
     }
 
     /**

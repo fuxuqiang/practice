@@ -25,14 +25,15 @@ class AddressController
             $codes = array_merge($codes, $address['codes']);
         }
         $regions = mysql('region')->whereIn('code', $codes)->col('name', 'code');
-        $addresses = array_map(function ($val) use ($regions) {
-            return [
-                'id' => $val['id'],
-                'code' => $val['code'],
-                'address' => implode('', (new \src\Arr($regions))->get($val['codes'])).$val['address']
-            ];
-        }, $addresses);
-        return ['data' => $addresses];
+        return [
+            'data' => array_map(function ($val) use ($regions) {
+                return [
+                    'id' => $val['id'],
+                    'code' => $val['code'],
+                    'address' => implode('', (new \src\Arr($regions))->get($val['codes'])).$val['address']
+                ];
+            }, $addresses)
+        ];
     }
 
     public function update($id, Request $request)

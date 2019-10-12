@@ -3,9 +3,9 @@ namespace src;
 
 class Request extends Arr
 {
-    private $user, $exists;
+    private $user, $exists, $perPage;
 
-    public function __construct($user, callable $exists)
+    public function __construct($user, callable $exists, int $perPage)
     {
         if (!$this->data = $_REQUEST) {
             if (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/json') {
@@ -16,18 +16,28 @@ class Request extends Arr
         }
         $this->user = $user;
         $this->exists = $exists;
+        $this->perPage = $perPage;
     }
 
+    /**
+     * 获取请求用户
+     */
     public function user()
     {
         return $this->user;
     }
 
+    /**
+     * 获取分页参数
+     */
     public function pageParams()
     {
-        return [$this->data['page'] ?? 1, $this->data['per_page'] ?? 5];
+        return [$this->data['page'] ?? 1, $this->data['per_page'] ?? $this->perPage];
     }
 
+    /**
+     * 验证请求参数
+     */
     public function validate(array $paramsRules)
     {
         $rules = [
@@ -56,7 +66,7 @@ class Request extends Arr
                         $this->data[$param],
                         ...(isset($rule[1]) ? explode(',', $rule[1]) : []))
                     ) {
-                    throw new \InvalidArgumentException('无效的'.$param);
+                    throw new \Exception('无效的'.$param);
                 }      
             }
         }

@@ -6,18 +6,18 @@
 function response($code, $msg = null)
 {
     http_response_code($code);
-    die($msg ?: '');
+    exit($msg ?: '');
 }
 
 /**
  * 记录日志
  */
-function logError($content, $die = true)
+function logError($content, $exit = true)
 {
     file_put_contents(
         __DIR__.'/log/error.log', '['.timestamp()."]\n".$content."\n", FILE_APPEND | LOCK_EX
     );
-    $die && response(500);
+    $exit && response(500);
 }
 
 /**

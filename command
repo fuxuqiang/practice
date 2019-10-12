@@ -3,7 +3,5 @@
 
 require __DIR__.'/app.php';
 
-$commands = ['region' => 'RegionSpider', 'register' => 'Register'];
-
-$command = '\app\command\\'.$commands[$argv[1]];
+$command = '\app\command\\'.ucfirst($argv[1]);
 (new $command)->handle();
