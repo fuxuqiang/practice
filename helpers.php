@@ -26,7 +26,7 @@ function logError($content, $exit = true)
 function config($name)
 {
     static $config;
-    $config || $config = require __DIR__.'/app/config.php';
+    $config || $config = parse_ini_file(__DIR__.'/.env', true);
     return $config[$name] ?? null;
 }
 
@@ -38,7 +38,7 @@ function mysql($table = null)
     static $mysqli;
     if (!$mysqli) {
         $config = config('mysql');
-        $mysqli = new mysqli($config['host'], $config['user'], $config['pwd'], $config['name']);
+        $mysqli = new mysqli($config['host'], $config['user'], $config['pwd'], $config['db']);
     }
     $mysql = new \src\Mysql($mysqli);
     return $table ? $mysql->from($table) : $mysql;

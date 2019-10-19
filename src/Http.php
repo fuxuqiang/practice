@@ -24,8 +24,7 @@ class Http
     public static function getHandler($url, $params)
     {
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt_array($ch, [CURLOPT_POSTFIELDS => $params, CURLOPT_RETURNTRANSFER => true]);
         return $ch;
     }
 }

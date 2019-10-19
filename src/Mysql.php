@@ -5,54 +5,24 @@ namespace src;
 class Mysql
 {
     /**
-     * @var mysqli
+     * @var \mysqli
      */
     private $mysqli;
 
     /**
-     * @var mysqli_stmt
+     * @var \mysqli_stmt
      */
-    private $stmt,
+    private $stmt;
     
     /**
      * @var string
      */
-    $table,
+    private $table, $limit, $lock, $order;
 
     /**
      * @var array
      */
-    $cols,
-    
-    /**
-     * @var array
-     */
-    $relation,
-    
-    /**
-     * @var array
-     */
-    $cond,
-    
-    /**
-     * @var string
-     */
-    $limit,
-    
-    /**
-     * @var string
-     */
-    $lock,
-
-    /**
-     * @var string
-     */
-    $order,
-
-    /**
-     * @var array
-     */
-    $params = [];
+    private $cols, $relation, $cond, $params = [];
 
     /**
      * @param mysqli

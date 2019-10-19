@@ -7,7 +7,8 @@ require __DIR__.'/app.php';
 require __DIR__.'/app/helpers.php';
 
 // 是否允许跨域
-if ($cors = config('cors')) {
+$config = config('common');
+if ($cors = $config['cors']) {
     header('Access-Control-Allow-Origin: '.$cors);
     if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
         header('Access-Control-Allow-Headers: Authorization');
@@ -16,7 +17,7 @@ if ($cors = config('cors')) {
 }
 
 // 报错处理
-if (!file_exists(__DIR__.'/.dev')) {
+if (! $config['debug']) {
     ini_set('display_errors', 0);
     set_error_handler(function () {
         ob_start();
@@ -61,7 +62,7 @@ try {
     // 实例化请求类
     $request = new \src\Request($user, function ($val, $table, $col) {
         return mysql($table)->exists($col, $val);
-    }, config('per_page'));
+    }, $config['per_page']);
     Container::instance('src\Request', $request);
 
     // 定位控制器方法

@@ -5,7 +5,7 @@ class Arr
 {
     protected $data;
 
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data;
     }
