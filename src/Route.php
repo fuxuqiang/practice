@@ -18,19 +18,19 @@ class Route
         }
     }
 
-    private function auth($auth)
+    protected function auth($auth)
     {
         $this->auth = $auth;
         return $this;
     }
 
-    private function prefix(string $prefix)
+    protected function prefix(string $prefix)
     {
         $this->prefix = $prefix;
         return $this;
     }
 
-    private function resource($name, array $actions)
+    protected function resource($name, array $actions)
     {
         $actions = array_intersect($actions, ['add', 'update', 'del', 'list']);
         $methods = ['add' => 'POST', 'update' => 'PUT', 'del' => 'DELETE', 'list' => 'GET'];

@@ -39,7 +39,7 @@ class AddressController
     public function update($id, Request $request)
     {
         $input = $request->get('code', 'address');
-        if (isset($input['code']) && ! mysql('region')->exists('code', $code)) {
+        if (isset($input['code']) && ! mysql('region')->exists('code', $input['code'])) {
             return ['error' => '行政区不存在'];
         }
         mysql('address')->where(['id' => $id, 'user_id' => $request->user()->id])->update($input);
