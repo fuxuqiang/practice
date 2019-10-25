@@ -25,7 +25,7 @@ class Mysql
     private $cols, $relation, $cond, $params = [];
 
     /**
-     * @param mysqli
+     * @param \mysqli
      */
     public function __construct(\mysqli $mysqli)
     {
@@ -42,7 +42,7 @@ class Mysql
 
     /**
      * 执行查询
-     * @return mysqli_result
+     * @return \mysqli_result
      */
     public function query($sql, array $vars = [])
     {

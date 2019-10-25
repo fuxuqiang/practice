@@ -1,7 +1,7 @@
 <?php
 namespace app\command;
 
-use src\Http;
+use src\HttpClient;
 
 class Order
 {
@@ -14,10 +14,10 @@ class Order
 
         $users = \app\model\Login::getToken($users);
 
-        Http::request(function ($mh) use ($users) {
+        HttpClient::request(function ($mh) use ($users) {
             $skus = mysql('sku')->col('id');
             foreach ($users as $user) {
-                $ch = Http::getHandler('http://stock.test/order', json_encode([
+                $ch = HttpClient::getHandler('http://stock.test/order', json_encode([
                     'address_id' => $user['id'],
                     'skus' => array_map(function ($val) {
                         return ['id' => $val, 'num' => mt_rand(1, 3)];

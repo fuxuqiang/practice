@@ -5,15 +5,9 @@ class Request extends Arr
 {
     private $user, $exists, $perPage;
 
-    public function __construct($user, callable $exists, int $perPage)
+    public function __construct(array $data, $user, callable $exists, int $perPage)
     {
-        if (!$this->data = $_REQUEST) {
-            if (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/json') {
-                $this->data = json_decode(file_get_contents('php://input'), true);
-            } else {
-                parse_str(file_get_contents('php://input'), $this->data);
-            }
-        }
+        $this->data = $data;
         $this->user = $user;
         $this->exists = $exists;
         $this->perPage = $perPage;

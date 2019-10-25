@@ -10,10 +10,9 @@ if ($cors = config('common')['cors']) {
     }
 }
 
-require __DIR__.'/route.php';
 require __DIR__.'/helpers.php';
 
-$response = \src\App::run($_SERVER);
+$response = \src\Http::handle($_SERVER, $_REQUEST);
 
 if (!is_null($response)) {
     header('Content-Type: application/json');

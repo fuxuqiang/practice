@@ -1,7 +1,7 @@
 <?php
 namespace app\command;
 
-use src\Http;
+use src\HttpClient;
 
 class Address
 {
@@ -11,10 +11,10 @@ class Address
 
         $users = \app\model\Login::getToken($phones);
 
-        Http::request(function ($mh) use ($users) {
+        HttpClient::request(function ($mh) use ($users) {
             $addresses = mysql('address')->rand(16)->col('code');
             foreach ($users as $key => $token) {
-                $ch = Http::getHandler(
+                $ch = HttpClient::getHandler(
                     'http://stock.test/user/address',
                     ['code' => $addresses[$key], 'address' => '']
                 );
