@@ -1,23 +1,13 @@
 <?php
 
 /**
- * 响应状态码并结束执行
- */
-function response($code, $msg = null)
-{
-    http_response_code($code);
-    exit($msg ?: '');
-}
-
-/**
  * 记录日志
  */
-function logError($content, $exit = true)
+function logError($content)
 {
     file_put_contents(
         __DIR__.'/log/error.log', '['.timestamp()."]\n".$content."\n", FILE_APPEND | LOCK_EX
     );
-    $exit && response(500);
 }
 
 /**

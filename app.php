@@ -1,27 +1,24 @@
 <?php
 
+// 自动加载类文件
 spl_autoload_register(function ($class) {
     strpos($class, 'PHPUnit') === 0 || require __DIR__.'/'.str_replace('\\', '/', $class).'.php';
 });
 
+// 加载助手函数
 require __DIR__.'/helpers.php';
+require __DIR__.'/app/helpers.php';
 
-if (! config('debug')) {
-    ini_set('display_errors', 0);
-    set_error_handler(function () {
-        ob_start();
-        debug_print_backtrace();
-        logError(ob_get_clean());
-    });
-    register_shutdown_function(function () {
-        ($error = error_get_last()) && logError($error['message']);
-    });
-}
-
+// 绑定Redis类到容器中
 \src\Container::bind('Redis', function () {
     $redis = new Redis;
     $config = config('redis');
     $redis->connect($config['host']);
     // $redis->auth($config['pwd']);
     return $redis;
+});
+
+// 设置模型的数据库连接
+\src\Model::setConnector(function ($model) {
+    return mysql($model->getTable())->where('id', $model->id);
 });
