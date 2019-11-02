@@ -17,6 +17,7 @@ class Container
 
     public static function get($name)
     {
-        return self::$instances[$name] ?? self::$instances[$name] = call_user_func(self::$binds[$name]);
+        return self::$instances[$name] ??
+            (isset(self::$binds[$name]) ? self::$instances[$name] = call_user_func(self::$binds[$name]) : null);
     }
 }

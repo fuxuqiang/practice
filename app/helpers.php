@@ -2,7 +2,9 @@
 
 function validateCode($phone, $code)
 {
-    ($code != \src\Container::get('Redis')->get($phone)) && response(200, '验证码错误');
+    if ($code != \src\Container::get('Redis')->get($phone)) {
+        throw new Exception('验证码', 200);
+    }
 }
 
 function inSubs($id, array $data, $aid)

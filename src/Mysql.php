@@ -13,7 +13,7 @@ class Mysql
      * @var \mysqli_stmt
      */
     private $stmt;
-    
+
     /**
      * @var string
      */
@@ -48,7 +48,7 @@ class Mysql
     {
         if ($this->stmt = $this->mysqli->prepare($sql)) {
             if ($types = str_repeat('s', count($vars) + count($this->params))) {
-                $vars = array_merge($vars, $this->params);    
+                $vars = array_merge($vars, $this->params);
                 $this->stmt->bind_param($types, ...array_values($vars));
             }
             $this->stmt->execute() || trigger_error($this->mysqli->error, E_USER_ERROR);
@@ -93,7 +93,7 @@ class Mysql
     {
         if (is_array($col)) {
             foreach ($col as $key => $item) {
-                if (is_array($item)) {   
+                if (is_array($item)) {
                     $this->setWhere($item[0], $item[1], $item[2]);
                 } else {
                     $this->setWhere($key, '=', $item);
@@ -114,7 +114,7 @@ class Mysql
      */
     private function setWhere($col, $operator, $val)
     {
-        $this->cond[] = '`'.$col.'`'.$operator.'?';
+        $this->cond[] = '`' . $col . '`' . $operator . '?';
         $this->params[] = $val;
     }
 
@@ -123,7 +123,7 @@ class Mysql
      */
     public function whereNull($col)
     {
-        $this->cond[] = '`'.$col.'` IS NULL';
+        $this->cond[] = '`' . $col . '` IS NULL';
         return $this;
     }
 
@@ -132,7 +132,7 @@ class Mysql
      */
     public function whereIn($col, array $vals)
     {
-        $this->cond[] = '`'.$col.'` IN '.$this->markers($vals);
+        $this->cond[] = '`' . $col . '` IN ' . $this->markers($vals);
         $this->params = array_merge($this->params, $vals);
         return $this;
     }
@@ -152,7 +152,7 @@ class Mysql
     public function rand($limit)
     {
         $this->order = ' ORDER BY RAND()';
-        $this->limit = 'LIMIT '.$limit;
+        $this->limit = 'LIMIT ' . $limit;
         return $this;
     }
 
@@ -181,12 +181,14 @@ class Mysql
     {
         $this->cols || $this->cols = $cols;
         $data = $this->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
-        if ($this->relation && ($table = key($this->relation))
-            && $foreignKeysVal = array_column($data, $table.'_id')) {
+        if (
+            $this->relation && ($table = key($this->relation))
+            && $foreignKeysVal = array_column($data, $table . '_id')
+        ) {
             $relationData = (new self($this->mysqli))->cols(...$this->relation[$table])
                 ->from($table)->whereIn('id', $foreignKeysVal)->col(null, 'id');
             $data = array_map(function ($item) use ($table, $relationData) {
-                $item[$table] = $relationData[$item[$table.'_id']];
+                $item[$table] = $relationData[$item[$table . '_id']];
                 return $item;
             }, $data);
         }
@@ -208,7 +210,7 @@ class Mysql
     public function exists($col, $val)
     {
         $this->limit = 'LIMIT 1';
-        return $this->where($col, $val)->query($this->getDqlSql('`'.$col.'`'))->num_rows;
+        return $this->where($col, $val)->query($this->getDqlSql('`' . $col . '`'))->num_rows;
     }
 
     /**
@@ -216,7 +218,7 @@ class Mysql
      */
     public function paginate($page, $perPage)
     {
-        $this->limit = 'LIMIT '.($page - 1) * $perPage.','.$perPage;
+        $this->limit = 'LIMIT ' . ($page - 1) * $perPage . ',' . $perPage;
         return [
             'data' => $this->all(),
             'total' => $this->query($this->getDqlSql('COUNT(*)'))->fetch_row()[0]
@@ -259,7 +261,7 @@ class Mysql
             $binds = $data;
         }
         return $this->query(
-            $action.' `'.$this->table.'` ('.implode(',', $cols).') VALUES '.$markers,
+            $action . ' `' . $this->table . '` (' . implode(',', $cols) . ') VALUES ' . $markers,
             $binds
         );
     }
@@ -270,17 +272,18 @@ class Mysql
     public function update($data)
     {
         return $this->query(
-            'UPDATE `'.$this->table.'` SET '.$this->gather(array_keys($data), '`%s`=?').$this->getWhere(),
+            "UPDATE `$this->table` SET " . $this->gather(array_keys($data), '`%s`=?') . $this->getWhere(),
             $data
-        ); 
+        );
     }
 
     /**
      * 执行DELETE语句
      */
-    public function del(int $id)
+    public function del(int $id = null)
     {
-        return $this->query('DELETE FROM `'.$this->table.'` WHERE `id`=?', [$id]);
+        return $id ? $this->query("DELETE FROM `$this->table` WHERE `id`=?", [$id])
+            : $this->query("DELETE FROM `$this->table`" . $this->getWhere());
     }
 
     /**
@@ -288,7 +291,7 @@ class Mysql
      */
     private function getWhere()
     {
-        return $this->cond ? ' WHERE '.implode(' AND ', $this->cond) : '';
+        return $this->cond ? ' WHERE ' . implode(' AND ', $this->cond) : '';
     }
 
     /**
@@ -306,8 +309,8 @@ class Mysql
      */
     private function getDqlSql($cols = null)
     {
-        return 'SELECT '.($cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
-            .' FROM `'.$this->table.'` '.$this->getWhere().$this->order.' '.$this->limit.$this->lock;
+        return 'SELECT ' . ($cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
+            . " FROM `$this->table`" . $this->getWhere() . $this->order . ' ' . $this->limit . $this->lock;
     }
 
     /**
@@ -315,6 +318,6 @@ class Mysql
      */
     private function markers(array $data)
     {
-        return '('.rtrim(str_repeat('?,', count($data)), ',').')';
+        return '(' . rtrim(str_repeat('?,', count($data)), ',') . ')';
     }
 }
