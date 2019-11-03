@@ -161,6 +161,7 @@ class Mysql
      */
     public function get($class = null, $params = [])
     {
+        $this->limit = 'LIMIT 1';
         $stmt = $this->query($this->getDqlSql());
         return $class ? $stmt->fetch_object($class, $params) : $stmt->fetch_object();
     }
@@ -170,6 +171,7 @@ class Mysql
      */
     public function val($col)
     {
+        $this->limit = 'LIMIT 1';
         $row = $this->query($this->getDqlSql())->fetch_row();
         return $row ? $row[0] : null;
     }

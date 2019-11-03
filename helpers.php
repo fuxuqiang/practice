@@ -6,7 +6,7 @@
 function logError($content)
 {
     file_put_contents(
-        __DIR__.'/log/error.log', '['.timestamp()."]\n".$content."\n", FILE_APPEND | LOCK_EX
+        __DIR__.'/runtime/error.log', '['.timestamp()."]\n".$content."\n", FILE_APPEND | LOCK_EX
     );
 }
 

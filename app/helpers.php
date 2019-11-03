@@ -3,7 +3,7 @@
 function validateCode($phone, $code)
 {
     if ($code != \src\Container::get('Redis')->get($phone)) {
-        throw new Exception('验证码', 200);
+        throw new Exception('验证码错误', 200);
     }
 }
 

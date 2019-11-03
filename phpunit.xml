@@ -1,0 +1,1 @@
+<phpunit bootstrap="app.php" cacheResultFile="runtime/.phpunit.result.cache"></phpunit>
