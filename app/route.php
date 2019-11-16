@@ -2,6 +2,8 @@
 
 use src\Route;
 
+// 前台
+
 Route::add([
     'POST' => [
         'sendCode' => 'Auth@sendCode',
@@ -35,9 +37,13 @@ $route->add([
 
 $route->resource('address', ['add', 'update', 'del']);
 
-Route::prefix('admin')->add(['POST' => ['login' => 'Auth@adminLogin']]);
+// 后台
 
-$route = Route::prefix('admin')->auth(\app\auth\Admin::class);
+$adminRoute = Route::prefix('admin');
+
+$adminRoute->add(['POST' => ['login' => 'Auth@adminLogin']]);
+
+$route = $adminRoute->auth(\app\auth\Admin::class);
 
 $route->add([
     'PUT' => [

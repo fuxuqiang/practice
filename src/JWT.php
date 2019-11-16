@@ -1,20 +1,22 @@
 <?php
+
 namespace src;
 
 class JWT
 {
-    private $header, $exp;
+    private $header, $jti, $exp;
 
     public function __construct($jti, $exp)
     {
-        $this->header = ['typ' => 'JWT', 'alg' => 'HS256', 'jti' => $jti];
+        $this->header = ['typ' => 'JWT', 'alg' => 'HS256'];
+        $this->jti = $jti;
         $this->exp = $exp;
     }
 
     public function encode($sub)
     {
-        return $this->base64Encode($this->header).'.'
-            .$this->base64Encode(['sub' => $sub, 'exp' => time() + $this->exp]).'.';
+        return $this->base64Encode($this->header) . '.'
+            . $this->base64Encode(['sub' => $sub, 'exp' => time() + $this->exp, 'jti' => $this->jti]) . '.';
     }
 
     public function decode($token)
@@ -24,11 +26,11 @@ class JWT
             throw new \Exception('token格式错误');
         }
         $header = $this->base64Decode($data[0]);
-        if ($header->alg != $this->header['alg'] || $header->jti != $this->header['jti']) {
+        if ($header->alg != $this->header['alg']) {
             return false;
         }
         $payload = $this->base64Decode($data[1]);
-        if ($payload->exp < time()) {
+        if ($payload->exp < time() || $payload->jti != $this->jti) {
             return false;
         }
         return $payload->sub;
@@ -38,7 +40,7 @@ class JWT
     {
         return str_replace('=', '', strtr(base64_encode(json_encode($data)), '+/', '-_'));
     }
-    
+
     private function base64Decode($data)
     {
         ($remainder = strlen($data) % 4) && $data .= str_repeat('=', 4 - $remainder);

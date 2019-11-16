@@ -2,7 +2,8 @@
 
 function validateCode($phone, $code)
 {
-    if ($code != \src\Container::get('Redis')->get($phone)) {
+    sessionStart();
+    if ($code != $_SESSION['code_' . $phone]) {
         throw new Exception('验证码错误', 200);
     }
 }

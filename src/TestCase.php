@@ -7,22 +7,22 @@ class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * @var Http
      */
-    protected $http;
+    protected static $http;
 
     /**
      * 设置测试基境
      */
-    protected function setUp(): void
+    public static function setUpBeforeClass(): void
     {
-        $this->http || $this->http = new \src\Http;
+        self::$http = new \src\Http;
     }
 
     /**
      * 调用测试请求
      */
-    protected function request($requestMethod, $uri, $params, $token = null)
+    protected function request($requestMethod, $uri, $params = [], $token = null)
     {
-        [$controller, $method, $args] = $this->http->handle([
+        [$controller, $method, $args] = self::$http->handle([
             'REQUEST_METHOD' => $requestMethod,
             'PATH_INFO' => $uri,
             'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null

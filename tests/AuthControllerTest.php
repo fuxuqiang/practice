@@ -2,8 +2,6 @@
 
 namespace tests;
 
-use src\Container;
-
 class AuthControllerTest extends \src\TestCase
 {
     private $beforePhone = 12345678901, $afterPhone = 12123456789, $password = 'a12345';
@@ -72,6 +70,6 @@ class AuthControllerTest extends \src\TestCase
     private function getCode($phone)
     {
         $this->post('sendCode', ['phone' => $phone]);
-        return Container::get('Redis')->get($phone);
+        return $_SESSION['code_' . $phone];
     }
 }

@@ -10,11 +10,11 @@ class AuthController
     /**
      * 发送验证码
      */
-    public function sendCode($phone, \Redis $redis)
+    public function sendCode($phone)
     {
         if (true/* todo 发送验证码到手机 */) {
-            $code = mt_rand(1000, 9999);
-            $redis->setex($phone, 99, $code);
+            sessionStart();
+            $_SESSION['code_' . $phone] = mt_rand(1000, 9999);
         }
         return ['msg' => '发送成功'];
     }

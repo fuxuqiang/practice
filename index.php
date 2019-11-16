@@ -2,17 +2,17 @@
 
 require __DIR__ . '/app.php';
 
-if ($cors = config('common')['cors']) {
+// 处理跨域请求
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && $cors = config('cors')) {
     header('Access-Control-Allow-Origin: ' . $cors);
-    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-        header('Access-Control-Allow-Headers: Authorization');
-        exit;
-    }
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Headers: Content-Type,Authorization');
+    exit;
 }
 
 try {
     // 响应
-    [$controller, $method, $args] = (new \src\Http)->handle($_SERVER, $_REQUEST);
+    [$controller, $method, $args] = (new \src\Http)->handle($_SERVER, $_GET + $_POST);
     $response = $method->invokeArgs(new $controller, $args);
     if (!is_null($response)) {
         header('Content-Type: application/json');

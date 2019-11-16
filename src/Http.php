@@ -1,4 +1,5 @@
 <?php
+
 namespace src;
 
 class Http
@@ -9,7 +10,7 @@ class Http
             $config = config('jwt');
             return new JWT($config['id'], $config['exp']);
         });
-        require __DIR__.'/../app/route.php';
+        require __DIR__ . '/../app/route.php';
     }
 
     /**
@@ -19,17 +20,19 @@ class Http
     {
         // 匹配路由
         $pathInfo = isset($server['PATH_INFO']) ? ltrim($server['PATH_INFO'], '/') : '';
-        if (! $route = Route::get($server['REQUEST_METHOD'], $pathInfo)) {
+        if (!$route = Route::get($server['REQUEST_METHOD'], $pathInfo)) {
             throw new \Exception('', 404);
-        }       
+        }
         $user = null;
 
         // 验证token
         if (is_array($route)) {
-            if (isset($server['HTTP_AUTHORIZATION'])
+            if (
+                isset($server['HTTP_AUTHORIZATION'])
                 && strpos($server['HTTP_AUTHORIZATION'], 'Bearer ') === 0
                 && ($id = Container::get('src\JWT')->decode(substr($server['HTTP_AUTHORIZATION'], 7)))
-                && $user = $route[1]::handle($id)) {
+                && $user = $route[1]::handle($id, $server)
+            ) {
                 $route = $route[0];
             } else {
                 throw new \Exception('', 401);
@@ -39,7 +42,7 @@ class Http
         // 解析请求参数
         if (!$input) {
             if (isset($server['CONTENT_TYPE']) && $server['CONTENT_TYPE'] == 'application/json') {
-                $this->data = json_decode(file_get_contents('php://input'), true);
+                $input = json_decode(file_get_contents('php://input'), true);
             } else {
                 parse_str(file_get_contents('php://input'), $input);
             }
@@ -52,7 +55,7 @@ class Http
 
         // 定位控制器方法
         $dispatch = explode('@', $route);
-        $controller = '\app\controller\\'.$dispatch[0].'Controller';
+        $controller = '\app\controller\\' . $dispatch[0] . 'Controller';
         $method = new \ReflectionMethod($controller, $dispatch[1]);
         // 解析方法参数
         $args = [];
@@ -64,7 +67,7 @@ class Http
             } elseif ($param->isDefaultValueAvailable()) {
                 $args[] = $param->getDefaultValue();
             } else {
-                throw new \Exception(file_exists(__DIR__.'/.dev') ? '缺少参数：'.$paramName : '', 400);
+                throw new \Exception(config('debug') ? '缺少参数：' . $paramName : '', 400);
             }
         }
         // 调用控制器方法

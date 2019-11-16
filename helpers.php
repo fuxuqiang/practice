@@ -6,7 +6,9 @@
 function logError($content)
 {
     file_put_contents(
-        __DIR__.'/runtime/error.log', '['.timestamp()."]\n".$content."\n", FILE_APPEND | LOCK_EX
+        __DIR__ . '/runtime/error.log',
+        '[' . timestamp() . "]\n" . $content . "\n",
+        FILE_APPEND | LOCK_EX
     );
 }
 
@@ -16,7 +18,7 @@ function logError($content)
 function config($name)
 {
     static $config;
-    $config || $config = parse_ini_file(__DIR__.'/.env', true);
+    $config || $config = parse_ini_file(__DIR__ . '/.env', true);
     return $config[$name] ?? null;
 }
 
@@ -40,4 +42,15 @@ function mysql($table = null)
 function timestamp($time = null)
 {
     return date('Y-m-d H:i:s', $time ? strtotime($time) : time());
+}
+
+/**
+ * 启动会话
+ */
+function sessionStart()
+{
+    static $started;
+    if (!$started) {
+        $started = session_start();
+    }
 }
