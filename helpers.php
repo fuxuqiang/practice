@@ -50,7 +50,5 @@ function timestamp($time = null)
 function sessionStart()
 {
     static $started;
-    if (!$started) {
-        $started = session_start();
-    }
+    return $started || $started = session_start();
 }

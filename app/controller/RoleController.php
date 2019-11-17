@@ -54,7 +54,7 @@ class RoleController
         if (mysql('role')->exists('pid', $id)) {
             return ['error' => '存在子级角色'];
         }
-        if (mysq('admin')->exists('role_id', $id)) {
+        if (mysql('admin')->exists('role_id', $id)) {
             return ['error' => '存在该角色的用户'];
         }
         if (mysql('role_route')->exists('role_id', $id)) {

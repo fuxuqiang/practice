@@ -30,7 +30,7 @@ class AddressController
                 return [
                     'id' => $val['id'],
                     'code' => $val['code'],
-                    'address' => implode('', (new \src\Arr($regions))->get($val['codes'])).$val['address']
+                    'address' => implode('', (new \src\Arr($regions))->get(...$val['codes'])).$val['address']
                 ];
             }, $addresses)
         ];

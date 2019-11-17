@@ -2,29 +2,19 @@
 
 namespace tests;
 
-class AuthControllerTest extends \src\TestCase
+class AuthControllerTest extends TestCase
 {
-    private $beforePhone = 12345678901, $afterPhone = 12123456789, $password = 'a12345';
+    private $beforePhone = 12345678901, $password = 'a12345';
 
-    public function testSendCode()
+    public function testUserLogin()
     {
-        $code = $this->getCode($this->beforePhone);
-        $this->assertTrue($code <= 9999);
-        $this->assertTrue($code > 999);
-        return $code;
-    }
-
-    /**
-     * @depends testSendCode
-     */
-    public function testUserLogin($code)
-    {
-        $response = $this->post('login', [
-            'phone' => $this->beforePhone,
-            'code' => $code
-        ]);
-        $this->assertArrayHasKey('data', $response);
-        $this->assertTrue(mysql('user')->where('phone', $this->beforePhone)->val('id') > 0);
+        $this->assertArrayHasKey(
+            'data',
+            $response = $this->post(
+                'login',
+                ['phone' => $this->beforePhone, 'code' => $this->getCode($this->beforePhone)]
+            )
+        );
         return $response['data'];
     }
 
@@ -33,43 +23,28 @@ class AuthControllerTest extends \src\TestCase
      */
     public function testSetPassword($token)
     {
+        $this->put('user/password', ['password' => $this->password], $token);
         $this->assertArrayHasKey(
-            'msg',
-            $this->put('user/password', ['password' => $this->password], $token)
+            'data',
+            $response = $this->post(
+                'login',
+                ['phone' => $this->beforePhone, 'password' => $this->password]
+            )
         );
-        $this->assertArrayHasKey('data', $this->post('login', [
-            'phone' => $this->beforePhone,
-            'password' => $this->password
-        ]));
+        return $response['data'];
     }
 
     /**
-     * @depends testUserLogin
+     * @depends testSetPassword
      */
     public function testChangePhone($token)
     {
-        $this->put('user/phone', [
-            'phone' => $this->afterPhone,
-            'code' => $this->getCode($this->afterPhone)
-        ], $token);
-        $this->assertArrayHasKey('data', $this->post('login', [
-            'phone' => $this->afterPhone,
-            'password' => $this->password
-        ]));
-        mysql('user')->where('phone', $this->afterPhone)->del();
-    }
-
-    public function testAdminLogin()
-    {
-        $this->assertArrayHasKey('data', $this->post('admin/login', [
-            'phone' => 18005661486,
-            'code' => $this->getCode(18005661486)
-        ]));
-    }
-
-    private function getCode($phone)
-    {
-        $this->post('sendCode', ['phone' => $phone]);
-        return $_SESSION['code_' . $phone];
+        $phone = 12123456789;
+        $this->put('user/phone', ['phone' => $phone, 'code' => $this->getCode($phone)], $token);
+        $this->assertArrayHasKey(
+            'data',
+            $this->post('login', ['phone' => $phone,'password' => $this->password])
+        );
+        mysql('user')->where('phone', $phone)->del();
     }
 }

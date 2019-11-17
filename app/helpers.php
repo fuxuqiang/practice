@@ -6,6 +6,7 @@ function validateCode($phone, $code)
     if ($code != $_SESSION['code_' . $phone]) {
         throw new Exception('验证码错误', 200);
     }
+    unset($_SESSION['code_' . $phone]);
 }
 
 function inSubs($id, array $data, $aid)

@@ -28,8 +28,7 @@ class AuthController
         if (empty($input['password']) && empty($input['code'])) {
             return ['error' => '参数错误'];
         }
-        if (!$user = mysql('user')->cols('id', 'password')
-            ->where('phone', $phone)->get()) {
+        if (!$user = mysql('user')->cols('id', 'password')->where('phone', $phone)->get()) {
             return [
                 'data' => $jwt->encode(mysql('user')->insert(['phone' => $phone])),
                 'msg' => '注册成功'
@@ -40,7 +39,7 @@ class AuthController
         } elseif (!password_verify($input['password'], $user->password)) {
             return ['error' => '密码错误'];
         }
-        return ['data' => $jwt->encode($user->id)];
+        return ['data' => $jwt->encode($user->id, $user->password)];
     }
 
     /**
@@ -67,12 +66,12 @@ class AuthController
                 return ['error' => '密码错误'];
             }
         } else {
-            if (!$admin = mysql('admin')->cols('id')->where('phone', $phone)->get()) {
+            if (!$admin = mysql('admin')->cols('id', 'password')->where('phone', $phone)->get()) {
                 return ['error' => '用户不存在'];
             }
             validateCode($phone, $input['code']);
         }
-        return ['data' => $jwt->encode($admin->id)];
+        return ['data' => $jwt->encode($admin->id, $admin->password)];
     }
 
     /**

@@ -8,7 +8,7 @@ class Http
     {
         Container::bind('src\JWT', function () {
             $config = config('jwt');
-            return new JWT($config['id'], $config['exp']);
+            return new JWT($config['exp'], $config['key']);
         });
         require __DIR__ . '/../app/route.php';
     }
@@ -30,8 +30,8 @@ class Http
             if (
                 isset($server['HTTP_AUTHORIZATION'])
                 && strpos($server['HTTP_AUTHORIZATION'], 'Bearer ') === 0
-                && ($id = Container::get('src\JWT')->decode(substr($server['HTTP_AUTHORIZATION'], 7)))
-                && $user = $route[1]::handle($id, $server)
+                && ($payload = Container::get('src\JWT')->decode(substr($server['HTTP_AUTHORIZATION'], 7)))
+                && $user = $route[1]::handle($payload, $server)
             ) {
                 $route = $route[0];
             } else {

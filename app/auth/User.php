@@ -3,8 +3,9 @@ namespace app\auth;
 
 class User
 {
-    public static function handle($id)
+    public static function handle($payload)
     {
-        return mysql('user')->cols('id')->where('id', $id)->get('src\Model', ['user']);
+        $user = mysql('user')->cols('id', 'password')->where('id', $payload->sub)->get('src\Model', ['user']);
+        return $user->password == $payload->jti ? $user : null;
     }
 }
