@@ -1,6 +1,6 @@
 <?php
 
-use src\Route;
+use vendor\Route;
 
 // 前台
 

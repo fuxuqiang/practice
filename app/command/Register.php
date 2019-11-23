@@ -1,7 +1,7 @@
 <?php
 namespace app\command;
 
-use src\HttpClient;
+use vendor\HttpClient;
 
 class Register
 {
@@ -20,7 +20,7 @@ class Register
             foreach ($phones as $phone) {
                 HttpClient::addCurl($mh, 'http://stock.test/register', [
                     'phone' => $phone,
-                    'code' => \src\Container::get('Redis')->get($phone)
+                    'code' => \vendor\Container::get('Redis')->get($phone)
                 ]);
             }
         });

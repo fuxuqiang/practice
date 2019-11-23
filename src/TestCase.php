@@ -2,6 +2,8 @@
 
 namespace src;
 
+use vendor\Container;
+
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
@@ -14,7 +16,10 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     public static function setUpBeforeClass(): void
     {
-        self::$http = new \src\Http;
+        if (!self::$http) {
+            require __DIR__ . '/config.php';
+            self::$http = new Http;
+        }
     }
 
     /**

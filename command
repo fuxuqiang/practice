@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-require __DIR__ . '/app.php';
+require __DIR__ . '/src/config.php';
+require __DIR__ . '/src/app.php';
 
 try {
     // 执行

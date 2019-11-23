@@ -1,5 +1,6 @@
 <?php
-namespace src;
+
+namespace vendor;
 
 class Request extends Arr
 {

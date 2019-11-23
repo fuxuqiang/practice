@@ -1,7 +1,7 @@
 <?php
 namespace app\controller;
 
-use src\Request;
+use vendor\Request;
 
 class AddressController
 {
@@ -30,7 +30,7 @@ class AddressController
                 return [
                     'id' => $val['id'],
                     'code' => $val['code'],
-                    'address' => implode('', (new \src\Arr($regions))->get(...$val['codes'])).$val['address']
+                    'address' => implode('', (new \vendor\Arr($regions))->get(...$val['codes'])).$val['address']
                 ];
             }, $addresses)
         ];

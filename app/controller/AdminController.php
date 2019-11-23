@@ -1,7 +1,7 @@
 <?php
 namespace app\controller;
 
-use src\Request;
+use vendor\Request;
 
 class AdminController 
 {

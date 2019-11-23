@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/app.php';
+require __DIR__ . '/src/config.php';
 
 // 处理跨域请求
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && $cors = config('cors')) {
@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && $cors = config('cors')) {
     header('Access-Control-Allow-Headers: Content-Type,Authorization');
     exit;
 }
+
+require __DIR__ . '/src/app.php';
 
 try {
     // 响应

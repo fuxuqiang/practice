@@ -13,16 +13,6 @@ function logError($content)
 }
 
 /**
- * 获取配置
- */
-function config($name)
-{
-    static $config;
-    $config || $config = parse_ini_file(__DIR__ . '/.env', true);
-    return $config[$name] ?? null;
-}
-
-/**
  * 获取Mysql实例
  */
 function mysql($table = null)
@@ -32,7 +22,7 @@ function mysql($table = null)
         $config = config('mysql');
         $mysqli = new mysqli($config['host'], $config['user'], $config['pwd'], $config['db']);
     }
-    $mysql = new \src\Mysql($mysqli);
+    $mysql = new \vendor\Mysql($mysqli);
     return $table ? $mysql->from($table) : $mysql;
 }
 

@@ -2,8 +2,8 @@
 
 namespace app\controller;
 
-use src\Request;
-use src\JWT;
+use vendor\Request;
+use vendor\JWT;
 
 class AuthController
 {
@@ -25,20 +25,25 @@ class AuthController
     public function userLogin($phone, JWT $jwt, Request $request)
     {
         $input = $request->get();
+
         if (empty($input['password']) && empty($input['code'])) {
             return ['error' => '参数错误'];
         }
-        if (!$user = mysql('user')->cols('id', 'password')->where('phone', $phone)->get()) {
-            return [
-                'data' => $jwt->encode(mysql('user')->insert(['phone' => $phone])),
-                'msg' => '注册成功'
-            ];
-        }
+
+        $user = mysql('user')->cols('id', 'password')->where('phone', $phone)->get();
+
         if (isset($input['code'])) {
             validateCode($phone, $input['code']);
+            if (!$user) {
+                return [
+                    'data' => $jwt->encode(mysql('user')->insert(['phone' => $phone])),
+                    'msg' => '注册成功'
+                ];
+            }
         } elseif (!password_verify($input['password'], $user->password)) {
             return ['error' => '密码错误'];
         }
+        
         return ['data' => $jwt->encode($user->id, $user->password)];
     }
 

@@ -1,7 +1,7 @@
 <?php
 namespace app\controller;
 
-use src\Request;
+use vendor\Request;
 use app\model\Region;
 
 class OrderController

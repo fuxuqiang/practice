@@ -2,13 +2,15 @@
 
 namespace src;
 
+use vendor\Container;
+
 class Http
 {
     public function __construct()
     {
-        Container::bind('src\JWT', function () {
+        Container::bind('vendor\JWT', function () {
             $config = config('jwt');
-            return new JWT($config['exp'], $config['key']);
+            return new \vendor\JWT($config['exp'], $config['key']);
         });
         require __DIR__ . '/../app/route.php';
     }
@@ -20,7 +22,7 @@ class Http
     {
         // 匹配路由
         $pathInfo = isset($server['PATH_INFO']) ? ltrim($server['PATH_INFO'], '/') : '';
-        if (!$route = Route::get($server['REQUEST_METHOD'], $pathInfo)) {
+        if (!$route = \vendor\Route::get($server['REQUEST_METHOD'], $pathInfo)) {
             throw new \Exception('', 404);
         }
         $user = null;
@@ -30,7 +32,7 @@ class Http
             if (
                 isset($server['HTTP_AUTHORIZATION'])
                 && strpos($server['HTTP_AUTHORIZATION'], 'Bearer ') === 0
-                && ($payload = Container::get('src\JWT')->decode(substr($server['HTTP_AUTHORIZATION'], 7)))
+                && ($payload = Container::get('vendor\JWT')->decode(substr($server['HTTP_AUTHORIZATION'], 7)))
                 && $user = $route[1]::handle($payload, $server)
             ) {
                 $route = $route[0];
@@ -48,10 +50,10 @@ class Http
             }
         }
         // 实例化请求类
-        $request = new Request($input, $user, function ($val, $table, $col) {
+        $request = new \vendor\Request($input, $user, function ($val, $table, $col) {
             return mysql($table)->exists($col, $val);
         }, config('per_page'));
-        Container::instance('src\Request', $request);
+        Container::instance('vendor\Request', $request);
 
         // 定位控制器方法
         $dispatch = explode('@', $route);

@@ -1,7 +1,7 @@
 <?php
 namespace app\command;
 
-use src\HttpClient;
+use vendor\HttpClient;
 
 class Address
 {

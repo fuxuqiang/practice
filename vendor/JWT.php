@@ -1,6 +1,6 @@
 <?php
 
-namespace src;
+namespace vendor;
 
 class JWT
 {
@@ -18,7 +18,8 @@ class JWT
     public function encode($sub, $jti = '')
     {
         return ($data = $this->base64Encode(json_encode($this->header)) . '.'
-            . $this->base64Encode(json_encode(['sub' => $sub, 'exp' => time() + $this->exp, 'jti' => $jti]))) . '.' . $this->base64Encode($this->sign($data));
+            . $this->base64Encode(json_encode(['sub' => $sub, 'exp' => time() + $this->exp, 'jti' => $jti])))
+            . '.' . $this->base64Encode($this->sign($data));
     }
 
     /**
@@ -31,9 +32,8 @@ class JWT
             throw new \Exception('token格式错误');
         }
         if (
-            json_decode($this->base64Decode($data[0]))->alg == $this->header['alg']
-            && ($payload = json_decode($this->base64Decode($data[1])))
-            && $payload->exp > time()
+            ($header = json_decode($this->base64Decode($data[0]))) && $header->alg == $this->header['alg']
+            && ($payload = json_decode($this->base64Decode($data[1]))) && $payload->exp > time()
             && hash_equals($this->sign($data[0] . '.' . $data[1]), $this->base64Decode($data[2]))
         ) {
             return $payload;
