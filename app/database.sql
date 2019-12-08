@@ -120,3 +120,14 @@ CREATE TABLE `order_sku` (
     `num` TINYINT UNSIGNED NOT NULL,
     UNIQUE(`order_id`,`sku_id`)
 );
+
+DROP TABLE IF EXISTS `request_log`;
+CREATE TABLE `request_log` (
+    `key` VARCHAR(255) PRIMARY KEY,
+    `method` VARCHAR(255) NOT NULL,
+    `uri` VARCHAR(255) NOT NULL,
+    `ip` VARCHAR(255) NOT NULL,
+    `input` TINYTEXT,
+    `token` VARCHAR(255) NOT NULL DEFAULT '',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

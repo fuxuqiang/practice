@@ -1,10 +1,13 @@
 <?php
 
 use vendor\Route;
+use app\middleware\{RecordRequest, Auth};
 
-// 前台
+$jwt = \vendor\Container::get('vendor\JWT');
 
-Route::add([
+$route = Route::middleware(RecordRequest::class);
+
+$route->add([
     'POST' => [
         'sendCode' => 'Auth@sendCode',
         'login' => 'Auth@userLogin'
@@ -12,16 +15,18 @@ Route::add([
     'GET' => ['regions' => 'Region@list']
 ]);
 
-$route = Route::auth(\app\auth\User::class);
+// 前台
 
-$route->add([
+$userRoute = $route->middleware(Auth::class, $jwt, 'user');
+
+$userRoute->add([
     'POST' => ['order' => 'Order@add'],
     'GET' => ['order' => 'Order@info']
 ]);
 
-$route = $route->prefix('user');
+$userAuthRoute = $userRoute->prefix('user');
 
-$route->add([
+$userAuthRoute->add([
     'PUT' => [
         'password' => 'Auth@setPassword',
         '' => 'User@update',
@@ -35,7 +40,7 @@ $route->add([
     ]
 ]);
 
-$route->resource('address', ['add', 'update', 'del']);
+$userAuthRoute->resource('address', ['add', 'update', 'del']);
 
 // 后台
 
@@ -43,9 +48,9 @@ $adminRoute = Route::prefix('admin');
 
 $adminRoute->add(['POST' => ['login' => 'Auth@adminLogin']]);
 
-$route = $adminRoute->auth(\app\auth\Admin::class);
+$adminAuthRoute = $adminRoute->middleware(Auth::class, $jwt, 'admin');
 
-$route->add([
+$adminAuthRoute->add([
     'PUT' => [
         'password' => 'Auth@setPassword',
         'phone' => 'Auth@changePhone',
@@ -56,6 +61,6 @@ $route->add([
     'GET' => ['routes' => 'Role@listRoutes'],
 ]);
 
-$route->resource('role', ['add', 'update', 'del', 'list']);
-$route->resource('admin', ['add', 'del', 'list']);
-$route->resource('sku', ['add', 'list', 'update', 'del']);
+$adminAuthRoute->resource('role', ['add', 'update', 'del', 'list']);
+$adminAuthRoute->resource('admin', ['add', 'del', 'list']);
+$adminAuthRoute->resource('sku', ['add', 'list', 'update', 'del']);

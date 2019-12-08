@@ -42,9 +42,9 @@ class Mysql
 
     /**
      * 执行查询
-     * @return \mysqli_result
+     * @return \mysqli_result|bool
      */
-    public function query($sql, array $vars = [])
+    public function query(string $sql, array $vars = [])
     {
         if ($this->stmt = $this->mysqli->prepare($sql)) {
             if ($types = str_repeat('s', count($vars) + count($this->params))) {
@@ -62,7 +62,7 @@ class Mysql
     /**
      * 设置表名
      */
-    public function from($table)
+    public function from(string $table)
     {
         $this->table = $table;
         return $this;
@@ -218,7 +218,7 @@ class Mysql
     /**
      * 分页查询
      */
-    public function paginate($page, $perPage)
+    public function paginate(int $page, int $perPage)
     {
         $this->limit = 'LIMIT ' . ($page - 1) * $perPage . ',' . $perPage;
         return [
@@ -230,7 +230,7 @@ class Mysql
     /**
      * 执行INSERT语句
      */
-    public function insert($data)
+    public function insert(array $data)
     {
         $this->into('INSERT', $data);
         return $this->stmt->insert_id;
@@ -239,7 +239,7 @@ class Mysql
     /**
      * 执行REPLACE语句
      */
-    public function replace($data)
+    public function replace(array $data)
     {
         return $this->into('REPLACE', $data);
     }
@@ -247,7 +247,7 @@ class Mysql
     /**
      * 执行INSERT或REPLACE语句
      */
-    private function into($action, $data)
+    private function into($action, array $data)
     {
         if (is_array(reset($data))) {
             $cols = $this->cols;
@@ -263,7 +263,7 @@ class Mysql
             $binds = $data;
         }
         return $this->query(
-            $action . ' `' . $this->table . '` (' . implode(',', $cols) . ') VALUES ' . $markers,
+            $action . ' `' . $this->table . '` (' . $this->gather($cols, '`%s`') . ') VALUES ' . $markers,
             $binds
         );
     }
@@ -271,7 +271,7 @@ class Mysql
     /**
      * 执行UPDATE语句
      */
-    public function update($data)
+    public function update(array $data)
     {
         return $this->query(
             "UPDATE `$this->table` SET " . $this->gather(array_keys($data), '`%s`=?') . $this->getWhere(),

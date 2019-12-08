@@ -6,7 +6,7 @@ class Route
 {
     private static $routes = [];
 
-    private $auth, $prefix;
+    private $middlewares = [], $prefix;
 
     /**
      * 添加路由
@@ -15,19 +15,23 @@ class Route
     {
         foreach ($routes as $method => $group) {
             foreach ($group as $uri => $action) {
-                $_group[$this->prefix ? rtrim($this->prefix.'/'.$uri, '/') : $uri] = $this->auth ?
-                    [$action, $this->auth] : $action;
+                $_group[$this->prefix ? rtrim($this->prefix . '/' . $uri, '/') : $uri] = $this->middlewares ?
+                    [$action, $this->middlewares] : $action;
             }
             self::$routes[$method] = array_merge(self::$routes[$method] ?? [], $_group);
         }
     }
 
     /**
-     * 设置路由权限验证
+     * 设置路由中间件
      */
-    protected function auth($auth)
+    protected function middleware($middleware, ...$args)
     {
-        $this->auth = $auth;
+        if ($args) {
+            $this->middlewares[$middleware] = $args;
+        } else {
+            $this->middlewares[] = $middleware;
+        }
         return $this;
     }
 
@@ -50,18 +54,22 @@ class Route
         foreach ($actions as $action) {
             $this->add([
                 $methods[$action] => [
-                    $name.($action == 'list' ? 's' : '') => ucfirst($name).'@'.$action
+                    $name . ($action == 'list' ? 's' : '') => ucfirst($name) . '@' . $action
                 ]
             ]);
         }
     }
 
     /**
-     * 获取路由
+     * 获取路由中间件
      */
     public static function get($method, $uri)
     {
-        return self::$routes[$method][$uri] ?? null;
+        if ($route = self::$routes[$method][$uri] ?? null) {
+            return $route;
+        } else {
+            throw new \Exception('', 404);
+        }
     }
 
     /**

@@ -32,7 +32,7 @@ class AuthController
 
         $user = mysql('user')->cols('id', 'password')->where('phone', $phone)->get();
 
-        if (isset($input['code'])) {
+        if (empty($input['password'])) {
             validateCode($phone, $input['code']);
             if (!$user) {
                 return [
@@ -43,7 +43,7 @@ class AuthController
         } elseif (!password_verify($input['password'], $user->password)) {
             return ['error' => '密码错误'];
         }
-        
+
         return ['data' => $jwt->encode($user->id, $user->password)];
     }
 
@@ -53,15 +53,18 @@ class AuthController
     public function adminLogin($phone, JWT $jwt, Request $request)
     {
         $input = $request->get();
+
         if (empty($input['code'])) {
             if (empty($input['password'])) {
                 return ['error' => '参数错误'];
             }
-            if (!$admin = mysql()->query(
-                'SELECT `a`.`id`,`a`.`password`,`r`.`pid` FROM `admin` `a`
-                LEFT JOIN `role` `r` ON `r`.`id`=`a`.`role_id` WHERE `a`.`phone`=?',
-                [$phone]
-            )->fetch_object()) {
+            if (
+                !$admin = mysql()->query(
+                    'SELECT `a`.`id`,`a`.`password`,`r`.`pid` FROM `admin` `a`
+                    LEFT JOIN `role` `r` ON `r`.`id`=`a`.`role_id` WHERE `a`.`phone`=?',
+                    [$phone]
+                )->fetch_object()
+            ) {
                 return ['error' => '用户不存在'];
             }
             if (!$admin->pid) {
@@ -76,6 +79,7 @@ class AuthController
             }
             validateCode($phone, $input['code']);
         }
+
         return ['data' => $jwt->encode($admin->id, $admin->password)];
     }
 
@@ -84,7 +88,7 @@ class AuthController
      */
     public function setPassword($password, Request $request)
     {
-        if (!preg_match('/^(?!\d+$)(?![a-zA-Z]+$)[\dA-Za-z]{6,}$/', $password)) {
+        if (!preg_match('/^(?!\d+$)(?![a-zA-Z]+$)[\dA-Za-z]{6,10}$/', $password)) {
             return ['error' => '密码长度至少为6位，由数字和字母组成'];
         }
         $request->user()->update(['password' => password_hash($password, PASSWORD_DEFAULT)]);

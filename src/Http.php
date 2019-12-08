@@ -2,7 +2,7 @@
 
 namespace src;
 
-use vendor\Container;
+use vendor\{Container, JWT, Request, Route};
 
 class Http
 {
@@ -10,7 +10,7 @@ class Http
     {
         Container::bind('vendor\JWT', function () {
             $config = config('jwt');
-            return new \vendor\JWT($config['exp'], $config['key']);
+            return new JWT($config['exp'], $config['key']);
         });
         require __DIR__ . '/../app/route.php';
     }
@@ -20,39 +20,24 @@ class Http
      */
     public function handle($server, $input)
     {
-        // 匹配路由
-        $pathInfo = isset($server['PATH_INFO']) ? ltrim($server['PATH_INFO'], '/') : '';
-        if (!$route = \vendor\Route::get($server['REQUEST_METHOD'], $pathInfo)) {
-            throw new \Exception('', 404);
-        }
-        $user = null;
-
-        // 验证token
-        if (is_array($route)) {
-            if (
-                isset($server['HTTP_AUTHORIZATION'])
-                && strpos($server['HTTP_AUTHORIZATION'], 'Bearer ') === 0
-                && ($payload = Container::get('vendor\JWT')->decode(substr($server['HTTP_AUTHORIZATION'], 7)))
-                && $user = $route[1]::handle($payload, $server)
-            ) {
-                $route = $route[0];
-            } else {
-                throw new \Exception('', 401);
-            }
-        }
-
-        // 解析请求参数
-        if (!$input) {
-            if (isset($server['CONTENT_TYPE']) && $server['CONTENT_TYPE'] == 'application/json') {
-                $input = json_decode(file_get_contents('php://input'), true);
-            } else {
-                parse_str(file_get_contents('php://input'), $input);
-            }
-        }
         // 实例化请求类
-        $request = new \vendor\Request($input, $user, function ($val, $table, $col) {
+        $request = new Request($server, $input, function ($val, $table, $col) {
             return mysql($table)->exists($col, $val);
         }, config('per_page'));
+
+        // 匹配路由
+        $route = Route::get($server['REQUEST_METHOD'], $request->uri());
+        if (is_array($route)) {
+            foreach ($route[1] as $key => $val) {
+                if (is_array($val)) {
+                    (new $key)->handle($request, ...$val);
+                } else {
+                    (new $val)->handle($request);
+                }
+            }
+            $route = $route[0];
+        }
+
         Container::instance('vendor\Request', $request);
 
         // 定位控制器方法
@@ -72,7 +57,7 @@ class Http
                 throw new \Exception(config('debug') ? '缺少参数：' . $paramName : '', 400);
             }
         }
-        // 调用控制器方法
+
         return [$controller, $method, $args];
     }
 }

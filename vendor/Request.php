@@ -4,14 +4,58 @@ namespace vendor;
 
 class Request extends Arr
 {
-    private $user, $exists, $perPage;
+    private $uri, $server, $user, $exists, $perPage;
 
-    public function __construct(array $data, $user, callable $exists, int $perPage)
+    public function __construct(array $server, array $data, callable $exists, $perPage)
     {
-        $this->data = $data;
-        $this->user = $user;
+        $this->server = $server;
+        if (!$this->data = $data) {
+            if (isset($server['CONTENT_TYPE']) && $server['CONTENT_TYPE'] == 'application/json') {
+                $this->data = json_decode(file_get_contents('php://input'), true);
+            } else {
+                parse_str(file_get_contents('php://input'), $this->data);
+            }
+        }
         $this->exists = $exists;
         $this->perPage = $perPage;
+        $this->uri = isset($server['PATH_INFO']) ? ltrim($server['PATH_INFO'], '/') : '';
+    }
+
+    /**
+     * 获取$server
+     */
+    public function server()
+    {
+        return $this->server;
+    }
+
+    /**
+     * 获取请求的uri
+     */
+    public function uri()
+    {
+        return $this->uri;
+    }
+
+    /**
+     * 获取token
+     */
+    public function token()
+    {
+        if (
+            isset($this->server['HTTP_AUTHORIZATION'])
+            && strpos($this->server['HTTP_AUTHORIZATION'], 'Bearer ') === 0
+        ) {
+            return substr($this->server['HTTP_AUTHORIZATION'], 7);
+        }
+    }
+
+    /**
+     * 设置请求用户
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
     }
 
     /**
