@@ -1,6 +1,7 @@
 <?php
 namespace app\controller;
 
+use src\Mysql;
 use vendor\Request;
 
 class AdminController 
@@ -11,14 +12,14 @@ class AdminController
         $cond = [];
         isset($input['name']) && $cond[] = ['name', 'LIKE', '%'.$input['name'].'%'];
         isset($input['role_id']) && $cond['role_id'] = $input['role_id'];
-        return mysql('admin')->cols('id', 'phone', 'name', 'role_id', 'joined_at')->where($cond)
+        return Mysql::table('admin')->cols('id', 'phone', 'name', 'role_id', 'joined_at')->where($cond)
                 ->with(['role' => ['id', 'name']])->paginate(...$request->pageParams());
     }
 
     public function add(Request $request, $name = '')
     {
         $request->validate(['phone' => 'unique:admin,phone', 'role_id' => 'exists:role,id']);
-        mysql('admin')->insert(
+        Mysql::table('admin')->insert(
             $request->get('phone', 'role_id') + ['joined_at' => date('Y-m-d'), 'name' => $name]
         );
         return ['msg' => '添加成功'];
@@ -32,14 +33,14 @@ class AdminController
 
     public function del($id)
     {
-        mysql('admin')->del($id);
+        Mysql::table('admin')->del($id);
         return ['msg' => '删除成功'];
     }
 
     public function setRole($id, Request $request)
     {
         $request->validate(['role_id' => 'exists:role,id']);
-        mysql('admin')->where('id', $id)->update(['role_id' => $request->role_id]);
+        Mysql::table('admin')->where('id', $id)->update(['role_id' => $request->role_id]);
         return ['msg' => '设置成功'];
     }
 }

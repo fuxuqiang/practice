@@ -1,13 +1,14 @@
 <?php
 namespace app\command;
 
+use src\Mysql;
 use vendor\HttpClient;
 
 class Order
 {
     public function handle()
     {
-        $users = mysql()->query(
+        $users = Mysql::query(
             'SELECT `u`.`phone`,`a`.`id` FROM `user` `u`
             JOIN `address` `a` ON `u`.`id`=`a`.`user_id` ORDER BY RAND() LIMIT 5'
         )->fetch_all(MYSQLI_ASSOC);
@@ -15,7 +16,7 @@ class Order
         $users = \app\model\Login::getToken($users);
 
         HttpClient::request(function ($mh) use ($users) {
-            $skus = mysql('sku')->col('id');
+            $skus = Mysql::table('sku')->col('id');
             foreach ($users as $user) {
                 $ch = HttpClient::getHandler('http://stock.test/order', json_encode([
                     'address_id' => $user['id'],

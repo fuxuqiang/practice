@@ -11,5 +11,5 @@ require __DIR__ . '/../app/helpers.php';
 
 // 设置模型的数据库连接
 \vendor\Model::setConnector(function ($model) {
-    return mysql($model->getTable())->where('id', $model->id);
+    return \src\Mysql::table($model->getTable())->where('id', $model->id);
 });

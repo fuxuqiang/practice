@@ -15,6 +15,11 @@ class Mysql
     private $stmt;
 
     /**
+     * @var int
+     */
+    private static $trans = 0;
+
+    /**
      * @var string
      */
     private $table, $limit, $lock, $order;
@@ -30,14 +35,6 @@ class Mysql
     public function __construct(\mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
-    }
-
-    /**
-     * 获取mysqli实例
-     */
-    public function handler()
-    {
-        return $this->mysqli;
     }
 
     /**
@@ -62,7 +59,7 @@ class Mysql
     /**
      * 设置表名
      */
-    public function from(string $table)
+    public function table(string $table)
     {
         $this->table = $table;
         return $this;
@@ -188,7 +185,7 @@ class Mysql
             && $foreignKeysVal = array_column($data, $table . '_id')
         ) {
             $relationData = (new self($this->mysqli))->cols(...$this->relation[$table])
-                ->from($table)->whereIn('id', $foreignKeysVal)->col(null, 'id');
+                ->table($table)->whereIn('id', $foreignKeysVal)->col(null, 'id');
             $data = array_map(function ($item) use ($table, $relationData) {
                 $item[$table] = $relationData[$item[$table . '_id']];
                 return $item;
@@ -254,9 +251,7 @@ class Mysql
             $markers = implode(',', array_map(function ($item) {
                 return $this->markers($item);
             }, $data));
-            $binds = array_reduce($data, function ($carry, $item) {
-                return array_merge($carry, $item);
-            }, []);
+            $binds = array_merge(...$data);
         } else {
             $cols = array_keys($data);
             $markers = $this->markers($data);
@@ -286,6 +281,30 @@ class Mysql
     {
         return $id ? $this->query("DELETE FROM `$this->table` WHERE `id`=?", [$id])
             : $this->query("DELETE FROM `$this->table`" . $this->getWhere());
+    }
+
+    /**
+     * 开始事务
+     */
+    public function begin()
+    {
+        self::$trans++ || $this->mysqli->begin_transaction();
+    }
+
+    /**
+     * 提交事务
+     */
+    public function commit()
+    {
+        self::$trans-- == 1 && $this->mysqli->commit();
+    }
+
+    /**
+     * 回滚事务
+     */
+    public function rollback()
+    {
+        self::$trans-- == 1 || $this->mysqli->rollback();
     }
 
     /**

@@ -15,6 +15,12 @@ class AuthControllerTest extends TestCase
                 ['phone' => $this->beforePhone, 'code' => $this->getCode($this->beforePhone)]
             )
         );
+        $this->assertFalse(
+            $this->post(
+                'login',
+                ['phone' => $this->beforePhone, 'code' => $this->getCode($this->beforePhone) . '0']
+            )
+        );
         return $response['data'];
     }
 
@@ -45,6 +51,5 @@ class AuthControllerTest extends TestCase
             'data',
             $this->post('login', ['phone' => $phone,'password' => $this->password])
         );
-        mysql('user')->where('phone', $phone)->del();
     }
 }

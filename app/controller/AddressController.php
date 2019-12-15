@@ -1,6 +1,7 @@
 <?php
 namespace app\controller;
 
+use src\Mysql;
 use vendor\Request;
 
 class AddressController
@@ -8,7 +9,7 @@ class AddressController
     public function add(Request $request, $address)
     {
         $request->validate(['code' => 'exists:region,code']);
-        mysql('address')->insert([
+        Mysql::table('address')->insert([
             'user_id' => $request->user()->id,
             'code' => $request->code,
             'address' => $address
@@ -18,13 +19,13 @@ class AddressController
 
     public function list(Request $request)
     {
-        $addresses = mysql('address')->where('user_id', $request->user()->id)->all();
+        $addresses = Mysql::table('address')->where('user_id', $request->user()->id)->all();
         $codes = [];
         foreach ($addresses as &$address) {
             $address['codes'] = \app\model\Region::getAllCode($address['code']);
             $codes = array_merge($codes, $address['codes']);
         }
-        $regions = mysql('region')->whereIn('code', $codes)->col('name', 'code');
+        $regions = Mysql::table('region')->whereIn('code', $codes)->col('name', 'code');
         return [
             'data' => array_map(function ($val) use ($regions) {
                 return [
@@ -39,16 +40,16 @@ class AddressController
     public function update($id, Request $request)
     {
         $input = $request->get('code', 'address');
-        if (isset($input['code']) && ! mysql('region')->exists('code', $input['code'])) {
+        if (isset($input['code']) && ! Mysql::table('region')->exists('code', $input['code'])) {
             return ['error' => '行政区不存在'];
         }
-        mysql('address')->where(['id' => $id, 'user_id' => $request->user()->id])->update($input);
+        Mysql::table('address')->where(['id' => $id, 'user_id' => $request->user()->id])->update($input);
         return ['msg' => '更新成功'];
     }
 
     public function del($id)
     {
-        mysql('address')->del($id);
+        Mysql::table('address')->del($id);
         return ['msg' => '删除成功'];
     }
 }

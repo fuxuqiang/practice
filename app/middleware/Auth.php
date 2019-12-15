@@ -2,7 +2,8 @@
 
 namespace app\middleware;
 
-use \vendor\{Request, JWT, Model};
+use src\Mysql;
+use vendor\{Request, JWT, Model};
 
 class Auth
 {
@@ -11,12 +12,12 @@ class Auth
         $server = $request->server();
         if (($token = $request->token()) && $payload = $jwt->decode($token)) {
             if ($table == 'user') {
-                $user = mysql('user')->cols('id', 'password')->where('id', $payload->sub)->get(Model::class, ['user']);
+                $user = Mysql::table('user')->cols('id', 'password')->where('id', $payload->sub)->get(Model::class, ['user']);
             } elseif (
                 $table == 'admin'
-                && ($admin = mysql('admin')->cols('id', 'role_id', 'password')->where('id', $payload->sub)->get(Model::class, ['admin']))
+                && ($admin = Mysql::table('admin')->cols('id', 'role_id', 'password')->where('id', $payload->sub)->get(Model::class, ['admin']))
                 && $admin->password == $payload->jti
-                && (!($routeId = mysql('route')->where(['method' => $server['REQUEST_METHOD'], 'uri' => ltrim($server['PATH_INFO'], '/')])->val('id')) || mysql('role_route')->where('role_id', $admin->role_id)->exists('route_id', $routeId))
+                && (!($routeId = Mysql::table('route')->where(['method' => $server['REQUEST_METHOD'], 'uri' => ltrim($server['PATH_INFO'], '/')])->val('id')) || Mysql::table('role_route')->where('role_id', $admin->role_id)->exists('route_id', $routeId))
             ) {
                 $user = $admin;
             }

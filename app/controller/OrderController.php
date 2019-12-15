@@ -1,6 +1,7 @@
 <?php
 namespace app\controller;
 
+use src\Mysql;
 use vendor\Request;
 use app\model\Region;
 
@@ -14,7 +15,7 @@ class OrderController
         // 参数验证
         $request->validate(['skus' => 'array']);
         $userId = $request->user()->id;
-        if (! $address = mysql('address')->cols('code', 'address')
+        if (! $address = Mysql::table('address')->cols('code', 'address')
             ->where(['user_id' => $userId, 'id' => $address_id])->get()) {
             return ['error' => '不存在的地址'];
         }
@@ -22,17 +23,16 @@ class OrderController
         $skuIds = array_column($request->skus, 'id');
         $skus = array_column($request->skus, 'num', 'id');
         // 事务
-        $mysqli = mysql()->handler();
-        $mysqli->begin_transaction();
+        Mysql::begin();
         try {
             // sku详情
-            $skuInfos = mysql('sku')->where('num', '>', 0)->whereIn('id', $skuIds)
+            $skuInfos = Mysql::table('sku')->where('num', '>', 0)->whereIn('id', $skuIds)
                 ->lock()->all('id', 'name', 'price', 'num');
             if (!$skuInfos || count($skuIds) > count($skuInfos)) {
                 throw new \Exception('商品不存在或已售罄');
             }
             // 订单表
-            $id = mysql('order')->insert([
+            $id = Mysql::table('order')->insert([
                 'user_id' => $userId,
                 'region_code' => $address->code,
                 'address' => $address->address
@@ -45,16 +45,16 @@ class OrderController
                 }
                 $orderSkus[] = [$id, $skuInfo['id'], $skuInfo['price'], $num, $skuInfo['name']];
             }
-            mysql('order_sku')->cols('order_id', 'sku_id', 'price', 'num', 'name')
+            Mysql::table('order_sku')->cols('order_id', 'sku_id', 'price', 'num', 'name')
                 ->insert($orderSkus);
             // 减库存
             foreach ($skus as $id => $num) {
-                mysql()->query('UPDATE `sku` SET `num`=`num`-? WHERE `id`=?', [$num, $id]);
+                Mysql::query('UPDATE `sku` SET `num`=`num`-? WHERE `id`=?', [$num, $id]);
             }
-            $mysqli->commit();
+            Mysql::commit();
             return ['msg' => '下单成功'];
         } catch (\Exception $e) {
-            $mysqli->rollback();
+            Mysql::rollback();
             return ['error' => $e->getMessage()];
         }
     }
@@ -64,16 +64,16 @@ class OrderController
      */
     public function info($id)
     {
-        $order = mysql('order')->where('id', $id)->get();
+        $order = Mysql::table('order')->where('id', $id)->get();
         return [
             'id' => $order->id,
             'status' => $order->status,
             'created_at' => $order->created_at,
             'address' => implode(
                     '',
-                    mysql('region')->whereIn('code', Region::getAllCode($order->region_code))->col('name')
+                    Mysql::table('region')->whereIn('code', Region::getAllCode($order->region_code))->col('name')
                 ).$order->address,
-            'skus' => mysql('order_sku')->where('order_id', $id)->all('sku_id', 'name', 'price', 'num')
+            'skus' => Mysql::table('order_sku')->where('order_id', $id)->all('sku_id', 'name', 'price', 'num')
         ];
     }
 }

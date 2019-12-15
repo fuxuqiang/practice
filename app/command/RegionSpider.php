@@ -1,4 +1,5 @@
 <?php
+
 namespace app\command;
 
 class regionSpider
@@ -17,19 +18,19 @@ class regionSpider
     private function crawl($url, $expressions)
     {
         if ($content = @file_get_contents($url)) {
-            $doc = new DOMDocument;
+            $doc = new \DOMDocument;
             $doc->loadHTML(
                 str_replace('gb2312', 'utf-8', iconv('GB2312', 'UTF-8//IGNORE', $content))
             );
             $expression = current($expressions);
-            if (! $doms = (new DOMXPath($doc))->query($expression)) {
+            if (! $doms = (new \DOMXPath($doc))->query($expression)) {
                 $expression = next($expressions);
-                $doms = (new DOMXPath($doc))->query($expression);
+                $doms = (new \DOMXPath($doc))->query($expression);
             }
             if (next($expressions)) {
                 if ($expression == '//tr[@class="countytr"]') {
                     $firstNodes = $doms->item(0)->childNodes;
-                    if ($firstNodes[0]->firstChild instanceof DOMText) {
+                    if ($firstNodes[0]->firstChild instanceof \DOMText) {
                         $data[] = [$firstNodes[0]->nodeValue, $firstNodes[1]->nodeValue];
                         $i = 1;
                     } else {
@@ -50,7 +51,7 @@ class regionSpider
                     $data[] = [$childNodes[0]->nodeValue, $childNodes[2]->nodeValue];
                 }
             }
-            mysql('region')->cols('code', 'name')->insert($data);
+            \src\Mysql::table('region')->cols('code', 'name')->insert($data);
             return true;
         } else {
             return false;

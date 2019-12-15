@@ -2,8 +2,8 @@
 
 namespace app\controller;
 
-use vendor\Request;
-use vendor\JWT;
+use src\Mysql;
+use vendor\{JWT, Request};
 
 class AuthController
 {
@@ -30,13 +30,13 @@ class AuthController
             return ['error' => '参数错误'];
         }
 
-        $user = mysql('user')->cols('id', 'password')->where('phone', $phone)->get();
+        $user = Mysql::table('user')->cols('id', 'password')->where('phone', $phone)->get();
 
         if (empty($input['password'])) {
             validateCode($phone, $input['code']);
             if (!$user) {
                 return [
-                    'data' => $jwt->encode(mysql('user')->insert(['phone' => $phone])),
+                    'data' => $jwt->encode(Mysql::table('user')->insert(['phone' => $phone])),
                     'msg' => '注册成功'
                 ];
             }
@@ -59,7 +59,7 @@ class AuthController
                 return ['error' => '参数错误'];
             }
             if (
-                !$admin = mysql()->query(
+                !$admin = Mysql::query(
                     'SELECT `a`.`id`,`a`.`password`,`r`.`pid` FROM `admin` `a`
                     LEFT JOIN `role` `r` ON `r`.`id`=`a`.`role_id` WHERE `a`.`phone`=?',
                     [$phone]
@@ -74,7 +74,7 @@ class AuthController
                 return ['error' => '密码错误'];
             }
         } else {
-            if (!$admin = mysql('admin')->cols('id', 'password')->where('phone', $phone)->get()) {
+            if (!$admin = Mysql::table('admin')->cols('id', 'password')->where('phone', $phone)->get()) {
                 return ['error' => '用户不存在'];
             }
             validateCode($phone, $input['code']);

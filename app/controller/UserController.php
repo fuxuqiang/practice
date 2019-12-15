@@ -1,6 +1,7 @@
 <?php
 namespace app\controller;
 
+use vendor\Mysql;
 use vendor\Request;
 
 class UserController
@@ -29,11 +30,10 @@ class UserController
         $fee = round($total/5000);
         $fee = $fee > 500 ? $fee : 500;
 
-        $mysqli = mysql()->handler();
-        $mysqli->begin_transaction();
+        Mysql::begin();
         try {
-            $capital = mysql('user')->where('id', $user->id)->val('capital');
-            $positionNum = mysql('position')
+            $capital = Mysql::table('user')->where('id', $user->id)->val('capital');
+            $positionNum = Mysql::table('position')
                 ->where(['code' => $code, 'user_id' => $user->id])->val('num');
             $capital -= $total + $fee;
             if ($num > 0) {
@@ -46,7 +46,7 @@ class UserController
                 }
                 $capital -= round($total/1000);
             }
-            mysql('trade')->insert([
+            Mysql::table('trade')->insert([
                 'user_id' => $user->id,
                 'code' => $code,
                 'price' => $price,
@@ -54,16 +54,16 @@ class UserController
                 'date' => $date,
                 'note' => $note
             ]);
-            mysql('position')->replace([
+            Mysql::table('position')->replace([
                 'code' => $code,
                 'user_id' => $user->id,
                 'num' => ($positionNum ?: 0) + $num
             ]);
             $user->update(['capital' => $capital]);
-            $mysqli->commit();
+            Mysql::commit();
             return ['msg' => '交易成功'];
         } catch (\Exception $e) {
-            $mysqli->rollback();
+            Mysql::rollback();
             return ['error' => $e->getMessage()];
         }
     }
@@ -79,7 +79,7 @@ class UserController
         isset($input['start']) && $cond[] = ['date', '>', $input['start']];
         isset($input['end']) && $cond[] = ['date', '<', $input['end']];
         return [
-            'data' => mysql('trade')->where($cond)->paginate(...$request->pageParams())
+            'data' => Mysql::table('trade')->where($cond)->paginate(...$request->pageParams())
         ];
     }
 
@@ -88,7 +88,7 @@ class UserController
      */
     public function updateTradeNote($id, $note, Request $request)
     {
-        mysql('trade')->where(['id' => $id, 'user_id' => $request->user()->id])
+        Mysql::table('trade')->where(['id' => $id, 'user_id' => $request->user()->id])
             ->update(['note' => $note]);
         return ['msg' => '修改成功'];
     }

@@ -22,7 +22,7 @@ class Http
     {
         // 实例化请求类
         $request = new Request($server, $input, function ($val, $table, $col) {
-            return mysql($table)->exists($col, $val);
+            return \src\Mysql::table($table)->exists($col, $val);
         }, config('per_page'));
 
         // 匹配路由

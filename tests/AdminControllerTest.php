@@ -2,15 +2,21 @@
 
 namespace tests;
 
+use src\Mysql;
+
 class AdminControllerTest extends TestCase
 {
     private $phone = 12345678901;
 
     public function testAdminLogin()
     {
+        $adminPhone = 18005661486;
         $this->assertArrayHasKey(
             'data',
-            $response = $this->post('admin/login', ['phone' => 18005661486, 'code' => $this->getCode(18005661486)])
+            $response = $this->post('admin/login', ['phone' => $adminPhone, 'code' => $this->getCode($adminPhone)])
+        );
+        $this->assertTrue(
+            '请输入验证码' == $this->post('admin/login', ['phone' => $adminPhone, 'password' => 1])['error']
         );
         return $response['data'];
     }
@@ -29,7 +35,7 @@ class AdminControllerTest extends TestCase
     public function testRoleAdd($token)
     {
         $this->assertArrayHasKey('msg', $this->post('admin/role', ['name' => 'test', 'pid' => 1], $token));
-        return mysql('role')->where('name', 'test')->val('id');
+        return Mysql::table('role')->where('name', 'test')->val('id');
     }
 
     /**
@@ -80,7 +86,7 @@ class AdminControllerTest extends TestCase
             'msg',
             $this->put(
                 'admin/adminRole',
-                ['role_id' => $id, 'id' => mysql('admin')->where('phone', $this->phone)->val('id')],
+                ['role_id' => $id, 'id' => Mysql::table('admin')->where('phone', $this->phone)->val('id')],
                 $token
             )
         );
@@ -93,7 +99,7 @@ class AdminControllerTest extends TestCase
     {
         $this->assertArrayHasKey(
             'msg',
-            $this->delete('admin/admin', ['id' => mysql('admin')->where('phone', $this->phone)->val('id')], $token)
+            $this->delete('admin/admin', ['id' => Mysql::table('admin')->where('phone', $this->phone)->val('id')], $token)
         );
     }
 

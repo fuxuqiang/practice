@@ -81,7 +81,7 @@ class Request extends Arr
     {
         $rules = [
             'phone' => function ($phone) {
-                    return preg_match('/1[2-9]\d{9}/', $phone);
+                    return preg_match('/^1[2-9]\d{9}$/', $phone);
                 },
             'exists' => $this->exists,
             'array' => 'is_array',

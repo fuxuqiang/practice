@@ -20,6 +20,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             require __DIR__ . '/config.php';
             self::$http = new Http;
         }
+        Mysql::begin();
     }
 
     /**
@@ -33,7 +34,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
             'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
         ], $params);
         Container::get($controller) || Container::instance($controller, new $controller);
-        return $method->invokeArgs(Container::get($controller), $args);
+        try {
+            return $method->invokeArgs(Container::get($controller), $args);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -42,5 +47,13 @@ class TestCase extends \PHPUnit\Framework\TestCase
     public function __call($name, $args)
     {
         return $this->request(strtoupper($name), ...$args);
+    }
+
+    /**
+     * 清理测试基镜
+     */
+    public static function tearDownAfterClass(): void
+    {
+        Mysql::rollback();
     }
 }
