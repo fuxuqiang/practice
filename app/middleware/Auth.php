@@ -10,19 +10,24 @@ class Auth
     public function handle(Request $request, JWT $jwt, $table)
     {
         $server = $request->server();
-        if (($token = $request->token()) && $payload = $jwt->decode($token)) {
-            if ($table == 'user') {
-                $user = Mysql::table('user')->cols('id', 'password')->where('id', $payload->sub)->get(Model::class, ['user']);
-            } elseif (
-                $table == 'admin'
-                && ($admin = Mysql::table('admin')->cols('id', 'role_id', 'password')->where('id', $payload->sub)->get(Model::class, ['admin']))
-                && $admin->password == $payload->jti
-                && (!($routeId = Mysql::table('route')->where(['method' => $server['REQUEST_METHOD'], 'uri' => ltrim($server['PATH_INFO'], '/')])->val('id')) || Mysql::table('role_route')->where('role_id', $admin->role_id)->exists('route_id', $routeId))
-            ) {
-                $user = $admin;
-            }
-        }
-        if (isset($user)) {
+        if (
+            ($token = $request->token()) && ($payload = $jwt->decode($token))
+            && (
+                $table == 'user'
+                && ($user = Mysql::table('user')->cols('id', 'password')
+                    ->where(['id' => $payload->sub, 'is_forbidden' => 0])->get(Model::class, ['user']))
+                && $user->password == $payload->jti
+                || $table == 'admin'
+                && ($user = Mysql::table('admin')->cols('id', 'role_id', 'password')
+                    ->where('id', $payload->sub)->get(Model::class, ['admin']))
+                && $user->password == $payload->jti
+                && (
+                    !($routeId = Mysql::table('route')
+                        ->where(['method' => $server['REQUEST_METHOD'], 'uri' => ltrim($request->uri(), 'admin/')])->val('id'))
+                    || Mysql::table('role_route')->where('role_id', $user->role_id)->exists('route_id', $routeId)
+                )
+            )
+        ) {
             $request->setUser($user);
         } else {
             throw new \Exception('', 401);

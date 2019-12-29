@@ -3,8 +3,6 @@
 use vendor\Route;
 use app\middleware\{RecordRequest, Auth};
 
-$jwt = \vendor\Container::get('vendor\JWT');
-
 $route = Route::middleware(RecordRequest::class);
 
 $route->add([
@@ -17,7 +15,7 @@ $route->add([
 
 // 前台
 
-$userRoute = $route->middleware(Auth::class, $jwt, 'user');
+$userRoute = $route->middleware(Auth::class, 'user');
 
 $userRoute->add([
     'POST' => ['order' => 'Order@add'],
@@ -48,7 +46,7 @@ $adminRoute = Route::prefix('admin');
 
 $adminRoute->add(['POST' => ['login' => 'Auth@adminLogin']]);
 
-$adminAuthRoute = $adminRoute->middleware(Auth::class, $jwt, 'admin');
+$adminAuthRoute = $adminRoute->middleware(Auth::class, 'admin');
 
 $adminAuthRoute->add([
     'PUT' => [

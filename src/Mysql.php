@@ -4,15 +4,15 @@ namespace src;
 
 class Mysql
 {
-    public static $mysqli;
+    private static $mysqli;
 
     public static function __callStatic($name, $args)
     {
         if (!self::$mysqli) {
             $config = config('mysql');
-            $mysqli = new \mysqli($config['host'], $config['user'], $config['pwd'], $config['db']);
+            self::$mysqli = new \mysqli($config['host'], $config['user'], $config['pwd'], $config['db']);
         }
-        $mysql = new \vendor\Mysql($mysqli);
+        $mysql = new \vendor\Mysql(self::$mysqli);
         return $mysql->$name(...$args);
     }
 }

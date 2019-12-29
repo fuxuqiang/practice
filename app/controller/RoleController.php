@@ -29,12 +29,12 @@ class RoleController
      */
     public function update($id, Request $request)
     {
-        $roles = Mysql::table('role')->all(['id', 'pid']);
+        $roles = Mysql::table('role')->all('id', 'pid');
         $ids = array_column($roles, 'id');
         if (!in_array($id, $ids)) {
             return ['error' => '操作的角色不存在'];
         }
-        $input = $request->get(['name', 'pid']);
+        $input = $request->get('name', 'pid');
         if (isset($input['pid'])) {
             if (!in_array($input['pid'], $ids)) {
                 return ['error' => '上级角色不存在'];

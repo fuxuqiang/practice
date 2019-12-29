@@ -29,10 +29,11 @@ class Http
         $route = Route::get($server['REQUEST_METHOD'], $request->uri());
         if (is_array($route)) {
             foreach ($route[1] as $key => $val) {
+                $jwt = Container::get('vendor\JWT');
                 if (is_array($val)) {
-                    (new $key)->handle($request, ...$val);
+                    (new $key)->handle($request, $jwt, ...$val);
                 } else {
-                    (new $val)->handle($request);
+                    (new $val)->handle($request, $jwt);
                 }
             }
             $route = $route[0];
