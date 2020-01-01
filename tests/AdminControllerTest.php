@@ -8,25 +8,23 @@ class AdminControllerTest extends TestCase
 {
     private $phone = 12345678901;
 
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        Mysql::table('route')->del();
+    }
+
     public function testAdminLogin()
     {
         $adminPhone = 18005661486;
-        $this->assertArrayHasKey(
-            'data',
-            $response = $this->post('admin/login', ['phone' => $adminPhone, 'code' => $this->getCode($adminPhone)])
+        $response = $this->post(
+            'admin/login',
+            ['phone' => $adminPhone, 'code' => $this->getCode($adminPhone)]
         );
-        $this->assertTrue(
-            '请输入验证码' == $this->post('admin/login', ['phone' => $adminPhone, 'password' => 1])['error']
-        );
-        return $response['data'];
-    }
-
-    /**
-     * @depends testAdminLogin
-     */
-    public function testList($token)
-    {
-        $this->assertIsArray($this->get('admin/admins', [], $token));
+        $response->assertArrayHasKey('data');
+        $this->post('admin/login', ['phone' => $adminPhone, 'password' => 1])
+            ->assertArrayHasKey('error');
+        return $response->data;
     }
 
     /**
@@ -34,8 +32,18 @@ class AdminControllerTest extends TestCase
      */
     public function testRoleAdd($token)
     {
-        $this->assertArrayHasKey('msg', $this->post('admin/role', ['name' => 'test', 'pid' => 1], $token));
+        $this->post('admin/role', ['name' => 'test', 'pid' => 1], $token)->assertOk();
         return Mysql::table('role')->where('name', 'test')->val('id');
+    }
+
+    /**
+     * @depends testAdminLogin
+     * @depends testRoleAdd
+     */
+    public function testRoleUpdate($token, $id)
+    {
+        $this->put('admin/role', ['id' => $id, 'pid' => 1], $token)->assertArrayHasKey('msg');
+        $this->put('admin/role', ['id' => $id, 'pid' => $id], $token)->assertArrayHasKey('error');
     }
 
     /**
@@ -44,28 +52,30 @@ class AdminControllerTest extends TestCase
      */
     public function testAdd($token, $id)
     {
-        $this->assertArrayHasKey(
-            'msg',
-            $this->post('admin/admin', ['phone' => $this->phone, 'role_id' => $id], $token)
-        );
+        $this->post('admin/admin', ['phone' => $this->phone, 'role_id' => $id], $token)->assertOk();
+        return Mysql::table('admin')->where('phone', $this->phone)->val('id');
+    }
+
+    /**
+     * @depends testAdminLogin
+     */
+    public function testList($token)
+    {
+        $this->get('admin/admins', [], $token)->assertArrayHasKey('total');
     }
 
     /**
      * @depends testAdd
      */
-    public function testSetPassword($token)
+    public function testSetPassword($id)
     {
         $password = 'a12345';
-        $this->put(
-            'admin/password',
-            ['password' => $password],
-            $this->post('admin/login', ['phone' => $this->phone, 'code' => $this->getCode($this->phone)])['data']
-        );
-        $this->assertArrayHasKey(
-            'data',
-            $response = $this->post('admin/login', ['phone' => $this->phone, 'password' => $password])
-        );
-        return $response['data'];
+        $token = $this->admin($id);
+        $this->put('admin/password', ['password' => $password], $token);
+        $this->put('admin/password', ['password' => $password], $token)->assertStatus(401);
+        $response = $this->post('admin/login', ['phone' => $this->phone, 'password' => $password]);
+        $response->assertArrayHasKey('data');
+        return $response->data;
     }
 
     /**
@@ -73,42 +83,44 @@ class AdminControllerTest extends TestCase
      */
     public function testUpdate($token)
     {
-        $this->assertArrayHasKey('msg', $this->put('admin/adminName', ['name' => 'a'], $token));
+        $this->put('admin/adminName', ['name' => 'a'], $token)->assertOk();
     }
 
     /**
      * @depends testSetPassword
+     * @depends testAdd
      * @depends testRoleAdd
      */
-    public function testSetRole($token, $id)
+    public function testSetRole($token, $id, $roleId)
     {
-        $this->assertArrayHasKey(
-            'msg',
-            $this->put(
-                'admin/adminRole',
-                ['role_id' => $id, 'id' => Mysql::table('admin')->where('phone', $this->phone)->val('id')],
-                $token
-            )
-        );
+        $this->put('admin/adminRole', ['role_id' => $roleId, 'id' => $id], $token)->assertOk();
     }
-    
+
     /**
      * @depends testSetPassword
      */
-    public function testDel($token)
+    public function testListRoles($token)
     {
-        $this->assertArrayHasKey(
-            'msg',
-            $this->delete('admin/admin', ['id' => Mysql::table('admin')->where('phone', $this->phone)->val('id')], $token)
-        );
+        $this->get('admin/roles', [], $token)->assertOk();
+    }
+
+    /**
+     * @depends testSetPassword
+     */
+    public function testListRoutes($token)
+    {
+        $this->get('admin/routes', [], $token)->assertOk();
     }
 
     /**
      * @depends testAdminLogin
+     * @depends testAdd
      * @depends testRoleAdd
      */
-    public function testRoleDel($token, $id)
+    public function testDel($token, $id, $roleId)
     {
-        $this->assertArrayHasKey('msg', $this->delete('admin/role', ['id' => $id], $token));
+        $this->delete('admin/role', ['id' => $roleId], $token)->assertArrayHasKey('error');
+        $this->delete('admin/admin', ['id' => $id], $token);
+        $this->delete('admin/role', ['id' => $roleId], $token)->assertArrayHasKey('msg');
     }
 }

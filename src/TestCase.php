@@ -28,17 +28,18 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function request($requestMethod, $uri, $params = [], $token = null)
     {
-        [$controller, $method, $args] = self::$http->handle([
-            'REQUEST_METHOD' => $requestMethod,
-            'PATH_INFO' => $uri,
-            'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
-        ], $params);
-        Container::get($controller) || Container::instance($controller, new $controller);
         try {
-            return $method->invokeArgs(Container::get($controller), $args);
+            [$controller, $method, $args] = self::$http->handle([
+                'REQUEST_METHOD' => $requestMethod,
+                'PATH_INFO' => $uri,
+                'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
+            ], $params);
+            Container::get($controller) || Container::instance($controller, new $controller);
+            $val = $method->invokeArgs(Container::get($controller), $args);
         } catch (\Exception $e) {
-            return false;
+            $val = $e;
         }
+        return new \vendor\TestResponse($val);
     }
 
     /**

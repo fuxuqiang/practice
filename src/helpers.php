@@ -7,7 +7,7 @@ function logError($content)
 {
     file_put_contents(
         __DIR__ . '/runtime/error.log',
-        '[' . timestamp() . "]\n" . $content . "\n",
+        '[' . timestamp() . "]\n$content\n",
         FILE_APPEND | LOCK_EX
     );
 }
@@ -15,9 +15,9 @@ function logError($content)
 /**
  * 获取时间
  */
-function timestamp($time = null)
+function timestamp()
 {
-    return date('Y-m-d H:i:s', $time ? strtotime($time) : time());
+    return date('Y-m-d H:i:s');
 }
 
 /**

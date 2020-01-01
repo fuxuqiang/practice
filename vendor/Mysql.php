@@ -169,7 +169,7 @@ class Mysql
     public function val($col)
     {
         $this->limit = 'LIMIT 1';
-        return ($row = $this->query($this->getDqlSql($col))->fetch_row()) ? $row[0] : null;
+        return ($row = $this->cols($col)->get()) ? $row->$col : null;
     }
 
     /**

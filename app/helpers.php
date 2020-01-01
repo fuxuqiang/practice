@@ -3,7 +3,7 @@
 function validateCode($phone, $code)
 {
     sessionStart();
-    if ($code != $_SESSION['code_' . $phone]) {
+    if (!(isset($_SESSION['code_' . $phone]) && $code == $_SESSION['code_' . $phone])) {
         throw new Exception('验证码错误', 200);
     }
     unset($_SESSION['code_' . $phone]);
