@@ -49,10 +49,6 @@ CREATE TABLE `admin` (
     `quitted_at` DATE
 );
 
-INSERT `role` (`name`,`pid`) VALUE ('超级管理员',0);
-INSERT `admin` (`phone`,`name`,`role_id`,`api_token`,`token_expires`,`joined_at`)
-VALUE (18005661486,'',1,'',CURRENT_DATE);
-
 DROP TABLE IF EXISTS `route`;
 CREATE TABLE `route` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -62,16 +58,6 @@ CREATE TABLE `route` (
     `action` VARCHAR(255) NOT NULL,
     UNIQUE(`method`,`uri`)
 );
-
-INSERT `route` VALUES
-(NULL,'GET','admins','管理员','列表'),
-(NULL,'POST','create','管理员','创建'),
-(NULL,'DELETE','admin','管理员','删除'),
-(NULL,'PUT','setRole','管理员','修改角色'),
-(NULL,'POST','role','角色','创建'),
-(NULL,'PUT','role','角色','修改'),
-(NULL,'DELETE','role','角色','删除'),
-(NULL,'POST','saveAccess','角色','设置权限');
 
 DROP TABLE IF EXISTS `role_route`;
 CREATE TABLE `role_route` (
@@ -132,3 +118,20 @@ CREATE TABLE `request_log` (
     `token` VARCHAR(255) NOT NULL DEFAULT '',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT `role` (`name`,`pid`) VALUE ('超级管理员',0);
+INSERT `admin` (`phone`,`name`,`role_id`,`api_token`,`token_expires`,`joined_at`)
+VALUE (18005661486,'',1,'',CURRENT_DATE);
+
+INSERT `route` VALUES
+(NULL,'GET','admins','管理员','列表'),
+(NULL,'POST','create','管理员','创建'),
+(NULL,'DELETE','admin','管理员','删除'),
+(NULL,'PUT','setRole','管理员','修改角色'),
+(NULL,'POST','role','角色','创建'),
+(NULL,'PUT','role','角色','修改'),
+(NULL,'DELETE','role','角色','删除'),
+(NULL,'POST','saveAccess','角色','设置权限');
+
+INSERT `role_route` VALUES
+(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8);

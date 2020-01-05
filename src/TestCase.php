@@ -35,11 +35,13 @@ class TestCase extends \PHPUnit\Framework\TestCase
                 'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
             ], $params);
             Container::get($controller) || Container::instance($controller, new $controller);
-            $val = $method->invokeArgs(Container::get($controller), $args);
+            $response = $method->invokeArgs(Container::get($controller), $args);
+            $status = 200;
         } catch (\Exception $e) {
-            $val = $e;
+            $response = ['error' => $e->getMessage()];
+            $status = $e->getCode();
         }
-        return new \vendor\TestResponse($val);
+        return new \vendor\TestResponse($response, $status);
     }
 
     /**

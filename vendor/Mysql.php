@@ -57,6 +57,14 @@ class Mysql
     }
 
     /**
+     * 执行select查询
+     */
+    public function select(string $sql)
+    {
+        return $this->query($sql)->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
      * 设置表名
      */
     public function table(string $table)
@@ -178,7 +186,7 @@ class Mysql
     public function all(...$cols)
     {
         $this->cols || $this->cols = $cols;
-        $data = $this->query($this->getDqlSql())->fetch_all(MYSQLI_ASSOC);
+        $data = $this->select($this->getDqlSql());
         if (
             $this->relation && ($table = key($this->relation))
             && $foreignKeysVal = array_column($data, $table . '_id')

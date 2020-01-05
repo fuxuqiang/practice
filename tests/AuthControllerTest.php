@@ -13,9 +13,7 @@ class AuthControllerTest extends TestCase
             ['phone' => $this->beforePhone, 'code' => $this->getCode($this->beforePhone)]
         );
         $response->assertArrayHasKey('data');
-        $this->assertTrue(
-            $this->post('login', ['phone' => $this->beforePhone, 'code' => 1])->isException()
-        );
+        $this->post('login', ['phone' => $this->beforePhone, 'code' => 1])->assertArrayHasKey('error');
         return $response->data;
     }
 

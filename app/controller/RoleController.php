@@ -58,9 +58,6 @@ class RoleController
         if (Mysql::table('admin')->exists('role_id', $id)) {
             return ['error' => '存在该角色的用户'];
         }
-        if (Mysql::table('role_route')->exists('role_id', $id)) {
-            return ['error' => '该角色的权限未清空'];
-        }
         Mysql::table('role')->del($id);
         return ['msg' => '删除成功'];
     }
@@ -71,10 +68,10 @@ class RoleController
     public function listRoutes()
     {
         return [
-            'data' => Mysql::query(
+            'data' => Mysql::select(
                     'SELECT `id`,`method`,CONCAT("admin/",`uri`) AS `uri`,`resource`,`action`
                     FROM `route`'
-                )->fetch_all(MYSQLI_ASSOC)
+                )
         ];
     }
 

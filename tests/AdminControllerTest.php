@@ -113,6 +113,22 @@ class AdminControllerTest extends TestCase
     }
 
     /**
+     * @depends testSetPassword
+     * @depends testRoleAdd
+     */
+    public function testSaveRoutes($token, $roleId)
+    {
+        $routeId = Mysql::table('route')->insert(
+            ['method' => 'POST', 'uri' => 'saveAccess', 'resource' => '角色', 'action' => '设置权限']
+        );
+        $this->post('admin/saveAccess', ['id' => $roleId, 'route_ids' => [$routeId]], $token)
+            ->assertStatus(401);
+        Mysql::table('role_route')->insert(['role_id' => $roleId, 'route_id' => $routeId]);
+        $this->post('admin/saveAccess', ['id' => $roleId, 'route_ids' => [$routeId]], $token)
+            ->assertOk();
+    }
+
+    /**
      * @depends testAdminLogin
      * @depends testAdd
      * @depends testRoleAdd

@@ -8,10 +8,10 @@ class Order
 {
     public function handle()
     {
-        $users = Mysql::query(
+        $users = Mysql::select(
             'SELECT `u`.`phone`,`a`.`id` FROM `user` `u`
             JOIN `address` `a` ON `u`.`id`=`a`.`user_id` ORDER BY RAND() LIMIT 5'
-        )->fetch_all(MYSQLI_ASSOC);
+        );
 
         $users = \app\model\Login::getToken($users);
 
