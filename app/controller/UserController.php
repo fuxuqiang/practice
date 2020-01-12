@@ -64,7 +64,7 @@ class UserController
             return ['msg' => '交易成功'];
         } catch (\Exception $e) {
             Mysql::rollback();
-            return ['error' => $e->getMessage()];
+            return error($e->getMessage());
         }
     }
 

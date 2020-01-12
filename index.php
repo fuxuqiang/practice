@@ -11,24 +11,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && $cors = config('cors')) {
 
 require __DIR__ . '/src/app.php';
 
+// 处理请求
 try {
-    // 调用控制器方法
     [$controller, $method, $args] = (new \src\Http)->handle($_SERVER, $_GET + $_POST);
     $response = $method->invokeArgs(new $controller, $args);
-} catch (Throwable $th) {
-    // 错误处理
-    if ($th instanceof Exception) {
-        http_response_code($th->getCode());
-        $response = ['error' => $th->getMessage()];
-    } elseif (!config('debug')) {
-        logError($th);
-        http_response_code(500);
+// 异常处理
+} catch (Exception $e) {
+    http_response_code($e->getCode());
+    $response = error($e->getMessage());
+// 错误处理
+} catch (Error $e) {
+    http_response_code(500);
+    if (!config('debug')) {
+        logError($e);
     } else {
-        throw $th;
+        echo $e;
     }
-}
-
-if (!is_null($response)) {
-    header('Content-Type: application/json');
-    echo json_encode($response);
+// 响应
+} finally {
+    if (isset($response) && !is_null($response)) {
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
 }

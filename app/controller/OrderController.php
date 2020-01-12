@@ -17,7 +17,7 @@ class OrderController
         $userId = $request->user()->id;
         if (! $address = Mysql::table('address')->cols('code', 'address')
             ->where(['user_id' => $userId, 'id' => $address_id])->get()) {
-            return ['error' => '不存在的地址'];
+            return error('不存在的地址');
         }
         // 格式化skus参数
         $skuIds = array_column($request->skus, 'id');
@@ -55,7 +55,7 @@ class OrderController
             return ['msg' => '下单成功'];
         } catch (\Exception $e) {
             Mysql::rollback();
-            return ['error' => $e->getMessage()];
+            return error($e->getMessage());
         }
     }
 

@@ -41,7 +41,7 @@ class AddressController
     {
         $input = $request->get('code', 'address');
         if (isset($input['code']) && ! Mysql::table('region')->exists('code', $input['code'])) {
-            return ['error' => '行政区不存在'];
+            return error('行政区不存在');
         }
         Mysql::table('address')->where(['id' => $id, 'user_id' => $request->user()->id])->update($input);
         return ['msg' => '更新成功'];

@@ -32,15 +32,15 @@ class RoleController
         $roles = Mysql::table('role')->all('id', 'pid');
         $ids = array_column($roles, 'id');
         if (!in_array($id, $ids)) {
-            return ['error' => '操作的角色不存在'];
+            return error('操作的角色不存在');
         }
         $input = $request->get('name', 'pid');
         if (isset($input['pid'])) {
             if (!in_array($input['pid'], $ids)) {
-                return ['error' => '上级角色不存在'];
+                return error('上级角色不存在');
             }
             if (inSubs($input['pid'], $roles, $id) || $input['pid'] == $id) {
-                return ['error' => '上级角色不能为自身或下级角色'];
+                return error('上级角色不能为自身或下级角色');
             }
         }
         Mysql::table('role')->where('id', $id)->update($input);
@@ -53,10 +53,10 @@ class RoleController
     public function del($id)
     {
         if (Mysql::table('role')->exists('pid', $id)) {
-            return ['error' => '存在子级角色'];
+            return error('存在子级角色');
         }
         if (Mysql::table('admin')->exists('role_id', $id)) {
-            return ['error' => '存在该角色的用户'];
+            return error('存在该角色的用户');
         }
         Mysql::table('role')->del($id);
         return ['msg' => '删除成功'];

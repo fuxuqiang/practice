@@ -8,11 +8,10 @@ try {
     // 执行
     $command = '\app\command\\' . ucfirst($argv[1]);
     (new $command)->handle();
-} catch (\Throwable $th) {
-    // 错误处理
-    if ($th instanceof Exception) {
-        echo $th->getMessage();
-    } elseif (!config('debug')) {
+} catch (Exception $e) {
+    echo $th->getMessage();
+} catch (Error $e) {
+    if (!config('debug')) {
         logError($th);
     } else {
         throw $th;

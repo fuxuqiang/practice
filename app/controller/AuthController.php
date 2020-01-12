@@ -27,7 +27,7 @@ class AuthController
         $input = $request->get();
 
         if (empty($input['password']) && empty($input['code'])) {
-            return ['error' => '参数错误'];
+            return error('参数错误');
         }
 
         $user = Mysql::table('user')->cols('id', 'password')->where('phone', $phone)->get();
@@ -41,7 +41,7 @@ class AuthController
                 ];
             }
         } elseif (!password_verify($input['password'], $user->password)) {
-            return ['error' => '密码错误'];
+            return error('密码错误');
         }
 
         return ['data' => $jwt->encode($user->id, $user->password)];
@@ -56,7 +56,7 @@ class AuthController
 
         if (empty($input['code'])) {
             if (empty($input['password'])) {
-                return ['error' => '参数错误'];
+                return error('参数错误');
             }
             if (
                 !$admin = Mysql::query(
@@ -65,17 +65,17 @@ class AuthController
                     [$phone]
                 )->fetch_object()
             ) {
-                return ['error' => '用户不存在'];
+                return error('用户不存在');
             }
             if (!$admin->pid) {
-                return ['error' => '请输入验证码'];
+                return error('请输入验证码');
             }
             if (!password_verify($input['password'], $admin->password)) {
-                return ['error' => '密码错误'];
+                return error('密码错误');
             }
         } else {
             if (!$admin = Mysql::table('admin')->cols('id', 'password')->where('phone', $phone)->get()) {
-                return ['error' => '用户不存在'];
+                return error('用户不存在');
             }
             validateCode($phone, $input['code']);
         }
@@ -89,7 +89,7 @@ class AuthController
     public function setPassword($password, Request $request)
     {
         if (!preg_match('/^(?!\d+$)(?![a-zA-Z]+$)[\dA-Za-z]{6,10}$/', $password)) {
-            return ['error' => '密码长度至少为6位，由数字和字母组成'];
+            return error('密码长度至少为6位，由数字和字母组成');
         }
         $request->user()->update(['password' => password_hash($password, PASSWORD_DEFAULT)]);
         return ['msg' => '修改成功'];

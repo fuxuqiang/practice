@@ -48,9 +48,11 @@ class Mysql
                 $vars = array_merge($vars, $this->params);
                 $this->stmt->bind_param($types, ...array_values($vars));
             }
-            $this->stmt->execute() || trigger_error($this->mysqli->error, E_USER_ERROR);
+            if (!$this->stmt->execute()) {
+                throw new \Error($this->mysqli->error);
+            }
         } else {
-            trigger_error($this->mysqli->error, E_USER_ERROR);
+            throw new \Error($this->mysqli->error);
         }
         $rst = $this->stmt->get_result() ?: true;
         return $rst;
@@ -59,9 +61,9 @@ class Mysql
     /**
      * 执行select查询
      */
-    public function select(string $sql)
+    public function select(string $sql, array $vars = [])
     {
-        return $this->query($sql)->fetch_all(MYSQLI_ASSOC);
+        return $this->query($sql, $vars)->fetch_all(MYSQLI_ASSOC);
     }
 
     /**
@@ -117,7 +119,7 @@ class Mysql
     /**
      * 设置WHERE条件
      */
-    private function setWhere($col, $operator, $val)
+    private function setWhere(string $col, string $operator, $val)
     {
         $this->cond[] = '`' . $col . '`' . $operator . '?';
         $this->params[] = $val;
@@ -126,7 +128,7 @@ class Mysql
     /**
      * 添加 WHERE {COLUMN} IS NULL 条件
      */
-    public function whereNull($col)
+    public function whereNull(string $col)
     {
         $this->cond[] = '`' . $col . '` IS NULL';
         return $this;
@@ -135,7 +137,7 @@ class Mysql
     /**
      * 添加 WHERE {COLUMN} IN 条件
      */
-    public function whereIn($col, array $vals)
+    public function whereIn(string $col, array $vals)
     {
         $this->cond[] = '`' . $col . '` IN ' . $this->markers($vals);
         $this->params = array_merge($this->params, $vals);
@@ -154,7 +156,7 @@ class Mysql
     /**
      * ORDER BY RAND()
      */
-    public function rand($limit)
+    public function rand(int $limit)
     {
         $this->order = ' ORDER BY RAND()';
         $this->limit = 'LIMIT ' . $limit;
@@ -164,7 +166,7 @@ class Mysql
     /**
      * 返回查询结果首行对象
      */
-    public function get($class = null, $params = [])
+    public function get(string $class = null, array $params = [])
     {
         $this->limit = 'LIMIT 1';
         $stmt = $this->query($this->getDqlSql());
@@ -174,7 +176,7 @@ class Mysql
     /**
      * 获取查询结果首行单个列的值
      */
-    public function val($col)
+    public function val(string $col)
     {
         $this->limit = 'LIMIT 1';
         return ($row = $this->cols($col)->get()) ? $row->$col : null;
@@ -204,7 +206,7 @@ class Mysql
     /**
      * 获取查询结果的指定列
      */
-    public function col($col, $idx = null)
+    public function col($col, string $idx = null)
     {
         $col && $this->cols = $idx ? [$col, $idx] : [$col];
         return array_column($this->all(), $col, $idx);
@@ -213,7 +215,7 @@ class Mysql
     /**
      * 数据是否存在
      */
-    public function exists($col, $val)
+    public function exists(string $col, $val)
     {
         $this->limit = 'LIMIT 1';
         return $this->where($col, $val)->query($this->getDqlSql('`' . $col . '`'))->num_rows;
@@ -251,7 +253,7 @@ class Mysql
     /**
      * 执行INSERT或REPLACE语句
      */
-    private function into($action, array $data)
+    private function into(string $action, array $data)
     {
         if (is_array(reset($data))) {
             $cols = $this->cols;
@@ -325,7 +327,7 @@ class Mysql
     /**
      * 格式化数组元素后用,连接成字符串
      */
-    private function gather(array $arr, $format)
+    private function gather(array $arr, string $format)
     {
         return implode(',', array_map(function ($val) use ($format) {
             return sprintf($format, $val);
@@ -335,9 +337,9 @@ class Mysql
     /**
      * 获取查询sql
      */
-    private function getDqlSql($cols = null)
+    private function getDqlSql(string $col = null)
     {
-        return 'SELECT ' . ($cols ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
+        return 'SELECT ' . ($col ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
             . " FROM `$this->table`" . $this->getWhere() . $this->order . ' ' . $this->limit . $this->lock;
     }
 

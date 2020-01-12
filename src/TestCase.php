@@ -38,7 +38,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             $response = $method->invokeArgs(Container::get($controller), $args);
             $status = 200;
         } catch (\Exception $e) {
-            $response = ['error' => $e->getMessage()];
+            $response = error($e->getMessage());
             $status = $e->getCode();
         }
         return new \vendor\TestResponse($response, $status);
