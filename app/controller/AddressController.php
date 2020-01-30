@@ -1,4 +1,5 @@
 <?php
+
 namespace app\controller;
 
 use src\Mysql;
@@ -6,7 +7,7 @@ use vendor\Request;
 
 class AddressController
 {
-    public function add(Request $request, $address)
+    public function add(Request $request, $address = '')
     {
         $request->validate(['code' => 'exists:region,code']);
         Mysql::table('address')->insert([
@@ -31,7 +32,7 @@ class AddressController
                 return [
                     'id' => $val['id'],
                     'code' => $val['code'],
-                    'address' => implode('', (new \vendor\Arr($regions))->get(...$val['codes'])).$val['address']
+                    'address' => implode('', (new \vendor\Arr($regions))->get(...$val['codes'])) . $val['address']
                 ];
             }, $addresses)
         ];
@@ -40,7 +41,7 @@ class AddressController
     public function update($id, Request $request)
     {
         $input = $request->get('code', 'address');
-        if (isset($input['code']) && ! Mysql::table('region')->exists('code', $input['code'])) {
+        if (isset($input['code']) && !Mysql::table('region')->exists('code', $input['code'])) {
             return error('行政区不存在');
         }
         Mysql::table('address')->where(['id' => $id, 'user_id' => $request->user()->id])->update($input);

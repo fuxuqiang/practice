@@ -8,12 +8,12 @@ try {
     // 执行
     $command = '\app\command\\' . ucfirst($argv[1]);
     (new $command)->handle();
-} catch (Exception $e) {
-    echo $th->getMessage();
-} catch (Error $e) {
+} catch (ErrorException $e) {
     if (!config('debug')) {
-        logError($th);
+        logError($e);
     } else {
-        throw $th;
+        echo $e . "\n";
     }
+} catch (Exception $e) {
+    echo $e->getMessage();
 }

@@ -15,18 +15,18 @@ require __DIR__ . '/src/app.php';
 try {
     [$controller, $method, $args] = (new \src\Http)->handle($_SERVER, $_GET + $_POST);
     $response = $method->invokeArgs(new $controller, $args);
-// 异常处理
-} catch (Exception $e) {
-    http_response_code($e->getCode());
-    $response = error($e->getMessage());
 // 错误处理
-} catch (Error $e) {
+} catch (ErrorException $e) {
     http_response_code(500);
     if (!config('debug')) {
         logError($e);
     } else {
         echo $e;
     }
+// 异常处理
+} catch (Exception $e) {
+    http_response_code($e->getCode());
+    ($msg = $e->getMessage()) && $response = error($msg);
 // 响应
 } finally {
     if (isset($response) && !is_null($response)) {

@@ -1,25 +1,34 @@
 <?php
 namespace app\model;
 
-use src\Http;
+use vendor\HttpClient;
 
 class Login 
 {
     public static function getToken($phones)
     {
-        Http::request(function ($mh) use ($phones) {
-            foreach ($phones as $phone) {
-                Http::addCurl($mh, 'http://stock.test/sendCode', ['phone' => $phone['phone']]);
-            }
-        });
+        $sendCode = new HttpClient(true);
+        foreach ($phones as $phone) {
+            $sendCode->addCurl('http://practice.test/sendCode', $phone);
+        }
 
-        return array_map(function ($phone) {
-            $ch = Http::getHandler('http://stock.test/login', [
-                'phone' => $phone['phone'],
-                'code' => \vendor\Container::get('Redis')->get($phone['phone'])
-            ]);
-            unset($phone['phone']);
-            return ['token' => json_decode(curl_exec($ch))->data] + $phone;
-        }, $phones);
+        $redis = new \Redis;
+        $redis->connect('127.0.0.1');
+        $login = new HttpClient;
+        foreach ($sendCode->request() as $val) {
+            preg_match('/Set-Cookie:\s(PHPSESSID=.+);/', curl_multi_getcontent($val['handle']), $matches);
+            $response = json_decode(
+                curl_exec(
+                    $login->getHandle(
+                        'http://practice.test/login',
+                        ['code' => $redis->get($val['params']['phone'])] + $val['params'],
+                        [CURLOPT_COOKIE => $matches[1], CURLOPT_HEADER => false]
+                    )
+                )
+            );
+            if (isset($response->data)) {
+                yield ['token' => $response->data] + $val['params'];
+            }
+        }
     }
 }

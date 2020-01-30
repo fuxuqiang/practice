@@ -12,9 +12,12 @@ class AuthController
      */
     public function sendCode($phone)
     {
-        if (true/* todo 发送验证码到手机 */) {
+        $code = mt_rand(1000, 9999);
+        $redis = new \Redis;
+        $redis->connect('127.0.0.1');
+        if ($redis->setex($phone, 99, $code)) {
             sessionStart();
-            $_SESSION['code_' . $phone] = mt_rand(1000, 9999);
+            $_SESSION['code_' . $phone] = $code;
         }
         return ['msg' => '发送成功'];
     }

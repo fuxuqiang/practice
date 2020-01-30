@@ -1,28 +1,16 @@
 <?php
-namespace app\command;
 
-use vendor\HttpClient;
+namespace app\command;
 
 class Register
 {
     public function handle()
     {
-        $phones = HttpClient::request(function ($mh) {
-            for ($i=0; $i < 20; $i++) { 
-                $phone = mt_rand(12000000000, 19999999999);
-                $phones[] = $phone;
-                HttpClient::addCurl($mh, 'http://stock.test/sendCode', ['phone' => $phone]);
-            }
-            return $phones;
-        });
+        for ($i = 0; $i < 4; $i++) {
+            $phone = mt_rand(12000000000, 19999999999);
+            $phones[] = ['phone' => $phone];
+        }
 
-        HttpClient::request(function ($mh) use ($phones) {
-            foreach ($phones as $phone) {
-                HttpClient::addCurl($mh, 'http://stock.test/register', [
-                    'phone' => $phone,
-                    'code' => \vendor\Container::get('Redis')->get($phone)
-                ]);
-            }
-        });
+        iterator_count(\app\model\Login::getToken($phones));
     }
 }

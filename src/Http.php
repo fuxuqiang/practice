@@ -47,6 +47,7 @@ class Http
         $method = new \ReflectionMethod($controller, $dispatch[1]);
         // 解析方法参数
         $args = [];
+        $input = $request->get();
         foreach ($method->getParameters() as $param) {
             if ($class = $param->getClass()) {
                 $args[] = Container::get($class->name);

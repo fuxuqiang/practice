@@ -4,28 +4,45 @@ namespace vendor;
 
 class HttpClient
 {
-    public static function request(callable $callback)
+    private $mh, $chs;
+
+    public function __construct($multi = false)
     {
-        $mh = curl_multi_init();
-        $rst = $callback($mh);
+        $multi && $this->mh = curl_multi_init();
+    }
+
+    public function request()
+    {
         $active = null;
+        $totalSuccesses = [];
         do {
-            curl_multi_exec($mh, $active);
-            usleep(10000);
+            curl_multi_exec($this->mh, $active);
+            foreach ($this->chs as $ch) {
+                if (
+                    curl_getinfo($ch['handle'], CURLINFO_HTTP_CODE) == 200
+                    && !in_array($ch['handle'], $totalSuccesses)
+                ) {
+                    $totalSuccesses[] = $ch['handle'];
+                    yield $ch;
+                }
+            }
         } while ($active);
-        return $rst;
     }
 
-    public static function addCurl($mh, $url, $params)
+    public function addCurl($url, $params, $opt = [])
     {
-        $ch = self::getHandler($url, $params);
-        curl_multi_add_handle($mh, $ch);
+        curl_multi_add_handle($this->mh, $ch = $this->getHandle($url, $params, $opt));
+        $this->chs[] = ['params' => $params, 'handle' => $ch];
     }
 
-    public static function getHandler($url, $params)
+    public function getHandle($url, $params, $opt = [])
     {
         $ch = curl_init($url);
-        curl_setopt_array($ch, [CURLOPT_POSTFIELDS => $params, CURLOPT_RETURNTRANSFER => true]);
+        curl_setopt_array($ch, $opt + [
+            CURLOPT_POSTFIELDS => $params,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => true
+        ]);
         return $ch;
     }
 }
