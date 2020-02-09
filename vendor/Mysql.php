@@ -49,10 +49,10 @@ class Mysql
                 $this->stmt->bind_param($types, ...array_values($vars));
             }
             if (!$this->stmt->execute()) {
-                throw new \Error($this->mysqli->error);
+                throw new \ErrorException($this->mysqli->error);
             }
         } else {
-            throw new \Error($this->mysqli->error);
+            throw new \ErrorException($this->mysqli->error);
         }
         $rst = $this->stmt->get_result() ?: true;
         return $rst;

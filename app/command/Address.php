@@ -12,12 +12,10 @@ class Address
         $addresses = Mysql::table('region')->rand(16)->col('code');
         $http = new HttpClient;
         foreach (\app\model\Login::getToken($phones) as $key => $token) {
-            curl_exec(
-                $http->getHandle(
-                    'http://practice.test/user/address',
-                    ['code' => $addresses[$key]],
-                    [CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token['token']]]
-                )
+            $http->request(
+                'http://practice.test/user/address',
+                ['code' => $addresses[$key]],
+                [CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token['token']]]
             );
         }
     }

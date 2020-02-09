@@ -16,22 +16,20 @@ class Order
         $skus = Mysql::table('sku')->col('id');
         $http = new HttpClient;
         foreach (\app\model\Login::getToken($users) as $user) {
-            curl_exec(
-                $http->getHandle(
-                    'http://practice.test/order',
-                    json_encode([
-                        'address_id' => $user['id'],
-                        'skus' => array_map(function ($val) use ($skus) {
-                            return ['id' => $skus[$val], 'num' => mt_rand(1, 3)];
-                        }, array_rand($skus, mt_rand(1, count($skus))))
-                    ]),
-                    [
-                        CURLOPT_HTTPHEADER => [
-                            'Authorization: Bearer ' . $user['token'],
-                            'Content-Type: application/json'
-                        ]
+            $http->request(
+                'http://practice.test/order',
+                json_encode([
+                    'address_id' => $user['id'],
+                    'skus' => array_map(function ($val) use ($skus) {
+                        return ['id' => $skus[$val], 'num' => mt_rand(1, 3)];
+                    }, array_rand($skus, mt_rand(1, count($skus))))
+                ]),
+                [
+                    CURLOPT_HTTPHEADER => [
+                        'Authorization: Bearer ' . $user['token'],
+                        'Content-Type: application/json'
                     ]
-                )
+                ]
             );
         }
     }
