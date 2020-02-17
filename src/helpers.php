@@ -15,9 +15,9 @@ function logError($content)
 /**
  * 获取时间
  */
-function timestamp()
+function timestamp($time = null)
 {
-    return date('Y-m-d H:i:s');
+    return date('Y-m-d H:i:s', $time ?: time());
 }
 
 /**

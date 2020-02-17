@@ -12,14 +12,21 @@ class AuthController
      */
     public function sendCode($phone)
     {
-        $code = mt_rand(1000, 9999);
-        $redis = new \Redis;
-        $redis->connect('127.0.0.1');
-        if ($redis->setex($phone, 99, $code)) {
-            sessionStart();
-            $_SESSION['code_' . $phone] = $code;
+        if (
+            !Mysql::table('request_log')->whereBetween(
+                'created_at',
+                [timestamp($_SERVER['REQUEST_TIME'] - 60), timestamp($_SERVER['REQUEST_TIME'] - 1)]
+            )->where('ip', $_SERVER['REMOTE_ADDR'])->exists('uri', 'sendCode')
+        ) {
+            $code = mt_rand(1000, 9999);
+            $redis = new \Redis;
+            $redis->connect('127.0.0.1');
+            if ($redis->setex($phone, 99, $code)) {
+                sessionStart();
+                $_SESSION['code_' . $phone] = $code;
+            }
+            return ['msg' => '发送成功'];
         }
-        return ['msg' => '发送成功'];
     }
 
     /**

@@ -54,8 +54,7 @@ class Mysql
         } else {
             throw new \ErrorException($this->mysqli->error);
         }
-        $rst = $this->stmt->get_result() ?: true;
-        return $rst;
+        return $this->stmt->get_result() ?: true;
     }
 
     /**
@@ -121,7 +120,7 @@ class Mysql
      */
     private function setWhere(string $col, string $operator, $val)
     {
-        $this->cond[] = '`' . $col . '`' . $operator . '?';
+        $this->cond[] = "`$col`$operator?";
         $this->params[] = $val;
     }
 
@@ -130,7 +129,7 @@ class Mysql
      */
     public function whereNull(string $col)
     {
-        $this->cond[] = '`' . $col . '` IS NULL';
+        $this->cond[] = "`$col` IS NULL";
         return $this;
     }
 
@@ -139,8 +138,25 @@ class Mysql
      */
     public function whereIn(string $col, array $vals)
     {
-        $this->cond[] = '`' . $col . '` IN ' . $this->markers($vals);
-        $this->params = array_merge($this->params, $vals);
+        $this->cond[] = "`$col` IN " . $this->markers($vals);
+        return $this->paramsPush($vals);
+    }
+
+    /**
+     * 添加 WHERE {COLUMN} BETWEEN 条件
+     */
+    public function whereBetween(string $col, array $vals)
+    {
+        $this->cond[] = "`$col`" . ' BETWEEN ? AND ?';
+        return $this->paramsPush($vals);
+    }
+
+    /**
+     * 添加绑定的参数
+     */
+    private function paramsPush(array $vals)
+    {
+        array_push($this->params, ...$vals);
         return $this;
     }
 
