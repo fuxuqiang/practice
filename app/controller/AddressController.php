@@ -7,6 +7,9 @@ use vendor\Request;
 
 class AddressController
 {
+    /**
+     * 添加
+     */
     public function add(Request $request, $address = '')
     {
         $request->validate(['code' => 'exists:region,code']);
@@ -18,6 +21,9 @@ class AddressController
         return ['msg' => '添加成功'];
     }
 
+    /**
+     * 列表
+     */
     public function list(Request $request)
     {
         $addresses = Mysql::table('address')->where('user_id', $request->user()->id)->all();
@@ -38,6 +44,9 @@ class AddressController
         ];
     }
 
+    /**
+     * 更新
+     */
     public function update($id, Request $request)
     {
         $input = $request->get('code', 'address');
@@ -48,6 +57,9 @@ class AddressController
         return ['msg' => '更新成功'];
     }
 
+    /**
+     * 删除
+     */
     public function del($id)
     {
         Mysql::table('address')->del($id);

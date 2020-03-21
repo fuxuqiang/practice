@@ -245,8 +245,16 @@ class Mysql
         $this->limit = 'LIMIT ' . ($page - 1) * $perPage . ',' . $perPage;
         return [
             'data' => $this->all(),
-            'total' => $this->query($this->getDqlSql('COUNT(*)'))->fetch_row()[0]
+            'total' => $this->count()
         ];
+    }
+
+    /**
+     * COUNT查询
+     */
+    public function count()
+    {
+        return $this->query($this->getDqlSql('COUNT(*)'))->fetch_row()[0];
     }
 
     /**

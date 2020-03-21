@@ -23,7 +23,7 @@ class HttpClient
                 curl_multi_remove_handle($this->mh, $info['handle']);
                 yield $this->chs[$id = (int) $info['handle']];
                 unset($this->chs[$id]);
-            }    
+            }
         }
     }
 

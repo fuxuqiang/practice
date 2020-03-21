@@ -4,16 +4,19 @@ namespace app\command;
 
 use vendor\HttpClient;
 
-class regionSpider
+class RegionSpider
 {
     const FILE = __DIR__ . '/../../runtime/spiderQueue.log';
 
-    private $queue;
+    private $queue, $count = 0;
 
     public function __construct()
     {
         $this->queue = new \SplQueue;
-        file_exists(self::FILE) && $this->queue->unserialize(file_get_contents(self::FILE));
+        if (file_exists(self::FILE)) {
+            $this->queue->unserialize(file_get_contents(self::FILE));
+            $this->count = $this->getQuery()->count();
+        }
     }
 
     /**
@@ -21,7 +24,6 @@ class regionSpider
      */
     public function handle()
     {
-        $prefix = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/';
         $expressions = [
             '//tr[@class="provincetr"]/td/a',
             '//tr[@class="citytr"]/td[2]/a',
@@ -30,12 +32,12 @@ class regionSpider
             '//tr[@class="villagetr"]'
         ];
         if ($this->queue->isEmpty()) {
-            $url = $prefix . 'index.html';
+            $url = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/index.html';
             $this->crawl($url, $this->domXpath(file_get_contents($url)), $expressions);
         } else {
             $http = new HttpClient(true);
             while (!$this->queue->isEmpty()) {
-                $http->addHandle($prefix . $this->queue->dequeue() . '.html');
+                $http->addHandle($this->queue->dequeue());
             }
             $this->childCrawl($http, array_slice($expressions, 1));
         }
@@ -50,15 +52,13 @@ class regionSpider
         if (next($expressions)) {
             $http = new HttpClient(true);
             if ($expression == '//tr[@class="countytr"]') {
-                $firstNodes = $doms->item(0)->childNodes;
-                if ($firstNodes[0]->firstChild instanceof \DOMText) {
-                    $data[] = [rtrim($firstNodes[0]->nodeValue, 0), $firstNodes[1]->nodeValue];
-                    $i = 1;
-                } else {
-                    $i = 0;
-                }
-                for (; $i < $doms->length; $i++) {
-                    $data[] = $this->addHandle($http, $doms->item($i)->childNodes[1]->firstChild, $url);
+                foreach ($doms as $dom) {
+                    $firstNodes = $dom->childNodes;
+                    if ($firstNodes[0]->firstChild instanceof \DOMText) {
+                        $data[] = [rtrim($firstNodes[0]->nodeValue, 0), $firstNodes[1]->nodeValue];
+                    } else {
+                        $data[] = $this->addHandle($http, $dom->childNodes[1]->firstChild, $url);
+                    }
                 }
             } else {
                 foreach ($doms as $dom) {
@@ -72,7 +72,8 @@ class regionSpider
                 $data[] = [$childNodes[0]->nodeValue, $childNodes[2]->nodeValue];
             }
         }
-        \src\Mysql::table('region_test')->cols('code', 'name')->insert($data);
+        echo ' ' . ($this->count += count($data)) . "\r";
+        $this->getQuery()->cols('code', 'name')->insert($data);
     }
 
     /**
@@ -107,11 +108,11 @@ class regionSpider
                 $xpath = $this->domXpath(curl_multi_getcontent($val['handle']));
                 if ($xpath->query('//table')->length) {
                     $this->crawl($url, $xpath, $expressions);
-                    continue;
+                } else {
+                    $this->queue->enqueue($url);
                 }
-            }
-            if (in_array($url, $failedUrls)) {
-                $this->queue->enqueue(substr($url, 54, -5));
+            } elseif (in_array($url, $failedUrls)) {
+                $this->queue->enqueue($url);
             } else {
                 $http->addHandle($url);
                 $failedUrls[] = $url;
@@ -135,10 +136,20 @@ class regionSpider
     }
 
     /**
+     * 获取数据库查询实例
+     * @return \vendor\Mysql
+     */
+    private function getQuery()
+    {
+        return \src\Mysql::table('region_test');
+    }
+
+    /**
      * 缓存队列
      */
     public function __destruct()
     {
         file_put_contents(self::FILE, $this->queue->serialize());
+        echo "\n";
     }
 }

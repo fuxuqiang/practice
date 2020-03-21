@@ -1,10 +1,11 @@
 <?php
+
 namespace app\controller;
 
 use src\Mysql;
 use vendor\Request;
 
-class AdminController 
+class AdminController
 {
     /**
      * 列表
@@ -13,10 +14,10 @@ class AdminController
     {
         $input = $request->get();
         $cond = [];
-        isset($input['name']) && $cond[] = ['name', 'LIKE', '%'.$input['name'].'%'];
+        isset($input['name']) && $cond[] = ['name', 'LIKE', '%' . $input['name'] . '%'];
         isset($input['role_id']) && $cond['role_id'] = $input['role_id'];
         return Mysql::table('admin')->cols('id', 'phone', 'name', 'role_id', 'joined_at')->where($cond)
-                ->with(['role' => ['id', 'name']])->paginate(...$request->pageParams());
+            ->with(['role' => ['id', 'name']])->paginate(...$request->pageParams());
     }
 
     /**
