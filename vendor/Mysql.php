@@ -291,7 +291,7 @@ class Mysql
             $binds = $data;
         }
         return $this->query(
-            $action . ' `' . $this->table . '` (' . $this->gather($cols, '`%s`') . ') VALUES ' . $markers,
+            $action . "`$this->table` (" . $this->gather($cols, '`%s`') . ') VALUES ' . $markers,
             $binds
         );
     }

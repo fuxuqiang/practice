@@ -14,17 +14,18 @@ class HttpClient
     /**
      * 发送请求
      */
-    public function multiRequest()
+    public function multiRequest($timeout = 1)
     {
         $active = null;
-        while ($this->chs) {
+        do {
             while (curl_multi_exec($this->mh, $active) === CURLM_CALL_MULTI_PERFORM);
+            curl_multi_select($this->mh, $timeout);
             while ($info = curl_multi_info_read($this->mh)) {
                 curl_multi_remove_handle($this->mh, $info['handle']);
                 yield $this->chs[$id = (int) $info['handle']];
                 unset($this->chs[$id]);
             }
-        }
+        } while ($active);
     }
 
     /**
@@ -37,7 +38,7 @@ class HttpClient
     }
 
     /**
-     * 执行 cURL 会话
+     * 执行curl会话
      */
     public function request($url, $params, $opts, $method = 'POST')
     {

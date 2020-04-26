@@ -120,8 +120,9 @@ CREATE TABLE `request_log` (
 );
 
 INSERT `role` (`name`,`pid`) VALUE ('超级管理员',0);
-INSERT `admin` (`phone`,`name`,`role_id`,`api_token`,`token_expires`,`joined_at`)
-VALUE (18005661486,'',1,'',CURRENT_DATE);
+
+INSERT `admin` (`phone`,`name`,`role_id`,`joined_at`)
+VALUE (18005661486,'',1,CURRENT_DATE);
 
 INSERT `route` VALUES
 (NULL,'GET','admins','管理员','列表'),

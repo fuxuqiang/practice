@@ -18,10 +18,10 @@ try {
 // 错误处理
 } catch (ErrorException $e) {
     http_response_code(500);
-    if (!config('debug')) {
-        logError($e);
-    } else {
+    if (config('debug')) {
         echo $e;
+    } else {
+        logError($e);
     }
 // 异常处理
 } catch (Exception $e) {
