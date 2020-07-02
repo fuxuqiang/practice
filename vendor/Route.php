@@ -25,7 +25,7 @@ class Route
     /**
      * 设置路由中间件
      */
-    protected function middleware($middleware, ...$args)
+    private function middleware($middleware, ...$args)
     {
         if ($args) {
             $this->middlewares[$middleware] = $args;
@@ -38,7 +38,7 @@ class Route
     /**
      * 设置路由前缀
      */
-    protected function prefix(string $prefix)
+    private function prefix(string $prefix)
     {
         $this->prefix = $prefix;
         return $this;
@@ -47,7 +47,7 @@ class Route
     /**
      * 设置资源路由
      */
-    protected function resource(string $name, array $actions)
+    private function resource(string $name, array $actions)
     {
         $actions = array_intersect($actions, ['add', 'update', 'del', 'list']);
         $methods = ['add' => 'POST', 'update' => 'PUT', 'del' => 'DELETE', 'list' => 'GET'];

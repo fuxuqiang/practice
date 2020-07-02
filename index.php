@@ -2,6 +2,7 @@
 
 require __DIR__ . '/src/config.php';
 
+// 处理跨域
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && $cors = config('cors')) {
     header('Access-Control-Allow-Origin: ' . $cors);
     header('Access-Control-Allow-Credentials: true');
@@ -17,20 +18,16 @@ try {
     $response = $method->invokeArgs(new $controller, $args);
 // 错误处理
 } catch (ErrorException $e) {
-    http_response_code(500);
-    if (config('debug')) {
-        echo $e;
-    } else {
-        logError($e);
-    }
+    handleErrorException($e);
 // 异常处理
 } catch (Exception $e) {
     http_response_code($e->getCode());
     ($msg = $e->getMessage()) && $response = error($msg);
-// 响应
-} finally {
-    if (isset($response) && !is_null($response)) {
-        header('Content-Type: application/json');
-        echo json_encode($response);
-    }
 }
+
+// 响应
+if (isset($response)) {
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
+

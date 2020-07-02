@@ -36,3 +36,16 @@ function error($msg)
 {
     return ['error' => $msg];
 }
+
+/**
+ * 处理错误
+ */
+function handleErrorException($e)
+{
+    http_response_code(500);
+    if (config('debug')) {
+        echo $e;
+    } else {
+        logError($e);
+    }
+}

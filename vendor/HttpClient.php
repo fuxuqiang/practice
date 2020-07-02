@@ -12,6 +12,14 @@ class HttpClient
     }
 
     /**
+     * 获取curl句柄
+     */
+    public function getChs()
+    {
+        return $this->chs;
+    }
+
+    /**
      * 发送请求
      */
     public function multiRequest($timeout = 1)
@@ -22,8 +30,9 @@ class HttpClient
             curl_multi_select($this->mh, $timeout);
             while ($info = curl_multi_info_read($this->mh)) {
                 curl_multi_remove_handle($this->mh, $info['handle']);
-                yield $this->chs[$id = (int) $info['handle']];
+                $ch = $this->chs[$id = (int) $info['handle']];
                 unset($this->chs[$id]);
+                yield $ch;
             }
         } while ($active);
     }
