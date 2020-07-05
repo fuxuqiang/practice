@@ -49,8 +49,8 @@ class Route
      */
     private function resource(string $name, array $actions)
     {
-        $actions = array_intersect($actions, ['add', 'update', 'del', 'list']);
-        $methods = ['add' => 'POST', 'update' => 'PUT', 'del' => 'DELETE', 'list' => 'GET'];
+        $actions = array_intersect($actions, ['add', 'update', 'del', 'list', 'show']);
+        $methods = ['add' => 'POST', 'update' => 'PUT', 'del' => 'DELETE', 'list' => 'GET', 'show' => 'GET'];
         foreach ($actions as $action) {
             $this->add([
                 $methods[$action] => [

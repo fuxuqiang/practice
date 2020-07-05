@@ -4,6 +4,7 @@ namespace app\controller;
 
 use src\Mysql;
 use vendor\Request;
+use app\model\Region;
 
 class AddressController
 {
@@ -14,7 +15,7 @@ class AddressController
     {
         $request->validate(['code' => 'exists:region,code']);
         Mysql::table('address')->insert([
-            'user_id' => $request->user()->id,
+            'user_id' => $request->userId(),
             'code' => $request->code,
             'address' => $address
         ]);
@@ -22,14 +23,24 @@ class AddressController
     }
 
     /**
+     * 详情
+     */
+    public function show($id, Request $request)
+    {
+        if ($address = Mysql::table('address')->where('id', $id)->where('user_id', $request->userId())->get()) {
+            return ['id' => $address->id, 'codes' => Region::getAllCode($address->code), 'address' => $address->address];
+        }
+    }
+
+    /**
      * 列表
      */
     public function list(Request $request)
     {
-        $addresses = Mysql::table('address')->where('user_id', $request->user()->id)->all();
+        $addresses = Mysql::table('address')->where('user_id', $request->userId())->all();
         $codes = [];
         foreach ($addresses as &$address) {
-            $address['codes'] = \app\model\Region::getAllCode($address['code']);
+            $address['codes'] = Region::getAllCode($address['code']);
             $codes = array_merge($codes, $address['codes']);
         }
         $regions = Mysql::table('region')->whereIn('code', $codes)->col('name', 'code');
@@ -53,7 +64,7 @@ class AddressController
         if (isset($input['code']) && !Mysql::table('region')->exists('code', $input['code'])) {
             return error('行政区不存在');
         }
-        Mysql::table('address')->where(['id' => $id, 'user_id' => $request->user()->id])->update($input);
+        Mysql::table('address')->where(['id' => $id, 'user_id' => $request->userId()])->update($input);
         return ['msg' => '更新成功'];
     }
 

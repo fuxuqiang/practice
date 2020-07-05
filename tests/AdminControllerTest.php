@@ -70,7 +70,7 @@ class AdminControllerTest extends TestCase
     public function testSetPassword($id)
     {
         $password = 'a12345';
-        $token = $this->admin($id);
+        $token = $this->getToken($id, 'admin');
         $this->put('admin/password', ['password' => $password], $token);
         $this->put('admin/password', ['password' => $password], $token)->assertStatus(401);
         $response = $this->post('admin/login', ['phone' => $this->phone, 'password' => $password]);

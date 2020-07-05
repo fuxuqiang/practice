@@ -14,7 +14,7 @@ class OrderController
     {
         // 参数验证
         $request->validate(['skus' => 'array']);
-        $userId = $request->user()->id;
+        $userId = $request->userId();
         if (! $address = Mysql::table('address')->cols('code', 'address')
             ->where(['user_id' => $userId, 'id' => $address_id])->get()) {
             return error('不存在的地址');

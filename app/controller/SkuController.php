@@ -1,7 +1,7 @@
 <?php
 namespace app\controller;
 
-use vendor\Mysql;
+use src\Mysql;
 use vendor\Request;
 
 class SkuController

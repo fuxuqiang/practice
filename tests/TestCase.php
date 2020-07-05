@@ -12,12 +12,12 @@ class TestCase extends \src\TestCase
         return $_SESSION['code_' . $phone];
     }
     
-    protected function admin($id)
+    protected function getToken($id, $table)
     {
-        return self::$tokens[$id] ??
-            self::$tokens[$id] = \vendor\Container::get('vendor\JWT')->encode(
+        return self::$tokens[$table][$id] ??
+            self::$tokens[$table][$id] = \vendor\Container::get('vendor\JWT')->encode(
                 $id,
-                \src\Mysql::table('admin')->where('id', $id)->val('password')
+                \src\Mysql::table($table)->where('id', $id)->val('password')
             );
     }
 }

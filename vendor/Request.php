@@ -67,6 +67,14 @@ class Request extends Arr
     }
 
     /**
+     * 获取请求用户id
+     */
+    public function userId()
+    {
+        return $this->user->id;
+    }
+
+    /**
      * 获取分页参数
      */
     public function pageParams()

@@ -16,16 +16,23 @@ class TestResponse extends ObjectAccess
 
     public function __call($name, $args)
     {
-        return Assert::$name($args[0], $this->data);
+        Assert::$name($args[0], $this->data);
+        return $this;
     }
 
     public function assertStatus($status)
     {
-        return Assert::assertEquals($status, $this->status);
+        Assert::assertEquals($status, $this->status);
+        return $this;
     }
 
     public function assertOk()
     {
         return $this->assertStatus(200);
+    }
+
+    public function __toString()
+    {
+        return json_encode($this->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }

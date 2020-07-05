@@ -1,7 +1,7 @@
 <?php
 namespace app\controller;
 
-use vendor\Mysql;
+use src\Mysql;
 use vendor\Request;
 
 class UserController
@@ -88,7 +88,7 @@ class UserController
      */
     public function updateTradeNote($id, $note, Request $request)
     {
-        Mysql::table('trade')->where(['id' => $id, 'user_id' => $request->user()->id])
+        Mysql::table('trade')->where(['id' => $id, 'user_id' => $request->userId()])
             ->update(['note' => $note]);
         return ['msg' => '修改成功'];
     }

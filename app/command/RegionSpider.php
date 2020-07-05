@@ -6,11 +6,24 @@ use vendor\HttpClient;
 
 class RegionSpider
 {
-    const ROOT_URL = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2019/index.html';
+    const ROOT_URL = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2019/index.html',
 
-    const FILE = __DIR__ . '/../../runtime/spiderQueue.log';
+        FILE = __DIR__ . '/../../runtime/spiderQueue.log';
 
-    private $queue, $failedQueue, $count = 0;
+    private $queue, $failedQueue, $count,
+
+        $expressions = [
+            '//tr[@class="provincetr"]/td/a',
+            '//tr[@class="citytr"]/td[2]/a',
+            '//tr[@class="countytr"]',
+            '//tr[@class="towntr"]/td[2]/a',
+            '//tr[@class="villagetr"]'
+        ];
+
+    /**
+     * @var HttpClient
+     */
+    private $http;
 
     /**
      * 初始化队列和计数
@@ -23,6 +36,15 @@ class RegionSpider
             $this->queue->unserialize(file_get_contents(self::FILE));
             $this->count = $this->getQuery()->count();
         }
+        pcntl_signal(SIGINT, function () {
+            foreach ($this->http->getChs() as $ch) {
+                $this->failedQueue->enqueue(curl_getinfo($ch['handle'], CURLINFO_EFFECTIVE_URL));
+            }
+            foreach ($this->queue as $url) {
+                $this->failedQueue->enqueue($url);
+            }
+            exit;
+        });
     }
 
     /**
@@ -30,25 +52,14 @@ class RegionSpider
      */
     public function handle()
     {
-        $expressions = [
-            '//tr[@class="provincetr"]/td/a',
-            '//tr[@class="citytr"]/td[2]/a',
-            '//tr[@class="countytr"]',
-            '//tr[@class="towntr"]/td[2]/a',
-            '//tr[@class="villagetr"]'
-        ];
         if ($this->queue->isEmpty()) {
-            $this->crawl(
-                self::ROOT_URL,
-                $this->domXpath(file_get_contents(self::ROOT_URL)),
-                $expressions
-            );
+            $this->crawl(self::ROOT_URL, $this->domXpath(file_get_contents(self::ROOT_URL)), true);
         } else {
             for ($i = 0; !$this->queue->isEmpty(); $i++) {
                 $i % 100 || $http = new HttpClient(true);
                 $http->addHandle($this->queue->dequeue());
                 if (!(($i + 1) % 100) || $this->queue->isEmpty()) {
-                    $this->childCrawl($http, array_slice($expressions, 1));
+                    $this->multiRequest($http, true);
                 }
             }
         }
@@ -57,9 +68,9 @@ class RegionSpider
     /**
      * 爬取行政区划数据
      */
-    private function crawl($url, $xpath, $expressions)
+    private function crawl($url, $xpath, $isRoot)
     {
-        [$expression, $expressions, $doms] = $this->query($xpath, $expressions);
+        [$expression, $expressions, $doms] = $this->query($xpath, $this->expressions);
         if (next($expressions)) {
             $http = new HttpClient(true);
             if ($expression == '//tr[@class="countytr"]') {
@@ -68,24 +79,63 @@ class RegionSpider
                     if ($firstNodes[0]->firstChild instanceof \DOMText) {
                         $data[] = [rtrim($firstNodes[0]->nodeValue, 0), $firstNodes[1]->nodeValue];
                     } else {
-                        $data[] = $this->addHandle($http, $dom->childNodes[1]->firstChild, $url);
+                        $data[] = $this->getDataAndAddHandle($http, $dom->childNodes[1]->firstChild, $url);
                     }
                 }
             } else {
                 foreach ($doms as $dom) {
-                    $data[] = $this->addHandle($http, $dom, $url);
+                    $data[] = $this->getDataAndAddHandle($http, $dom, $url);
                 }
             }
-            $this->childCrawl($http, $expressions);
+            $this->insert($data);
+            sleep(1);
+            $this->multiRequest($http, $isRoot);
         } else {
             foreach ($doms as $dom) {
                 $childNodes = $dom->childNodes;
                 $data[] = [$childNodes[0]->nodeValue, $childNodes[2]->nodeValue];
             }
+            $this->insert($data);
             sleep(1);
         }
-        $this->getQuery()->cols('code', 'name')->insert($data);
-        echo "\x0d\x1b[2k", '已爬取数据量：', $this->count += count($data);
+    }
+
+    /**
+     * 并发请求并解析curl句柄
+     */
+    private function multiRequest(HttpClient $http, $isRoot)
+    {
+        $gen = $http->multiRequest(3);
+        if ($isRoot) {
+            $this->http = $http;
+            foreach ($gen as $val) {
+                declare (ticks = 1) {
+                    $this->getCurlInfoAndContinueCrawl($val['handle']);
+                }
+            }
+        } else {
+            foreach ($gen as $val) {
+                $this->getCurlInfoAndContinueCrawl($val['handle']);
+            }
+        }
+    }
+
+    /**
+     * 解析响应页面并继续爬取子页面
+     */
+    private function getCurlInfoAndContinueCrawl($ch)
+    {
+        $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+        if (
+            200 == curl_getinfo($ch, CURLINFO_HTTP_CODE)
+            && ($xpath = $this->domXpath(curl_multi_getcontent($ch)))
+            && $xpath->query('//table')->length
+        ) {
+            $this->crawl($url, $xpath, false);
+        } else{
+            $this->failedQueue->enqueue($url);
+            sleep(1);
+        }
     }
 
     /**
@@ -99,9 +149,9 @@ class RegionSpider
     }
 
     /**
-     * 添加curl句柄并获取节点数据
+     * 获取节点数据并添加url至队列
      */
-    private function addHandle(HttpClient $http, \DOMNode $dom, $url)
+    private function getDataAndAddHandle(HttpClient $http, \DOMNode $dom, $url)
     {
         $file = $dom->attributes['href']->nodeValue;
         $http->addHandle(dirname($url) . '/' . $file);
@@ -109,29 +159,11 @@ class RegionSpider
     }
 
     /**
-     * 解析请求并继续爬取子页面
+     * 获取节点数据
      */
-    private function childCrawl(HttpClient $http, $expressions)
+    private function getDomData(\DOMNode $dom)
     {
-        $failedUrls = [];
-        foreach ($http->multiRequest(2) as $val) {
-            $url = curl_getinfo($val['handle'], CURLINFO_EFFECTIVE_URL);
-            if (
-                200 == curl_getinfo($val['handle'], CURLINFO_HTTP_CODE)
-                && ($xpath = $this->domXpath(curl_multi_getcontent($val['handle'])))
-                && $xpath->query('//table')->length
-            ) {
-                $this->crawl($url, $xpath, $expressions);
-            } else{
-                if (in_array($url, $failedUrls)) {
-                    $this->failedQueue->enqueue($url);
-                } else {
-                    $http->addHandle($url);
-                    $failedUrls[] = $url;
-                }
-                sleep(1);
-            }
-        }
+        return [substr(basename($dom->attributes['href']->nodeValue), 0, -5), $dom->nodeValue];
     }
 
     /**
@@ -162,7 +194,16 @@ class RegionSpider
     }
 
     /**
-     * 缓存爬取失败的队列数据
+     * 写入数据
+     */
+    private function insert($data)
+    {
+        $this->getQuery()->cols('code', 'name')->insert($data);
+        echo "\x0d\x1b[2k", '已爬取数据量：', $this->count += count($data);
+    }
+
+    /**
+     * 处理队列数据并提示是否完成
      */
     public function __destruct()
     {
