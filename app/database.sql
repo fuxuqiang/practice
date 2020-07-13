@@ -128,11 +128,11 @@ INSERT `route` VALUES
 (NULL,'GET','admins','管理员','列表'),
 (NULL,'POST','create','管理员','创建'),
 (NULL,'DELETE','admin','管理员','删除'),
-(NULL,'PUT','setRole','管理员','修改角色'),
+(NULL,'PUT','admin_role','管理员','修改角色'),
 (NULL,'POST','role','角色','创建'),
 (NULL,'PUT','role','角色','修改'),
 (NULL,'DELETE','role','角色','删除'),
-(NULL,'POST','saveAccess','角色','设置权限');
+(NULL,'POST','save_access','角色','设置权限');
 
 INSERT `role_route` VALUES
 (1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8);

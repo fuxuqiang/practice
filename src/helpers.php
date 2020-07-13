@@ -44,7 +44,7 @@ function handleErrorException($e)
 {
     http_response_code(500);
     if (config('debug')) {
-        echo $e;
+        echo $e, PHP_EOL;
     } else {
         logError($e);
     }

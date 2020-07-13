@@ -9,11 +9,7 @@ try {
     $command = '\app\command\\' . ucfirst($argv[1]);
     (new $command)->handle();
 } catch (ErrorException $e) {
-    if (config('debug')) {
-        echo $e, PHP_EOL;
-    } else {
-        logError($e);
-    }
+    handleErrorException($e);
 } catch (Exception $e) {
     echo $e->getMessage(), PHP_EOL;
 }

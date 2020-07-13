@@ -1,5 +1,8 @@
 <?php
+
 namespace app\controller;
+
+use app\model\Region;
 
 class RegionController
 {
@@ -10,5 +13,25 @@ class RegionController
             'data' => \src\Mysql::table('region')
                 ->whereBetween('code', [$p_code * $factor, ($p_code + 1) * $factor])->all()
         ];
+    }
+
+    public function getCode($address)
+    {
+        $getRegionName = function ($offset) use ($address) {
+            return mb_substr($address, $offset, 2);
+        };
+        if ($province = Region::find($getRegionName(0))) {
+            $provinceNameLen = mb_strlen($province->name);
+            if (
+                ($cityName = $getRegionName($provinceNameLen))
+                && ($city = Region::find($cityName))
+                && $districtName = $getRegionName($provinceNameLen + mb_strlen($city->name))
+            ) {
+                $district = Region::find($districtName);
+            }
+            return [$province, $city ?? null, $district ?? null];
+        } else {
+            return error('未查询到');
+        }
     }
 }

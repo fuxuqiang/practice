@@ -83,7 +83,7 @@ class AdminControllerTest extends TestCase
      */
     public function testUpdate($token)
     {
-        $this->put('admin/adminName', ['name' => 'a'], $token)->assertOk();
+        $this->put('admin/admin_name', ['name' => 'a'], $token)->assertOk();
     }
 
     /**
@@ -93,7 +93,7 @@ class AdminControllerTest extends TestCase
      */
     public function testSetRole($token, $id, $roleId)
     {
-        $this->put('admin/adminRole', ['role_id' => $roleId, 'id' => $id], $token)->assertOk();
+        $this->put('admin/admin_role', ['role_id' => $roleId, 'id' => $id], $token)->assertOk();
     }
 
     /**
@@ -119,12 +119,12 @@ class AdminControllerTest extends TestCase
     public function testSaveRoutes($token, $roleId)
     {
         $routeId = Mysql::table('route')->insert(
-            ['method' => 'POST', 'uri' => 'saveAccess', 'resource' => '角色', 'action' => '设置权限']
+            ['method' => 'POST', 'uri' => 'save_access', 'resource' => '角色', 'action' => '设置权限']
         );
-        $this->post('admin/saveAccess', ['id' => $roleId, 'route_ids' => [$routeId]], $token)
+        $this->post('admin/save_access', ['id' => $roleId, 'route_ids' => [$routeId]], $token)
             ->assertStatus(401);
         Mysql::table('role_route')->insert(['role_id' => $roleId, 'route_id' => $routeId]);
-        $this->post('admin/saveAccess', ['id' => $roleId, 'route_ids' => [$routeId]], $token)
+        $this->post('admin/save_access', ['id' => $roleId, 'route_ids' => [$routeId]], $token)
             ->assertOk();
     }
 

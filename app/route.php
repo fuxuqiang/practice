@@ -7,10 +7,13 @@ $route = Route::middleware(RecordRequest::class);
 
 $route->add([
     'POST' => [
-        'sendCode' => 'Auth@sendCode',
+        'send_code' => 'Auth@sendCode',
         'login' => 'Auth@userLogin'
     ],
-    'GET' => ['regions' => 'Region@list']
+    'GET' => [
+        'regions' => 'Region@list',
+        'get_region_code' => 'Region@getCode'
+    ]
 ]);
 
 // 前台
@@ -28,7 +31,7 @@ $userAuthRoute->add([
     'PUT' => [
         'password' => 'Auth@setPassword',
         '' => 'User@update',
-        'tradeNote' => 'User@updateTradeNote',
+        'trade_note' => 'User@updateTradeNote',
         'phone' => 'Auth@changePhone'
     ],
     'POST' => ['trade' => 'User@trade'],
@@ -38,7 +41,7 @@ $userAuthRoute->add([
     ]
 ]);
 
-$userAuthRoute->resource('address', ['add', 'update', 'del']);
+$userAuthRoute->resource('address', ['add', 'update', 'del', 'show']);
 
 // 后台
 
@@ -52,10 +55,10 @@ $adminAuthRoute->add([
     'PUT' => [
         'password' => 'Auth@setPassword',
         'phone' => 'Auth@changePhone',
-        'adminName' => 'Admin@update',
-        'adminRole' => 'Admin@setRole',
+        'admin_name' => 'Admin@update',
+        'admin_role' => 'Admin@setRole',
     ],
-    'POST' => ['saveAccess' => 'Role@saveRoutes'],
+    'POST' => ['save_access' => 'Role@saveRoutes'],
     'GET' => ['routes' => 'Role@listRoutes'],
 ]);
 

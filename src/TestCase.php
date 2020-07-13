@@ -12,6 +12,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected static $http;
 
     /**
+     * @var string
+     */
+    protected $token;
+
+    /**
      * 设置测试基境
      */
     public static function setUpBeforeClass(): void
@@ -28,6 +33,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function request($requestMethod, $uri, $params = [], $token = null)
     {
+        $token = $token ?: $this->token;
         try {
             [$controller, $method, $args] = self::$http->handle([
                 'REQUEST_METHOD' => $requestMethod,
@@ -41,6 +47,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             $response = error($e->getMessage());
             $status = $e->getCode();
         }
+        unset($this->token);
         return new \vendor\TestResponse($response, $status);
     }
 

@@ -8,7 +8,7 @@ class TestCase extends \src\TestCase
 
     protected function getCode($phone)
     {
-        $this->post('sendCode', ['phone' => $phone]);
+        $this->post('send_code', ['phone' => $phone]);
         return $_SESSION['code_' . $phone];
     }
     
@@ -19,5 +19,11 @@ class TestCase extends \src\TestCase
                 $id,
                 \src\Mysql::table($table)->where('id', $id)->val('password')
             );
+    }
+
+    protected function user($id)
+    {
+        $this->token = $this->getToken($id, 'user');
+        return $this;
     }
 }
