@@ -66,4 +66,12 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         Mysql::rollback();
     }
+
+    /**
+     * 断言数据库中数据是否存在
+     */
+    public function assertDatabaseHas($table, $data)
+    {
+        return $this->assertTrue(Mysql::table($table)->where($data)->count() > 0);
+    }
 }
