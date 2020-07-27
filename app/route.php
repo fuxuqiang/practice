@@ -12,7 +12,9 @@ $route->add([
     ],
     'GET' => [
         'regions' => 'Region@list',
-        'get_region_code' => 'Region@getCode'
+        'get_region_code' => 'Region@getCode',
+        'yuding_stores' => 'Yunding@getStores',
+        'customer_flow' => 'Yunding@getCustomerFlow',
     ]
 ]);
 
@@ -21,7 +23,10 @@ $route->add([
 $userRoute = $route->middleware(Auth::class, 'user');
 
 $userRoute->add([
-    'POST' => ['order' => 'Order@add'],
+    'POST' => [
+        'order' => 'Order@add',
+        'registerMerchant' => 'Auth@registerMerchant'
+    ],
     'GET' => ['order' => 'Order@info']
 ]);
 

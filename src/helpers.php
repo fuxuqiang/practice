@@ -43,7 +43,7 @@ function error($msg)
 function handleErrorException($e)
 {
     http_response_code(500);
-    if (config('debug')) {
+    if (env('debug')) {
         echo $e, PHP_EOL;
     } else {
         logError($e);

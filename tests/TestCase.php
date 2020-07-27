@@ -23,7 +23,17 @@ class TestCase extends \src\TestCase
 
     protected function user($id)
     {
-        $this->token = $this->getToken($id, 'user');
+        return $this->setToken($id, 'user');
+    }
+
+    protected function admin($id)
+    {
+        return $this->setToken($id, 'admin');
+    }
+
+    private function setToken($id, $table)
+    {
+        $this->token = $this->getToken($id, $table);
         return $this;
     }
 }

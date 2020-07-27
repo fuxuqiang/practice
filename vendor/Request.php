@@ -109,10 +109,13 @@ class Request extends Arr
         foreach ($paramsRules as $param => $ruleItem) {
             foreach (explode('|', $ruleItem) as $rule) {
                 $rule = explode(':', $rule);
-                if (! $rules[$rule[0]](
+                if (
+                    isset($this->data[$param]) &&
+                    !$rules[$rule[0]](
                         $this->data[$param],
-                        ...(isset($rule[1]) ? explode(',', $rule[1]) : []))
-                    ) {
+                        ...(isset($rule[1]) ? explode(',', $rule[1]) : [])
+                    )
+                ) {
                     throw new \Exception('无效的'.$param);
                 }      
             }

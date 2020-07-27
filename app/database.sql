@@ -12,6 +12,22 @@ CREATE TABLE `user` (
     `is_forbidden` TINYINT NOT NULL DEFAULT 0
 );
 
+DROP TABLE IF EXISTS `user_merchant`;
+CREATE TABLE `user_merchant` (
+    `user_id` SMALLINT UNSIGNED NOT NULL,
+    `merchant_id` SMALLINT UNSIGNED NOT NULL,
+    `role` TINYINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (`user_id`,`merchant_id`)
+);
+
+DROP TABLE IF EXISTS `merchant`;
+CREATE TABLE `merchant` (
+    `id` SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `credit_code` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `status` TINYINT NOT NULL DEFAULT 0
+);
+
 DROP TABLE IF EXISTS `trade`;
 CREATE TABLE `trade` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -85,7 +101,8 @@ CREATE TABLE `sku` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
     `price` SMALLINT UNSIGNED NOT NULL,
-    `num` TINYINT UNSIGNED NOT NULL
+    `num` TINYINT UNSIGNED NOT NULL,
+    `deleted_at` TIMESTAMP,
 );
 
 DROP TABLE IF EXISTS `order`;

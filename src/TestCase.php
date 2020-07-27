@@ -22,7 +22,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     public static function setUpBeforeClass(): void
     {
         if (!self::$http) {
-            require __DIR__ . '/config.php';
+            require __DIR__ . '/env.php';
             self::$http = new Http;
         }
         Mysql::begin();
@@ -47,7 +47,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             $response = error($e->getMessage());
             $status = $e->getCode();
         }
-        unset($this->token);
+        $this->token = null;
         return new \vendor\TestResponse($response, $status);
     }
 

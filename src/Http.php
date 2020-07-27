@@ -9,7 +9,7 @@ class Http
     public function __construct()
     {
         Container::bind('vendor\JWT', function () {
-            $config = config('jwt');
+            $config = env('jwt');
             return new JWT($config['exp'], $config['key']);
         });
         require __DIR__ . '/../app/route.php';
@@ -23,7 +23,7 @@ class Http
         // 实例化请求类
         $request = new Request($server, $input, function ($val, $table, $col) {
             return \src\Mysql::table($table)->exists($col, $val);
-        }, config('per_page'));
+        }, env('per_page'));
 
         // 匹配路由
         $route = Route::get($server['REQUEST_METHOD'], $request->uri());
@@ -56,7 +56,7 @@ class Http
             } elseif ($param->isDefaultValueAvailable()) {
                 $args[] = $param->getDefaultValue();
             } else {
-                throw new \Exception(config('debug') ? '缺少参数：' . $paramName : '', 400);
+                throw new \Exception(env('debug') ? '缺少参数：' . $paramName : '', 400);
             }
         }
 
