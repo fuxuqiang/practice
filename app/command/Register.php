@@ -7,10 +7,10 @@ class Register
     public function handle()
     {
         for ($i = 0; $i < 4; $i++) {
-            $phone = mt_rand(12000000000, 19999999999);
-            $phones[] = ['phone' => $phone];
+            $mobile = mt_rand(12000000000, 19999999999);
+            $mobiles[] = ['mobile' => $mobile];
         }
 
-        iterator_count(\app\model\Login::getToken($phones));
+        iterator_count(\app\model\Login::getToken($mobiles));
     }
 }

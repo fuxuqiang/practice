@@ -10,7 +10,7 @@ class Order
     public function handle()
     {
         $users = Mysql::select(
-            'SELECT `u`.`phone`,`a`.`id` FROM `user` `u`
+            'SELECT `u`.`mobile`,`a`.`id` FROM `user` `u`
             JOIN `address` `a` ON `u`.`id`=`a`.`user_id` ORDER BY RAND() LIMIT 5'
         );
         $skus = Mysql::table('sku')->col('id');

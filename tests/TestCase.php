@@ -2,14 +2,16 @@
 
 namespace tests;
 
+use src\{Redis, Mysql};
+
 class TestCase extends \src\TestCase
 {
     protected static $tokens;
 
-    protected function getCode($phone)
+    protected function getCode($mobile)
     {
-        $this->post('send_code', ['phone' => $phone]);
-        return $_SESSION['code_' . $phone];
+        $this->post('send_code', ['mobile' => $mobile]);
+        return Redis::get($mobile);
     }
     
     protected function getToken($id, $table)
@@ -17,7 +19,7 @@ class TestCase extends \src\TestCase
         return self::$tokens[$table][$id] ??
             self::$tokens[$table][$id] = \vendor\Container::get('vendor\JWT')->encode(
                 $id,
-                \src\Mysql::table($table)->where('id', $id)->val('password')
+                Mysql::table($table)->where('id', $id)->val('password')
             );
     }
 

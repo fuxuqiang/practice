@@ -1,12 +1,10 @@
 <?php
 
-function validateCode($phone, $code)
+function validateCode($mobile, $code)
 {
-    sessionStart();
-    if (!(isset($_SESSION['code_' . $phone]) && $code == $_SESSION['code_' . $phone])) {
-        throw new Exception('验证码错误', 200);
+    if ($code != \src\Redis::get($mobile)) {
+        throw new Exception('验证码', 200);
     }
-    unset($_SESSION['code_' . $phone]);
 }
 
 function inSubs($id, array $data, $aid)

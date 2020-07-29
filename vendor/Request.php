@@ -88,8 +88,8 @@ class Request extends Arr
     public function validate(array $paramsRules)
     {
         $rules = [
-            'phone' => function ($phone) {
-                    return preg_match('/^1[2-9]\d{9}$/', $phone);
+            'mobile' => function ($mobile) {
+                    return preg_match('/^1[2-9]\d{9}$/', $mobile);
                 },
             'exists' => $this->exists,
             'array' => 'is_array',

@@ -16,7 +16,7 @@ class AdminController
         $cond = [];
         isset($input['name']) && $cond[] = ['name', 'LIKE', '%' . $input['name'] . '%'];
         isset($input['role_id']) && $cond['role_id'] = $input['role_id'];
-        return Mysql::table('admin')->cols('id', 'phone', 'name', 'role_id', 'joined_at')->where($cond)
+        return Mysql::table('admin')->cols('id', 'mobile', 'name', 'role_id', 'joined_at')->where($cond)
             ->with(['role' => ['id', 'name']])->paginate(...$request->pageParams());
     }
 
@@ -25,9 +25,9 @@ class AdminController
      */
     public function add(Request $request, $name = '')
     {
-        $request->validate(['phone' => 'unique:admin,phone', 'role_id' => 'exists:role,id']);
+        $request->validate(['mobile' => 'unique:admin,mobile', 'role_id' => 'exists:role,id']);
         Mysql::table('admin')->insert(
-            $request->get('phone', 'role_id') + ['joined_at' => date('Y-m-d'), 'name' => $name]
+            $request->get('mobile', 'role_id') + ['joined_at' => date('Y-m-d'), 'name' => $name]
         );
         return ['msg' => '添加成功'];
     }

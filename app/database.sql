@@ -4,7 +4,7 @@ USE `personal`;
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
     `id` SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `phone` BIGINT NOT NULL UNIQUE,
+    `mobile` BIGINT NOT NULL UNIQUE,
     `name` VARCHAR(255) NOT NULL DEFAULT '',
     `password` VARCHAR(255) NOT NULL DEFAULT '',
     `capital` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
@@ -57,7 +57,7 @@ CREATE TABLE `role` (
 DROP TABLE IF EXISTS `admin`;
 CREATE TABLE `admin` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `phone` BIGINT NOT NULL UNIQUE,
+    `mobile` BIGINT NOT NULL UNIQUE,
     `name` VARCHAR(255) NOT NULL DEFAULT '',
     `password` VARCHAR(255) NOT NULL DEFAULT '',
     `role_id` TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -138,7 +138,7 @@ CREATE TABLE `request_log` (
 
 INSERT `role` (`name`,`pid`) VALUE ('超级管理员',0);
 
-INSERT `admin` (`phone`,`name`,`role_id`,`joined_at`)
+INSERT `admin` (`mobile`,`name`,`role_id`,`joined_at`)
 VALUE (18005661486,'',1,CURRENT_DATE);
 
 INSERT `route` VALUES

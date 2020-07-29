@@ -6,7 +6,7 @@ use src\Mysql;
 
 class AdminControllerTest extends TestCase
 {
-    private $phone = 12345678901;
+    private $mobile = 12345678901;
 
     public static function setUpBeforeClass(): void
     {
@@ -16,13 +16,13 @@ class AdminControllerTest extends TestCase
 
     public function testAdminLogin()
     {
-        $adminPhone = 18005661486;
+        $adminMobile = 18005661486;
         $response = $this->post(
             'admin/login',
-            ['phone' => $adminPhone, 'code' => $this->getCode($adminPhone)]
+            ['mobile' => $adminMobile, 'code' => $this->getCode($adminMobile)]
         );
         $response->assertArrayHasKey('data');
-        $this->post('admin/login', ['phone' => $adminPhone, 'password' => 1])
+        $this->post('admin/login', ['mobile' => $adminMobile, 'password' => 1])
             ->assertArrayHasKey('error');
         return $response->data;
     }
@@ -52,8 +52,8 @@ class AdminControllerTest extends TestCase
      */
     public function testAdd($token, $id)
     {
-        $this->post('admin/admin', ['phone' => $this->phone, 'role_id' => $id], $token)->assertOk();
-        return Mysql::table('admin')->where('phone', $this->phone)->val('id');
+        $this->post('admin/admin', ['mobile' => $this->mobile, 'role_id' => $id], $token)->assertOk();
+        return Mysql::table('admin')->where('mobile', $this->mobile)->val('id');
     }
 
     /**
@@ -73,7 +73,7 @@ class AdminControllerTest extends TestCase
         $token = $this->getToken($id, 'admin');
         $this->put('admin/password', ['password' => $password], $token);
         $this->put('admin/password', ['password' => $password], $token)->assertStatus(401);
-        $response = $this->post('admin/login', ['phone' => $this->phone, 'password' => $password]);
+        $response = $this->post('admin/login', ['mobile' => $this->mobile, 'password' => $password]);
         $response->assertArrayHasKey('data');
         return $response->data;
     }

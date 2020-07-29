@@ -14,6 +14,7 @@ class Route
     private function add(array $routes)
     {
         foreach ($routes as $method => $group) {
+            $_group = [];
             foreach ($group as $uri => $action) {
                 $_group[$this->prefix ? rtrim($this->prefix . '/' . $uri, '/') : $uri] = $this->middlewares ?
                     [$action, $this->middlewares] : $action;

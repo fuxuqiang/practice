@@ -37,7 +37,7 @@ $userAuthRoute->add([
         'password' => 'Auth@setPassword',
         '' => 'User@update',
         'trade_note' => 'User@updateTradeNote',
-        'phone' => 'Auth@changePhone'
+        'mobile' => 'Auth@changeMobile'
     ],
     'POST' => ['trade' => 'User@trade'],
     'GET' => [
@@ -59,7 +59,7 @@ $adminAuthRoute = $adminRoute->middleware(Auth::class, 'admin');
 $adminAuthRoute->add([
     'PUT' => [
         'password' => 'Auth@setPassword',
-        'phone' => 'Auth@changePhone',
+        'mobile' => 'Auth@changeMobile',
         'admin_name' => 'Admin@update',
         'admin_role' => 'Admin@setRole',
     ],

@@ -4,16 +4,16 @@ namespace tests;
 
 class AuthControllerTest extends TestCase
 {
-    private $beforePhone = 12345678901, $password = 'a12345';
+    private $beforeMobile = 12345678901, $password = 'a12345';
 
     public function testUserLogin()
     {
         $response = $this->post(
             'login',
-            ['phone' => $this->beforePhone, 'code' => $this->getCode($this->beforePhone)]
+            ['mobile' => $this->beforeMobile, 'code' => $this->getCode($this->beforeMobile)]
         );
         $response->assertArrayHasKey('data');
-        $this->post('login', ['phone' => $this->beforePhone, 'code' => 1])->assertArrayHasKey('error');
+        $this->post('login', ['mobile' => $this->beforeMobile, 'code' => 1])->assertArrayHasKey('error');
         return $response->data;
     }
 
@@ -26,7 +26,7 @@ class AuthControllerTest extends TestCase
         $this->put('user/password', ['password' => $this->password], $token)->assertStatus(401);
         $response = $this->post(
             'login',
-            ['phone' => $this->beforePhone, 'password' => $this->password]
+            ['mobile' => $this->beforeMobile, 'password' => $this->password]
         );
         $response->assertArrayHasKey('data');
         return $response->data;
@@ -35,11 +35,21 @@ class AuthControllerTest extends TestCase
     /**
      * @depends testSetPassword
      */
-    public function testChangePhone($token)
+    public function testChangeMobile($token)
     {
-        $phone = 12123456789;
-        $this->put('user/phone', ['phone' => $phone, 'code' => $this->getCode($phone)], $token);
-        $this->post('login', ['phone' => $phone,'password' => $this->password])
+        $mobile = 12123456789;
+        $this->put('user/mobile', ['mobile' => $mobile, 'code' => $this->getCode($mobile)], $token);
+        $this->post('login', ['mobile' => $mobile,'password' => $this->password])
             ->assertArrayHasKey('data');
+    }
+
+    /**
+     * @depends testSetPassword
+     */
+    public function testRegisterMerchant($token)
+    {
+        $data = ['name' => '测试', 'credit_code' => 'CS001'];
+        $this->post('registerMerchant', $data, $token);
+        $this->assertDatabaseHas('merchant', $data);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace app\controller;
 
-use src\Mysql;
+use src\{Mysql, Redis};
 use vendor\{JWT, Request};
 
 class AuthController
@@ -10,29 +10,25 @@ class AuthController
     /**
      * 发送验证码
      */
-    public function sendCode($phone)
+    public function sendCode($mobile)
     {
         if (
-            !Mysql::table('request_log')->whereBetween(
+            !isset($_SERVER['REMOTE_ADDR'])
+            || !Mysql::table('request_log')->whereBetween(
                 'created_at',
                 [timestamp($_SERVER['REQUEST_TIME'] - 60), timestamp($_SERVER['REQUEST_TIME'] - 1)]
-            )->where('ip', $_SERVER['REMOTE_ADDR'])->exists('uri', 'sendCode')
+            )->where('ip', $_SERVER['REMOTE_ADDR'])->exists('uri', 'send_code')
         ) {
-            $code = mt_rand(1000, 9999);
-            $redis = new \Redis;
-            $redis->connect('127.0.0.1');
-            if ($redis->setex($phone, 99, $code)) {
-                sessionStart();
-                $_SESSION['code_' . $phone] = $code;
+            if (Redis::setex($mobile, 99, mt_rand(1000, 9999))) {
+                return ['msg' => '发送成功'];
             }
-            return ['msg' => '发送成功'];
         }
     }
 
     /**
      * 用户登录
      */
-    public function userLogin($phone, JWT $jwt, Request $request)
+    public function userLogin($mobile, JWT $jwt, Request $request)
     {
         $input = $request->get();
 
@@ -40,13 +36,13 @@ class AuthController
             return error('参数错误');
         }
 
-        $user = Mysql::table('user')->cols('id', 'password')->where('phone', $phone)->get();
+        $user = Mysql::table('user')->cols('id', 'password')->where('mobile', $mobile)->get();
 
         if (empty($input['password'])) {
-            validateCode($phone, $input['code']);
+            validateCode($mobile, $input['code']);
             if (!$user) {
                 return [
-                    'data' => $jwt->encode(Mysql::table('user')->insert(['phone' => $phone])),
+                    'data' => $jwt->encode(Mysql::table('user')->insert(['mobile' => $mobile]), 'user'),
                     'msg' => '注册成功'
                 ];
             }
@@ -54,13 +50,13 @@ class AuthController
             return error('密码错误');
         }
 
-        return ['data' => $jwt->encode($user->id, $user->password)];
+        return ['data' => $jwt->encode($user->id, 'user' . $user->password)];
     }
 
     /**
      * 管理员登录
      */
-    public function adminLogin($phone, JWT $jwt, Request $request)
+    public function adminLogin($mobile, JWT $jwt, Request $request)
     {
         $input = $request->get();
 
@@ -71,8 +67,8 @@ class AuthController
             if (
                 !$admin = Mysql::query(
                     'SELECT `a`.`id`,`a`.`password`,`r`.`pid` FROM `admin` `a`
-                    LEFT JOIN `role` `r` ON `r`.`id`=`a`.`role_id` WHERE `a`.`phone`=?',
-                    [$phone]
+                    LEFT JOIN `role` `r` ON `r`.`id`=`a`.`role_id` WHERE `a`.`mobile`=?',
+                    [$mobile]
                 )->fetch_object()
             ) {
                 return error('用户不存在');
@@ -84,13 +80,13 @@ class AuthController
                 return error('密码错误');
             }
         } else {
-            if (!$admin = Mysql::table('admin')->cols('id', 'password')->where('phone', $phone)->get()) {
+            if (!$admin = Mysql::table('admin')->cols('id', 'password')->where('mobile', $mobile)->get()) {
                 return error('用户不存在');
             }
-            validateCode($phone, $input['code']);
+            validateCode($mobile, $input['code']);
         }
 
-        return ['data' => $jwt->encode($admin->id, $admin->password)];
+        return ['data' => $jwt->encode($admin->id, 'admin' . $admin->password)];
     }
 
     /**
@@ -108,12 +104,31 @@ class AuthController
     /**
      * 换绑手机
      */
-    public function changePhone(Request $request, $code)
+    public function changeMobile(Request $request, $code)
     {
-        $request->validate(['phone' => 'unique:user,phone']);
-        $phone = $request->phone;
-        validateCode($phone, $code);
-        $request->user()->update(['phone' => $phone]);
+        $request->validate(['mobile' => 'unique:user,mobile']);
+        $mobile = $request->mobile;
+        validateCode($mobile, $code);
+        $request->user()->update(['mobile' => $mobile]);
         return ['msg' => '换绑成功'];
+    }
+
+    /**
+     * 商家认证
+     */
+    public function registerMerchant(Request $request)
+    {
+        Mysql::begin();
+        try {
+            Mysql::table('user_merchant')->insert([
+                'user_id' => $request->userId(),
+                'merchant_id' => Mysql::table('merchant')->insert($request->get('name', 'credit_code'))
+            ]);
+            Mysql::commit();
+        } catch (\Exception $e) {
+            Mysql::rollback();
+            return error('提交失败');
+        }
+        return ['msg' => '提交成功'];
     }
 }
