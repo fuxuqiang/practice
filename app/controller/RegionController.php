@@ -2,8 +2,6 @@
 
 namespace app\controller;
 
-use app\model\Region;
-
 class RegionController
 {
     public function list($p_code = 0)
@@ -17,19 +15,8 @@ class RegionController
 
     public function getCode($address)
     {
-        $getRegionName = function ($offset) use ($address) {
-            return mb_substr($address, $offset, 2);
-        };
-        if ($province = Region::find($getRegionName(0))) {
-            $provinceNameLen = mb_strlen($province->name);
-            if (
-                ($cityName = $getRegionName($provinceNameLen))
-                && ($city = Region::find($cityName))
-                && $districtName = $getRegionName($provinceNameLen + mb_strlen($city->name))
-            ) {
-                $district = Region::find($districtName);
-            }
-            return [$province, $city ?? null, $district ?? null];
+        if ($regions = \app\model\Region::getCode($address)) {
+            return $regions;
         } else {
             return error('未查询到');
         }

@@ -3,11 +3,13 @@
 require __DIR__ . '/src/env.php';
 
 // 处理跨域
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' && $cors = env('cors')) {
+if ($cors = env('cors')) {
     header('Access-Control-Allow-Origin: ' . $cors);
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Headers: Content-Type,Authorization');
-    exit;
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+        exit;
+    }
 }
 
 require __DIR__ . '/src/app.php';
