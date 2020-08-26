@@ -19,7 +19,7 @@ class TestCase extends \src\TestCase
         return self::$tokens[$table][$id] ??
             self::$tokens[$table][$id] = \vendor\Container::get('vendor\JWT')->encode(
                 $id,
-                Mysql::table($table)->where('id', $id)->val('password')
+                $table . Mysql::table($table)->where('id', $id)->val('password')
             );
     }
 

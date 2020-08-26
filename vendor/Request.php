@@ -6,6 +6,9 @@ class Request extends Arr
 {
     private $uri, $server, $user, $exists, $perPage;
 
+    /**
+     * 初始化请求参数
+     */
     public function __construct(array $server, array $data, callable $exists, $perPage)
     {
         $this->server = $server;
@@ -104,21 +107,34 @@ class Request extends Arr
                 },
             'unique' => function (...$args) {
                     return !call_user_func($this->exists, ...$args);
-                }
+                },
+            'str' => function ($val) {
+                    return is_string($val);
+                },
         ];
-        foreach ($paramsRules as $param => $ruleItem) {
-            foreach (explode('|', $ruleItem) as $rule) {
-                $rule = explode(':', $rule);
+
+        foreach ($paramsRules as $param => $ruleItems) {
+            $ruleItems = explode('|', $ruleItems);
+            if (in_array('required', $ruleItems) && !isset($this->data[$param])) {
+                throw new \Exception('缺少参数' . $param);
+            }
+            foreach ($ruleItems as $ruleItem) {
+                $ruleItem = explode(':', $ruleItem);
+                if (!isset($rules[$ruleItem[0]])) {
+                    continue;
+                }
                 if (
-                    isset($this->data[$param]) &&
-                    !$rules[$rule[0]](
+                    isset($this->data[$param])
+                    && !$rules[$ruleItem[0]](
                         $this->data[$param],
-                        ...(isset($rule[1]) ? explode(',', $rule[1]) : [])
+                        ...(isset($ruleItem[1]) ? explode(',', $ruleItem[1]) : [])
                     )
                 ) {
-                    throw new \Exception('无效的'.$param);
+                    throw new \Exception('无效的' . $param);
                 }      
             }
         }
+
+        return $this->get(...array_keys($paramsRules));
     }
 }

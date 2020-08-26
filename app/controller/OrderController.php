@@ -1,4 +1,5 @@
 <?php
+
 namespace app\controller;
 
 use src\Mysql;
@@ -52,7 +53,7 @@ class OrderController
                 Mysql::query('UPDATE `sku` SET `num`=`num`-? WHERE `id`=?', [$num, $id]);
             }
             Mysql::commit();
-            return ['msg' => '下单成功'];
+            return msg('下单成功');
         } catch (\Exception $e) {
             Mysql::rollback();
             return error($e->getMessage());

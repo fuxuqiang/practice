@@ -20,7 +20,7 @@ class AuthController
             )->where('ip', $_SERVER['REMOTE_ADDR'])->exists('uri', 'send_code')
         ) {
             if (Redis::setex($mobile, 99, mt_rand(1000, 9999))) {
-                return ['msg' => '发送成功'];
+                return msg('发送成功');
             }
         }
     }
@@ -98,7 +98,7 @@ class AuthController
             return error('密码长度至少为6位，由数字和字母组成');
         }
         $request->user()->update(['password' => password_hash($password, PASSWORD_DEFAULT)]);
-        return ['msg' => '修改成功'];
+        return msg('修改成功');
     }
 
     /**
@@ -110,7 +110,7 @@ class AuthController
         $mobile = $request->mobile;
         validateCode($mobile, $code);
         $request->user()->update(['mobile' => $mobile]);
-        return ['msg' => '换绑成功'];
+        return msg('换绑成功');
     }
 
     /**
@@ -129,6 +129,6 @@ class AuthController
             Mysql::rollback();
             return error('提交失败');
         }
-        return ['msg' => '提交成功'];
+        return msg('提交成功');
     }
 }

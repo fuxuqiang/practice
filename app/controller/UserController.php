@@ -14,7 +14,7 @@ class UserController
         $input = $request->get('name', 'capital');
         isset($input['capital']) && $request->validate(['capital' => 'posInt']);
         $request->user()->update($input);
-        return ['msg' => '修改成功'];
+        return msg('修改成功');
     }
 
     /**
@@ -61,7 +61,7 @@ class UserController
             ]);
             $user->update(['capital' => $capital]);
             Mysql::commit();
-            return ['msg' => '交易成功'];
+            return msg('交易成功');
         } catch (\Exception $e) {
             Mysql::rollback();
             return error($e->getMessage());
@@ -90,6 +90,6 @@ class UserController
     {
         Mysql::table('trade')->where(['id' => $id, 'user_id' => $request->userId()])
             ->update(['note' => $note]);
-        return ['msg' => '修改成功'];
+        return msg('修改成功');
     }
 }

@@ -44,11 +44,10 @@ class Http
         // 定位控制器方法
         $dispatch = explode('@', $route);
         $controller = '\app\controller\\' . $dispatch[0] . 'Controller';
-        $method = new \ReflectionMethod($controller, $dispatch[1]);
         // 解析方法参数
         $args = [];
         $input = $request->get();
-        foreach ($method->getParameters() as $param) {
+        foreach ((new \ReflectionMethod($controller, $dispatch[1]))->getParameters() as $param) {
             if ($class = $param->getClass()) {
                 $args[] = Container::get($class->name);
             } elseif (($paramName = $param->getName()) && isset($input[$paramName])) {
@@ -60,6 +59,6 @@ class Http
             }
         }
 
-        return [$controller, $method, $args];
+        return [$controller, $dispatch[1], $args];
     }
 }

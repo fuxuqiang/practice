@@ -41,7 +41,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
                 'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
             ], $params);
             Container::get($controller) || Container::instance($controller, new $controller);
-            $response = $method->invokeArgs(Container::get($controller), $args);
+            $response = Container::get($controller)->$method(...$args);
             $status = 200;
         } catch (\Exception $e) {
             $response = error($e->getMessage());

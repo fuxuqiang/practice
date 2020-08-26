@@ -30,11 +30,19 @@ function sessionStart()
 }
 
 /**
- * 错误信息格式
+ * 获取错误信息格式
  */
 function error($msg)
 {
     return ['error' => $msg];
+}
+
+/**
+ * 获取信息提示格式
+ */
+function msg($msg)
+{
+    return ['msg' => $msg];
 }
 
 /**
@@ -48,4 +56,12 @@ function handleErrorException($e)
     } else {
         logError($e);
     }
+}
+
+/**
+ * 获取runtime文件夹中的文件路径
+ */
+function runtimePath($file)
+{
+    return __DIR__ . '/../runtime/' . $file;
 }

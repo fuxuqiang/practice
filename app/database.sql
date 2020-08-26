@@ -101,7 +101,7 @@ CREATE TABLE `sku` (
     `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
     `price` SMALLINT UNSIGNED NOT NULL,
-    `num` TINYINT UNSIGNED NOT NULL,
+    `num` TINYINT UNSIGNED NOT NULL DEFAULT 0,
     `deleted_at` TIMESTAMP,
 );
 
@@ -134,6 +134,16 @@ CREATE TABLE `request_log` (
     `input` TINYTEXT,
     `token` VARCHAR(255) NOT NULL DEFAULT '',
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS `yunding_store`;
+CREATE TABLE `yunding_store` (
+    `id` TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `store_id` VARCHAR(255) NOT NULL UNIQUE,
+    `name` VARCHAR(255) NOT NULL,
+    `region_code` BIGINT NOT NULL,
+    `address` VARCHAR(255) NOT NULL,
+    `status` VARCHAR(255) NOT NULL
 );
 
 INSERT `role` (`name`,`pid`) VALUE ('超级管理员',0);

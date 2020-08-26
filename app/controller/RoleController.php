@@ -21,7 +21,7 @@ class RoleController
     {
         $request->validate(['pid' => 'exists:role,id']);
         Mysql::table('role')->insert(['name' => $name, 'pid' => $request->pid]);
-        return ['msg' => '添加成功'];
+        return msg('添加成功');
     }
 
     /**
@@ -44,7 +44,7 @@ class RoleController
             }
         }
         Mysql::table('role')->where('id', $id)->update($input);
-        return ['msg' => '更新成功'];
+        return msg('更新成功');
     }
 
     /**
@@ -59,7 +59,7 @@ class RoleController
             return error('存在该角色的用户');
         }
         Mysql::table('role')->del($id);
-        return ['msg' => '删除成功'];
+        return msg('删除成功');
     }
 
     /**
@@ -87,6 +87,6 @@ class RoleController
                 return [$id, $val];
             }, $routeIds)
         );
-        return ['msg' => '保存成功'];
+        return msg('保存成功');
     }
 }

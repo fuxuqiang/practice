@@ -29,7 +29,7 @@ class AdminController
         Mysql::table('admin')->insert(
             $request->get('mobile', 'role_id') + ['joined_at' => date('Y-m-d'), 'name' => $name]
         );
-        return ['msg' => '添加成功'];
+        return msg('添加成功');
     }
 
     /**
@@ -38,7 +38,7 @@ class AdminController
     public function update($name, Request $request)
     {
         $request->user()->update(['name' => $name]);
-        return ['msg' => '修改成功'];
+        return msg('修改成功');
     }
 
     /**
@@ -47,7 +47,7 @@ class AdminController
     public function del($id)
     {
         Mysql::table('admin')->del($id);
-        return ['msg' => '删除成功'];
+        return msg('删除成功');
     }
 
     /**
@@ -57,6 +57,6 @@ class AdminController
     {
         $request->validate(['role_id' => 'exists:role,id']);
         Mysql::table('admin')->where('id', $id)->update(['role_id' => $request->role_id]);
-        return ['msg' => '设置成功'];
+        return msg('设置成功');
     }
 }

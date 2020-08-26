@@ -6,8 +6,13 @@ require __DIR__ . '/src/app.php';
 
 try {
     // 执行
-    $command = '\app\command\\' . ucfirst($argv[1]);
-    (new $command)->handle($argv[2] ?? null);
+    $command = '\app\command\\' . str_replace('/', '\\', $argv[1]);
+    $method = new ReflectionMethod($command, 'handle');
+    $args = [];
+    foreach ($method->getParameters() as $param) {
+        $args[] = ($class = $param->getClass()) ? new $class->name : $args[2];
+    }
+    $method->invokeArgs(new $command, $args);
 } catch (ErrorException $e) {
     handleErrorException($e);
 } catch (Exception $e) {

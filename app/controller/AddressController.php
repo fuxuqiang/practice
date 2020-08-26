@@ -19,7 +19,7 @@ class AddressController
             'code' => $request->code,
             'address' => $address
         ]);
-        return ['msg' => '添加成功'];
+        return msg('添加成功');
     }
 
     /**
@@ -65,7 +65,7 @@ class AddressController
             return error('行政区不存在');
         }
         Mysql::table('address')->where(['id' => $id, 'user_id' => $request->userId()])->update($input);
-        return ['msg' => '更新成功'];
+        return msg('更新成功');
     }
 
     /**
@@ -74,6 +74,6 @@ class AddressController
     public function del($id)
     {
         Mysql::table('address')->del($id);
-        return ['msg' => '删除成功'];
+        return msg('删除成功');
     }
 }
