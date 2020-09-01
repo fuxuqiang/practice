@@ -22,12 +22,12 @@ class Mysql
     /**
      * @var string
      */
-    private $table, $limit, $lock, $order;
+    private $table, $limit, $lock, $order, $sql, $selectExpr, $from;
 
     /**
      * @var array
      */
-    private $cols, $relation, $cond, $params = [];
+    private $cols, $relation, $conds, $params = [];
 
     /**
      * @param \mysqli
@@ -66,11 +66,29 @@ class Mysql
     }
 
     /**
+     * 设置select原生字段
+     */
+    public function selectRaw(string $expr)
+    {
+        $this->selectExpr = $expr;
+        return $this;
+    }
+
+    /**
      * 设置表名
      */
     public function table(string $table)
     {
         $this->table = $table;
+        return $this;
+    }
+
+    /**
+     * 设置from后的原生表达式
+     */
+    public function from(string $from)
+    {
+        $this->from = $from;
         return $this;
     }
 
@@ -120,8 +138,17 @@ class Mysql
      */
     private function setWhere(string $col, string $operator, $val)
     {
-        $this->cond[] = "`$col`$operator?";
-        $this->params[] = $val;
+        $this->whereRaw("`$col`$operator?", [$val]);
+    }
+
+    /**
+     * 设置原生WHERE条件
+     */
+    public function whereRaw(string $cond, array $vals = [])
+    {
+        $this->conds[] = $cond;
+        array_push($this->params, ...$vals);
+        return $this;
     }
 
     /**
@@ -129,8 +156,15 @@ class Mysql
      */
     public function whereNull(string $col)
     {
-        $this->cond[] = "`$col` IS NULL";
-        return $this;
+        return $this->whereRaw("`$col` IS NULL");
+    }
+
+    /**
+     * 添加 WHERE {COLUMN} IS NOT NULL 条件
+     */
+    public function whereNotNull(string $col)
+    {
+        return $this->whereRaw("`$col` IS NOT NULL");
     }
 
     /**
@@ -138,8 +172,7 @@ class Mysql
      */
     public function whereIn(string $col, array $vals)
     {
-        $this->cond[] = "`$col` IN " . $this->markers($vals);
-        return $this->paramsPush($vals);
+        return $this->whereRaw("`$col` IN " . $this->markers($vals), $vals);
     }
 
     /**
@@ -147,17 +180,7 @@ class Mysql
      */
     public function whereBetween(string $col, array $vals)
     {
-        $this->cond[] = "`$col`" . ' BETWEEN ? AND ?';
-        return $this->paramsPush($vals);
-    }
-
-    /**
-     * 添加绑定的参数
-     */
-    private function paramsPush(array $vals)
-    {
-        array_push($this->params, ...$vals);
-        return $this;
+        return $this->whereRaw("`$col` BETWEEN ? AND ?", $vals);
     }
 
     /**
@@ -185,7 +208,7 @@ class Mysql
     public function get(string $class = null, array $params = [])
     {
         $this->limit = 'LIMIT 1';
-        $stmt = $this->query($this->getDqlSql());
+        $stmt = $this->query($this->getSql());
         return $class ? $stmt->fetch_object($class, $params) : $stmt->fetch_object();
     }
 
@@ -204,7 +227,7 @@ class Mysql
     public function all(...$cols)
     {
         $this->cols || $this->cols = $cols;
-        $data = $this->select($this->getDqlSql());
+        $data = $this->select($this->getSql());
         if (
             $this->relation && ($table = key($this->relation))
             && $foreignKeysVal = array_column($data, $table . '_id')
@@ -234,7 +257,7 @@ class Mysql
     public function exists(string $col, $val)
     {
         $this->limit = 'LIMIT 1';
-        return $this->where($col, $val)->query($this->getDqlSql('`' . $col . '`'))->num_rows;
+        return $this->where($col, $val)->query($this->getSql('`' . $col . '`'))->num_rows > 0;
     }
 
     /**
@@ -254,7 +277,7 @@ class Mysql
      */
     public function count()
     {
-        return $this->query($this->getDqlSql('COUNT(*)'))->fetch_row()[0];
+        return $this->query($this->getSql('COUNT(*)'))->fetch_row()[0];
     }
 
     /**
@@ -308,6 +331,14 @@ class Mysql
     }
 
     /**
+     * 字段自增
+     */
+    public function inc($col, $num)
+    {
+        return $this->query("UPDATE `$this->table` SET `$col`=`$col`+$num" . $this->getWhere());
+    }
+
+    /**
      * 执行DELETE语句
      */
     public function del(int $id = null)
@@ -345,7 +376,7 @@ class Mysql
      */
     private function getWhere()
     {
-        return $this->cond ? ' WHERE ' . implode(' AND ', $this->cond) : '';
+        return $this->conds ? ' WHERE ' . implode(' AND ', $this->conds) : '';
     }
 
     /**
@@ -361,10 +392,20 @@ class Mysql
     /**
      * 获取查询sql
      */
-    private function getDqlSql(string $col = null)
+    private function getSql(string $col = null)
     {
-        return 'SELECT ' . ($col ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
-            . " FROM `$this->table`" . $this->getWhere() . $this->order . ' ' . $this->limit . $this->lock;
+        return 'SELECT ' . ($col ?: $this->selectExpr ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
+            . ' FROM ' . ($this->from ?: "`$this->table`") . $this->getWhere()
+            . $this->order . ' ' . $this->limit . $this->lock;
+    }
+
+    /**
+     * 设置sql
+     */
+    public function setSql(string $sql)
+    {
+        $this->sql = $sql;
+        return $this;
     }
 
     /**

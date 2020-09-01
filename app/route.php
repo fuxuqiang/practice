@@ -12,9 +12,18 @@ $route->add([
     ],
     'GET' => [
         'regions' => 'Region@list',
-        'get_region_code' => 'Region@getCode',
-        'yuding_stores' => 'Yunding@getStores',
+        'get_region_code' => 'Region@getCode'
+    ]
+]);
+
+$route->prefix('yunding')->add([
+    'GET' => [
+        'stores' => 'Yunding@getStores',
+        'store' => 'Yunding@getStore',
         'customer_flow' => 'Yunding@getCustomerFlow',
+        'devices' => 'Yunding@getDevices',
+        'members' => 'Yunding@getMembers',
+        'customer_snaps' => 'Yunding@getCustomerSnaps',
     ]
 ]);
 
@@ -50,7 +59,7 @@ $userAuthRoute->resource('address', ['add', 'update', 'del', 'show']);
 
 // 后台
 
-$adminRoute = Route::prefix('admin');
+$adminRoute = Route::prefix('admin')->middleware(RecordRequest::class);
 
 $adminRoute->add(['POST' => ['login' => 'Auth@adminLogin']]);
 
@@ -63,8 +72,14 @@ $adminAuthRoute->add([
         'admin_name' => 'Admin@update',
         'admin_role' => 'Admin@setRole',
     ],
-    'POST' => ['save_access' => 'Role@saveRoutes'],
-    'GET' => ['routes' => 'Role@listRoutes'],
+    'POST' => [
+        'save_access' => 'Role@saveRoutes',
+        'sku/io' => 'Sku@io',
+    ],
+    'GET' => [
+        'routes' => 'Role@listRoutes',
+        'sku/io_records' => 'Sku@getIoRecords',
+    ],
 ]);
 
 $adminAuthRoute->resource('role', ['add', 'update', 'del', 'list']);

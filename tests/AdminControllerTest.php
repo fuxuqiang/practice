@@ -30,7 +30,7 @@ class AdminControllerTest extends TestCase
     /**
      * @depends testAdminLogin
      */
-    public function testRoleAdd($token)
+    public function testAddRole($token)
     {
         $this->post('admin/role', ['name' => 'test', 'pid' => 1], $token)->assertOk();
         return Mysql::table('role')->where('name', 'test')->val('id');
@@ -38,9 +38,9 @@ class AdminControllerTest extends TestCase
 
     /**
      * @depends testAdminLogin
-     * @depends testRoleAdd
+     * @depends testAddRole
      */
-    public function testRoleUpdate($token, $id)
+    public function testUpdateRole($token, $id)
     {
         $this->put('admin/role', ['id' => $id, 'pid' => 1], $token)->assertArrayHasKey('msg');
         $this->put('admin/role', ['id' => $id, 'pid' => $id], $token)->assertArrayHasKey('error');
@@ -48,7 +48,7 @@ class AdminControllerTest extends TestCase
 
     /**
      * @depends testAdminLogin
-     * @depends testRoleAdd
+     * @depends testAddRole
      */
     public function testAdd($token, $id)
     {
@@ -89,7 +89,7 @@ class AdminControllerTest extends TestCase
     /**
      * @depends testSetPassword
      * @depends testAdd
-     * @depends testRoleAdd
+     * @depends testAddRole
      */
     public function testSetRole($token, $id, $roleId)
     {
@@ -114,7 +114,7 @@ class AdminControllerTest extends TestCase
 
     /**
      * @depends testSetPassword
-     * @depends testRoleAdd
+     * @depends testAddRole
      */
     public function testSaveRoutes($token, $roleId)
     {
@@ -131,7 +131,7 @@ class AdminControllerTest extends TestCase
     /**
      * @depends testAdminLogin
      * @depends testAdd
-     * @depends testRoleAdd
+     * @depends testAddRole
      */
     public function testDel($token, $id, $roleId)
     {

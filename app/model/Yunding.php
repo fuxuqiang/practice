@@ -4,9 +4,21 @@ namespace app\model;
 
 class Yunding
 {
-    const TOKEN_FILE = __DIR__ . '/../../runtime/yunding_token';
+    public $tokenFile, $storesFile, $customersFile;
 
-    public static function request($uri, $params = [], $method = 'GET')
+    public function __construct()
+    {
+        $this->tokenFile = runtimePath('yunding_token');
+        $this->storesFile = runtimePath('yunding_stores');
+        $this->customersFile = runtimePath('yunding_customers');
+    }
+
+    public function request($uri, $params = [], $method = 'GET')
+    {
+        return json_decode($this->requestGetRaw($uri, $params, $method));
+    }
+
+    public function requestGetRaw($uri, $params = [], $method = 'POST')
     {
         return (new \vendor\HttpClient)->request(
             'https://yd.yunding360.com/openapi/' . $uri,
@@ -14,15 +26,15 @@ class Yunding
             [
                 CURLOPT_HTTPHEADER => array_merge(
                     ['api-version: v1', 'Content-Type: application/json'],
-                    ($token = self::getTokenData()) ? ['Authorization: Bearer' . $token->accessToken] : []
+                    ($token = $this->getTokenData()) ? ['Authorization: Bearer' . $token->accessToken] : []
                 )
             ],
             $method
         );
     }
 
-    public static function getTokenData()
+    public function getTokenData()
     {
-        return file_exists(self::TOKEN_FILE) ? json_decode(file_get_contents(self::TOKEN_FILE)) : null;
+        return file_exists($this->tokenFile) ? json_decode(file_get_contents($this->tokenFile)) : null;
     }
 }

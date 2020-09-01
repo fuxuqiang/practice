@@ -2,12 +2,14 @@
 
 namespace tests;
 
+use src\Mysql;
+
 class SkuControllerTest extends TestCase
 {
     public function testAdd()
     {
-        $this->admin(1)->post('admin/sku', ['name' => '商品1', 'price' => 100, 'num' => 2])->assertOk();
-        return \src\Mysql::getMysqli()->insert_id;
+        $this->admin(1)->post('admin/sku', ['name' => '商品1', 'price' => 100])->assertOk();
+        return Mysql::getMysqli()->insert_id;
     }
 
     /**
@@ -23,5 +25,19 @@ class SkuControllerTest extends TestCase
     public function testList()
     {
         echo $this->admin(1)->get('admin/skus')->assertOk();
+    }
+
+    /**
+     * @depends testAdd
+     */
+    public function testDel($id)
+    {
+        $this->admin(1)->delete('admin/sku', ['id' => $id]);
+        $this->assertTrue(Mysql::table('sku')->whereNotNull('deleted_at')->exists('id', $id));
+    }
+
+    public function testGetIoRecords()
+    {
+        echo $this->admin(1)->get('admin/sku/io_records')->assertOk();
     }
 }
