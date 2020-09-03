@@ -39,6 +39,7 @@ class SkuController
      */
     public function list(Request $request)
     {
+        $request->validate(['keyword' => 'str']);
         $query = Mysql::table('sku');
         ($name = $request->name) && $query->where('name', 'LIKE', '%' . $name . '%');
         return $query->paginate(...$request->pageParams());
@@ -66,13 +67,8 @@ class SkuController
         }
         Mysql::begin();
         try {
-            Mysql::table('sku')->where('id', $data['id'])->inc('stock', $data['num']);
-            Mysql::table('sku_record')->insert([
-                'admin_id' => $request->userId(),
-                'num' => $data['num'],
-                'note' => $data['note'] ?? '',
-                'sku_id' => $data['id']
-            ]);
+            $sku = Mysql::table('sku')->where('id', $data['id'])->get(\app\model\Sku::class);
+            $sku->io(['admin_id' => $request->userId(), 'num' => $data['num']]);
             Mysql::commit();
             return msg('更新成功');
         } catch (\Exception $e) {
@@ -97,7 +93,9 @@ class SkuController
                 $query->whereRaw('(`a`.`name` LIKE ? OR `s`.`name` LIKE ?)', [$keyword, $keyword]);
             }
             empty($params['date_from']) || $query->where('created_at', '>=', $params['date_from']);
-            empty($params['date_to']) || $query->whereRaw('DATE(`created_at`)<=?', [date('Y-m-d', strtotime($params['date_to']))]);
+            if (!empty($params['date_to'])) {
+                $query->whereRaw('DATE(`created_at`)<=?', [date('Y-m-d', strtotime($params['date_to']))]);
+            }
         }
         return $query->paginate(...$request->pageParams());
     }

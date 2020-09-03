@@ -25,7 +25,6 @@ class TestCase extends \PHPUnit\Framework\TestCase
             require __DIR__ . '/env.php';
             self::$http = new Http;
         }
-        Mysql::begin();
     }
 
     /**
@@ -57,14 +56,6 @@ class TestCase extends \PHPUnit\Framework\TestCase
     public function __call($name, $args)
     {
         return $this->request(strtoupper($name), ...$args);
-    }
-
-    /**
-     * 清理测试基镜
-     */
-    public static function tearDownAfterClass(): void
-    {
-        Mysql::rollback();
     }
 
     /**

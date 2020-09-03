@@ -6,6 +6,8 @@ use src\Mysql;
 
 class AdminControllerTest extends TestCase
 {
+    use \src\DatabaseTransaction;
+
     private $mobile = 12345678901;
 
     public static function setUpBeforeClass(): void

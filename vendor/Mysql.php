@@ -22,7 +22,7 @@ class Mysql
     /**
      * @var string
      */
-    private $table, $limit, $lock, $order, $sql, $selectExpr, $from;
+    private $table, $limit, $lock, $order, $selectExpr, $from;
 
     /**
      * @var array
@@ -397,15 +397,6 @@ class Mysql
         return 'SELECT ' . ($col ?: $this->selectExpr ?: ($this->cols ? $this->gather($this->cols, '`%s`') : '*'))
             . ' FROM ' . ($this->from ?: "`$this->table`") . $this->getWhere()
             . $this->order . ' ' . $this->limit . $this->lock;
-    }
-
-    /**
-     * 设置sql
-     */
-    public function setSql(string $sql)
-    {
-        $this->sql = $sql;
-        return $this;
     }
 
     /**

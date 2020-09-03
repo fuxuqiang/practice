@@ -6,6 +6,8 @@ use src\Mysql;
 
 class AddressControllerTest extends TestCase
 {
+    use \src\DatabaseTransaction;
+
     public function testAdd()
     {
         $data = ['code' => 11, 'address' => '秀山南路'];

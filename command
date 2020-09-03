@@ -10,7 +10,7 @@ try {
     $method = new ReflectionMethod($command, 'handle');
     $args = [];
     foreach ($method->getParameters() as $param) {
-        $args[] = ($class = $param->getClass()) ? new $class->name : $args[2];
+        $args[] = ($class = $param->getClass()) ? new $class->name : $argv[2] ?? null;
     }
     $method->invokeArgs(new $command, $args);
 } catch (ErrorException $e) {

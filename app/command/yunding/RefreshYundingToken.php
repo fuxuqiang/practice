@@ -16,6 +16,6 @@ class RefreshYundingToken
         } else {
             $data = $yunding->requestGetRaw('oauth/token/' . $yunding->getTokenData()->refreshToken);
         }
-        file_put_contents(runtimePath($yunding->tokenFile), $data);
+        file_put_contents($yunding->tokenFile, $data);
     }
 }

@@ -4,6 +4,8 @@ namespace tests;
 
 class AuthControllerTest extends TestCase
 {
+    use \src\DatabaseTransaction;
+
     private $beforeMobile = 12345678901, $password = 'a12345';
 
     public function testUserLogin()

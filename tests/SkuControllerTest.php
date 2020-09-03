@@ -6,6 +6,8 @@ use src\Mysql;
 
 class SkuControllerTest extends TestCase
 {
+    use \src\DatabaseTransaction;
+
     public function testAdd()
     {
         $this->admin(1)->post('admin/sku', ['name' => '商品1', 'price' => 100])->assertOk();
@@ -21,11 +23,6 @@ class SkuControllerTest extends TestCase
         $this->admin(1)->put('admin/sku', $data);
         $this->assertDatabaseHas('sku', $data);
     }
-    
-    public function testList()
-    {
-        echo $this->admin(1)->get('admin/skus')->assertOk();
-    }
 
     /**
      * @depends testAdd
@@ -36,8 +33,24 @@ class SkuControllerTest extends TestCase
         $this->assertTrue(Mysql::table('sku')->whereNotNull('deleted_at')->exists('id', $id));
     }
 
+    /**
+     * @depends testAdd
+     */
+    public function testIo($id)
+    {
+        $this->admin(1)->post('admin/sku/io', ['id' => $id, 'num' => -1])->assertArrayHasKey('error');
+        $this->admin(1)->post('admin/sku/io', ['id' => $id, 'num' => 200]);
+        $this->assertDatabaseHas('sku', ['id' => $id, 'stock' => 200]);
+        $this->assertDatabaseHas('sku_record', ['sku_id' => $id, 'num' => 200]);
+    }
+
+    public function testList()
+    {
+        echo $this->admin(1)->get('admin/skus')->assertOk();
+    }
+
     public function testGetIoRecords()
     {
-        echo $this->admin(1)->get('admin/sku/io_records')->assertOk();
+        echo $this->admin(1)->get('admin/sku/io_records', ['keyword' => '菠萝'])->assertOk();
     }
 }
