@@ -5,7 +5,7 @@ namespace vendor;
 class Model extends Arr
 {
     /**
-     * @var callable
+     * @var Connector
      */
     private static $connector;
 
@@ -17,7 +17,7 @@ class Model extends Arr
     /**
      * 设置获取数据库操作类的方法
      */
-    public static function setConnector(callable $connector)
+    public static function setConnector(Connector $connector)
     {
         self::$connector = $connector;
     }
@@ -25,17 +25,17 @@ class Model extends Arr
     /**
      * @param string $table
      */
-    public function __construct($table = null)
+    public function __construct(string $table = null)
     {
-        $this->table = $table ?: strtolower(basename(str_replace('\\', '/', static::class)));
+        $this->table = $table ?: self::getTable();
     }
 
     /**
      * 获取当前表名
      */
-    public function getTable()
+    private static function getTable()
     {
-        return $this->table;
+        return strtolower(basename(str_replace('\\', '/', static::class)));
     }
 
     /**
@@ -51,6 +51,14 @@ class Model extends Arr
      */
     public function __call($name, $args)
     {
-        return call_user_func(self::$connector, $this)->$name(...$args);
+        return self::$connector->connect()->table($this->table)->where('id', $this->id)->$name(...$args);
+    }
+
+    /**
+     * 根据id查找模型
+     */
+    public static function find($id)
+    {
+        return self::$connector->connect()->table(self::getTable())->where('id', $id)->get(static::class);
     }
 }

@@ -19,6 +19,4 @@ register_shutdown_function(function () {
 });
 
 // 设置模型的数据库连接
-\vendor\Model::setConnector(function ($model) {
-    return \src\Mysql::table($model->getTable())->where('id', $model->id);
-});
+\vendor\Model::setConnector(\src\Mysql::getInstance());

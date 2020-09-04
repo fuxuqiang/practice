@@ -67,7 +67,7 @@ class SkuController
         }
         Mysql::begin();
         try {
-            $sku = Mysql::table('sku')->where('id', $data['id'])->get(\app\model\Sku::class);
+            $sku = \app\model\Sku::find($data['id']);
             $sku->io(['admin_id' => $request->userId(), 'num' => $data['num']]);
             Mysql::commit();
             return msg('更新成功');
