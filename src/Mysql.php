@@ -1,8 +1,10 @@
 <?php
 
-namespace src;
+namespace Src;
 
-class Mysql implements \vendor\Connector
+use Fuxuqiang\Framework\{Connector, Mysql as MysqlFacade};
+
+class Mysql implements Connector
 {
     /**
      * @var \mysqli
@@ -15,7 +17,7 @@ class Mysql implements \vendor\Connector
     private static $instance;
 
     /**
-     * 动态调用\vendor\Mysql的方法
+     * 动态调用\Fuxuqiang\Framework\Mysql的方法
      */
     public static function __callStatic($name, $args)
     {
@@ -33,14 +35,14 @@ class Mysql implements \vendor\Connector
     /**
      * 获取数据库查询实例
      */
-    public function connect(): \vendor\Mysql
+    public function connect(): MysqlFacade
     {
         if (!self::$mysqli) {
             $config = env('mysql');
             self::$mysqli = new \mysqli($config['host'], $config['user'], $config['pwd'] ?? null, $config['db']);
             self::$mysqli->set_charset('utf8');
         }
-        return new \vendor\Mysql(self::$mysqli);
+        return new MysqlFacade(self::$mysqli);
     }
 
     /**

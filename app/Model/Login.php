@@ -1,8 +1,8 @@
 <?php
 
-namespace app\model;
+namespace App\Model;
 
-use vendor\HttpClient;
+use Fuxuqiang\Framework\HttpClient;
 
 class Login 
 {
@@ -19,7 +19,7 @@ class Login
             $response = json_decode(
                 $login->request(
                     'http://practice.test/login',
-                    ['code' => \src\Redis::get($val['params']['mobile'])] + $val['params'],
+                    ['code' => \Src\Redis::get($val['params']['mobile'])] + $val['params'],
                     [CURLOPT_COOKIE => $matches[1]]
                 )
             );

@@ -1,8 +1,8 @@
 <?php
 
-namespace src;
+namespace Src;
 
-use vendor\Container;
+use Fuxuqiang\Framework\Container;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
@@ -47,7 +47,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             $status = $e->getCode();
         }
         $this->token = null;
-        return new \vendor\TestResponse($response, $status);
+        return new \Fuxuqiang\Framework\TestResponse($response, $status);
     }
 
     /**

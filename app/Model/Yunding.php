@@ -1,6 +1,6 @@
 <?php
 
-namespace app\model;
+namespace App\Model;
 
 class Yunding
 {
@@ -20,7 +20,7 @@ class Yunding
 
     public function requestGetRaw($uri, $params = [], $method = 'POST')
     {
-        return (new \vendor\HttpClient)->request(
+        return (new \Fuxuqiang\Framework\HttpClient)->request(
             'https://yd.yunding360.com/openapi/' . $uri,
             json_encode($params),
             [

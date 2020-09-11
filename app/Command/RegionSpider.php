@@ -1,8 +1,8 @@
 <?php
 
-namespace app\command;
+namespace App\Command;
 
-use vendor\HttpClient;
+use Fuxuqiang\Framework\HttpClient;
 
 class RegionSpider
 {
@@ -186,11 +186,11 @@ class RegionSpider
 
     /**
      * 获取数据库查询实例
-     * @return \vendor\Mysql
+     * @return \Fuxuqiang\Framework\Mysql
      */
     private function getQuery()
     {
-        return \src\Mysql::table('region');
+        return \Src\Mysql::table('region');
     }
 
     /**

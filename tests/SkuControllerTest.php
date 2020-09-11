@@ -1,12 +1,12 @@
 <?php
 
-namespace tests;
+namespace Tests;
 
-use src\Mysql;
+use Src\Mysql;
 
 class SkuControllerTest extends TestCase
 {
-    use \src\DatabaseTransaction;
+    use \Src\DatabaseTransaction;
 
     public function testAdd()
     {

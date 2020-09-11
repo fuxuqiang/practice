@@ -1,10 +1,10 @@
 <?php
 
-namespace tests;
+namespace Tests;
 
 class AuthControllerTest extends TestCase
 {
-    use \src\DatabaseTransaction;
+    use \Src\DatabaseTransaction;
 
     private $beforeMobile = 12345678901, $password = 'a12345';
 

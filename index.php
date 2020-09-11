@@ -16,7 +16,7 @@ require __DIR__ . '/src/app.php';
 
 // 处理请求
 try {
-    [$controller, $method, $args] = (new \src\Http)->handle($_SERVER, $_GET + $_POST);
+    [$controller, $method, $args] = (new \Src\Http)->handle($_SERVER, $_GET + $_POST);
     $response = (new $controller)->$method(...$args);
 // 错误处理
 } catch (ErrorException $e) {

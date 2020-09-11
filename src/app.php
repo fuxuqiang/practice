@@ -1,14 +1,8 @@
 <?php
 
-// 自动加载类文件
-spl_autoload_register(function ($class) {
-    strpos($class, 'PHPUnit') === 0 || require __DIR__ . '/../' . str_replace('\\', '/', $class) . '.php';
-});
+require __DIR__ . '/../vendor/autoload.php';
 
-// 加载助手函数
-require __DIR__ . '/helpers.php';
-require __DIR__ . '/../app/helpers.php';
-
+// 报错处理
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 });
@@ -19,4 +13,4 @@ register_shutdown_function(function () {
 });
 
 // 设置模型的数据库连接
-\vendor\Model::setConnector(\src\Mysql::getInstance());
+\Fuxuqiang\Framework\Model::setConnector(\Src\Mysql::getInstance());

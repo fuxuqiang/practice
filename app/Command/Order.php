@@ -1,9 +1,8 @@
 <?php
 
-namespace app\command;
+namespace App\Command;
 
-use src\Mysql;
-use vendor\HttpClient;
+use Src\Mysql;
 
 class Order
 {
@@ -14,8 +13,8 @@ class Order
             JOIN `address` `a` ON `u`.`id`=`a`.`user_id` ORDER BY RAND() LIMIT 5'
         );
         $skus = Mysql::table('sku')->col('id');
-        $http = new HttpClient;
-        foreach (\app\model\Login::getToken($users) as $user) {
+        $http = new \Fuxuqiang\Framework\HttpClient;
+        foreach (\App\Model\Login::getToken($users) as $user) {
             $http->request(
                 'http://practice.test/order',
                 json_encode([

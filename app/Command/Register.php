@@ -1,6 +1,6 @@
 <?php
 
-namespace app\command;
+namespace App\Command;
 
 class Register
 {
@@ -11,6 +11,6 @@ class Register
             $mobiles[] = ['mobile' => $mobile];
         }
 
-        iterator_count(\app\model\Login::getToken($mobiles));
+        iterator_count(\App\Model\Login::getToken($mobiles));
     }
 }

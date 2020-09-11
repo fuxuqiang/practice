@@ -1,7 +1,7 @@
 <?php
 
-use vendor\Route;
-use app\middleware\{RecordRequest, Auth};
+use Fuxuqiang\Framework\Route;
+use App\Middleware\{RecordRequest, Auth};
 
 $route = Route::middleware(RecordRequest::class);
 

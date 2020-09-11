@@ -1,8 +1,8 @@
 <?php
-namespace app\controller;
+namespace App\Controller;
 
-use src\Mysql;
-use vendor\Request;
+use Src\Mysql;
+use Fuxuqiang\Framework\Request;
 
 class SkuController
 {
@@ -67,7 +67,7 @@ class SkuController
         }
         Mysql::begin();
         try {
-            $sku = \app\model\Sku::find($data['id']);
+            $sku = \App\Model\Sku::find($data['id']);
             $sku->io(['admin_id' => $request->userId(), 'num' => $data['num']]);
             Mysql::commit();
             return msg('更新成功');

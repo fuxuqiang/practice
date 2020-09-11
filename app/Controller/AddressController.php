@@ -1,10 +1,10 @@
 <?php
 
-namespace app\controller;
+namespace App\Controller;
 
-use src\Mysql;
-use vendor\Request;
-use app\model\Region;
+use Src\Mysql;
+use Fuxuqiang\Framework\Request;
+use App\Model\Region;
 
 class AddressController
 {
@@ -49,7 +49,7 @@ class AddressController
                 return [
                     'id' => $val['id'],
                     'code' => $val['code'],
-                    'address' => implode('', (new \vendor\Arr($regions))->get(...$val['codes'])) . $val['address']
+                    'address' => implode('', (new \Fuxuqiang\Framework\Arr($regions))->get(...$val['codes'])) . $val['address']
                 ];
             }, $addresses)
         ];

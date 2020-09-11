@@ -1,10 +1,11 @@
 <?php
 
-namespace tests;
+namespace Tests;
 
-use src\{Redis, Mysql};
+use Src\{Redis, Mysql};
+use Fuxuqiang\Framework\{Container, JWT};
 
-class TestCase extends \src\TestCase
+class TestCase extends \Src\TestCase
 {
     protected static $tokens;
 
@@ -17,7 +18,7 @@ class TestCase extends \src\TestCase
     protected function getToken($id, $table)
     {
         return self::$tokens[$table][$id] ??
-            self::$tokens[$table][$id] = \vendor\Container::get('vendor\JWT')->encode(
+            self::$tokens[$table][$id] = Container::get(JWT::class)->encode(
                 $id,
                 $table . Mysql::table($table)->where('id', $id)->val('password')
             );

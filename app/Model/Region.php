@@ -1,6 +1,6 @@
 <?php
 
-namespace app\model;
+namespace App\Model;
 
 class Region
 {
@@ -22,7 +22,7 @@ class Region
 
     public static function find($name)
     {
-        return \src\Mysql::table('region')->where('name', 'LIKE', $name . '%')->get();
+        return \Src\Mysql::table('region')->where('name', 'LIKE', $name . '%')->get();
     }
 
     public static function getCode($address, $returnType = 'array')

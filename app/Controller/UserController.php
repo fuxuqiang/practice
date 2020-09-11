@@ -1,8 +1,8 @@
 <?php
-namespace app\controller;
+namespace App\Controller;
 
-use src\Mysql;
-use vendor\Request;
+use Src\Mysql;
+use Fuxuqiang\Framework\Request;
 
 class UserController
 {

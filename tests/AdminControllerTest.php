@@ -1,12 +1,12 @@
 <?php
 
-namespace tests;
+namespace Tests;
 
-use src\Mysql;
+use Src\Mysql;
 
 class AdminControllerTest extends TestCase
 {
-    use \src\DatabaseTransaction;
+    use \Src\DatabaseTransaction;
 
     private $mobile = 12345678901;
 

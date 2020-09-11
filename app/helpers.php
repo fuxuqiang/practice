@@ -2,7 +2,7 @@
 
 function validateCode($mobile, $code)
 {
-    if ($code != \src\Redis::get($mobile)) {
+    if ($code != \Src\Redis::get($mobile)) {
         throw new Exception('验证码错误', 200);
     }
 }

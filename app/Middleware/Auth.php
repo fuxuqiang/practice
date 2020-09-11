@@ -1,9 +1,9 @@
 <?php
 
-namespace app\middleware;
+namespace App\Middleware;
 
-use src\Mysql;
-use vendor\{Request, JWT, Model};
+use Src\Mysql;
+use Fuxuqiang\Framework\{Request, JWT, Model};
 
 class Auth
 {

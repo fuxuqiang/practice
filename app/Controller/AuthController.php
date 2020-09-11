@@ -1,9 +1,9 @@
 <?php
 
-namespace app\controller;
+namespace App\Controller;
 
-use src\{Mysql, Redis};
-use vendor\{JWT, Request};
+use Src\{Mysql, Redis};
+use Fuxuqiang\Framework\{JWT, Request};
 
 class AuthController
 {

@@ -1,8 +1,7 @@
 <?php
-namespace app\command;
+namespace App\Command;
 
-use src\Mysql;
-use vendor\HttpClient;
+use Src\Mysql;
 
 class Address
 {
@@ -10,8 +9,8 @@ class Address
     {
         $mobiles = Mysql::table('user')->rand(16)->all('mobile');
         $addresses = Mysql::table('region')->rand(16)->col('code');
-        $http = new HttpClient;
-        foreach (\app\model\Login::getToken($mobiles) as $key => $token) {
+        $http = new \Fuxuqiang\Framework\HttpClient;
+        foreach (\App\Model\Login::getToken($mobiles) as $key => $token) {
             $http->request(
                 'http://practice.test/user/address',
                 ['code' => $addresses[$key]],

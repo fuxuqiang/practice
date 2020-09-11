@@ -1,10 +1,10 @@
 <?php
 
-namespace app\controller;
+namespace App\Controller;
 
-use src\Mysql;
-use vendor\Request;
-use app\model\Region;
+use Src\Mysql;
+use Fuxuqiang\Framework\Request;
+use App\Model\Region;
 
 class OrderController
 {

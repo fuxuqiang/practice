@@ -1,10 +1,10 @@
 <?php
 
-namespace app\command\yunding;
+namespace App\Command\Yunding;
 
 class RefreshYundingToken
 {
-    public function handle($type, \app\model\Yunding $yunding)
+    public function handle($type, \App\Model\Yunding $yunding)
     {
         $account = env('yunding');
         if ($type == 'init') {
