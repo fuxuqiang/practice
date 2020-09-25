@@ -2,7 +2,7 @@
 
 namespace Src;
 
-use Fuxuqiang\Framework\Container;
+use Fuxuqiang\Framework\{Container, TestResponse};
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
@@ -34,20 +34,23 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         $token = $token ?: $this->token;
         try {
-            [$controller, $method, $args] = self::$http->handle([
+            [$concrete, $method, $args] = self::$http->handle([
                 'REQUEST_METHOD' => $requestMethod,
-                'PATH_INFO' => $uri,
+                'REQUEST_URI' => $uri,
                 'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
             ], $params);
-            Container::get($controller) || Container::instance($controller, new $controller);
-            $response = Container::get($controller)->$method(...$args);
+            if (!$controller = Container::get($concrete)) {
+                $controller = Container::newInstance($concrete);
+                Container::instance($concrete, $controller);
+            }
+            $response = $controller->$method(...$args);
             $status = 200;
         } catch (\Exception $e) {
             $response = error($e->getMessage());
             $status = $e->getCode();
         }
         $this->token = null;
-        return new \Fuxuqiang\Framework\TestResponse($response, $status);
+        return new TestResponse($response, $status);
     }
 
     /**

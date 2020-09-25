@@ -4,7 +4,9 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // 报错处理
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    if (error_reporting() & $errno) {
+        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);   
+    }
 });
 register_shutdown_function(function () {
     if ($error = error_get_last()) {

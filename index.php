@@ -16,8 +16,8 @@ require __DIR__ . '/src/app.php';
 
 // 处理请求
 try {
-    [$controller, $method, $args] = (new \Src\Http)->handle($_SERVER, $_GET + $_POST);
-    $response = (new $controller)->$method(...$args);
+    [$concrete, $method, $args] = (new \Src\Http)->handle($_SERVER, $_GET + $_POST);
+    $response = (\Fuxuqiang\Framework\Container::newInstance($concrete))->$method(...$args);
 // 错误处理
 } catch (ErrorException $e) {
     handleErrorException($e);
@@ -30,6 +30,6 @@ try {
 // 响应
 if (isset($response)) {
     header('Content-Type: application/json');
-    echo json_encode($response);
+    echo is_string($response) ? $response : json_encode($response);
 }
 

@@ -18,17 +18,16 @@ class Yunding
         return json_decode($this->requestGetRaw($uri, $params, $method));
     }
 
-    public function requestGetRaw($uri, $params = [], $method = 'POST')
+    public function requestGetRaw($uri, $params = [], $method = 'GET', $withToken = true)
     {
+        $headers = ['api-version: v1', 'Content-Type: application/json'];
+        if ($withToken && $token = $this->getTokenData()) {
+            array_push($headers, 'Authorization: Bearer' . $token->accessToken);
+        }
         return (new \Fuxuqiang\Framework\HttpClient)->request(
             'https://yd.yunding360.com/openapi/' . $uri,
             json_encode($params),
-            [
-                CURLOPT_HTTPHEADER => array_merge(
-                    ['api-version: v1', 'Content-Type: application/json'],
-                    ($token = $this->getTokenData()) ? ['Authorization: Bearer' . $token->accessToken] : []
-                )
-            ],
+            [CURLOPT_HTTPHEADER => $headers],
             $method
         );
     }

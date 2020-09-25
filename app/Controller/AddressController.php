@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use Src\Mysql;
-use Fuxuqiang\Framework\Request;
+use Fuxuqiang\Framework\{Request, Arr};
 use App\Model\Region;
 
 class AddressController
@@ -49,7 +49,7 @@ class AddressController
                 return [
                     'id' => $val['id'],
                     'code' => $val['code'],
-                    'address' => implode('', (new \Fuxuqiang\Framework\Arr($regions))->get(...$val['codes'])) . $val['address']
+                    'address' => implode('', (new Arr($regions))->get(...$val['codes'])) . $val['address']
                 ];
             }, $addresses)
         ];

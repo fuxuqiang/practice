@@ -7,7 +7,7 @@ function logError($content)
 {
     file_put_contents(
         __DIR__ . '/../runtime/error.log',
-        '[' . timestamp() . ']' . PHP_EOL . $content . PHP_EOL,
+        '[' . timestamp() . ']' . PHP_EOL . $content . PHP_EOL . PHP_EOL,
         FILE_APPEND | LOCK_EX
     );
 }

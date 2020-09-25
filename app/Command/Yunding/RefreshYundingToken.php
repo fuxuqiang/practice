@@ -8,11 +8,16 @@ class RefreshYundingToken
     {
         $account = env('yunding');
         if ($type == 'init') {
-            $data = $yunding->requestGetRaw('oauth/token', [
-                'account' => $account['account'],
-                'enterpriseCode' => $account['enterprise_code'],
-                'password' => $account['password']
-            ]);
+            $data = $yunding->requestGetRaw(
+                'oauth/token',
+                [
+                    'account' => $account['account'],
+                    'enterpriseCode' => $account['enterprise_code'],
+                    'password' => $account['password']
+                ],
+                'POST',
+                false
+            );
         } else {
             $data = $yunding->requestGetRaw('oauth/token/' . $yunding->getTokenData()->refreshToken);
         }
