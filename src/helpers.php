@@ -1,6 +1,16 @@
 <?php
 
 /**
+ * 获取配置的环境变量
+ */
+function env($name)
+{
+    static $env;
+    $env || $env = parse_ini_file(__DIR__ . '/../.env', true);
+    return $env[$name] ?? null;
+}
+
+/**
  * 记录日志
  */
 function logError($content)

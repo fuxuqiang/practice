@@ -1,7 +1,6 @@
 #!/usr/bin/env php
 <?php
 
-require __DIR__ . '/src/env.php';
 require __DIR__ . '/src/app.php';
 
 try {

@@ -13,6 +13,7 @@ class AdminControllerTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
+        Mysql::begin();
         Mysql::table('route')->del();
     }
 

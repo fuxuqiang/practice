@@ -2,10 +2,12 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
+date_default_timezone_set(env('timezone'));
+
 // 报错处理
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     if (error_reporting() & $errno) {
-        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);   
+        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     }
 });
 register_shutdown_function(function () {

@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/src/env.php';
+require __DIR__ . '/src/app.php';
 
 // 处理跨域
 if ($cors = env('cors')) {
@@ -11,8 +11,6 @@ if ($cors = env('cors')) {
         exit;
     }
 }
-
-require __DIR__ . '/src/app.php';
 
 // 处理请求
 try {

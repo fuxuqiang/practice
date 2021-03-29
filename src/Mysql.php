@@ -2,7 +2,7 @@
 
 namespace Src;
 
-use Fuxuqiang\Framework\{Connector, Mysql as MysqlFacade};
+use Fuxuqiang\Framework\{Connector, Mysql as Query};
 
 class Mysql implements Connector
 {
@@ -35,14 +35,14 @@ class Mysql implements Connector
     /**
      * 获取数据库查询实例
      */
-    public function connect(): MysqlFacade
+    public function connect(): Query
     {
         if (!self::$mysqli) {
             $config = env('mysql');
             self::$mysqli = new \mysqli($config['host'], $config['user'], $config['pwd'] ?? null, $config['db']);
             self::$mysqli->set_charset('utf8');
         }
-        return new MysqlFacade(self::$mysqli);
+        return new Query(self::$mysqli);
     }
 
     /**
