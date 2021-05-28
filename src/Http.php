@@ -48,8 +48,8 @@ class Http
         $args = [];
         $input = $request->get();
         foreach ((new \ReflectionMethod($controller, $dispatch[1]))->getParameters() as $param) {
-            if ($class = $param->getClass()) {
-                $args[] = Container::get($class->name);
+            if ($class = $param->getType()) {
+                $args[] = Container::get($class);
             } elseif (($paramName = $param->getName()) && isset($input[$paramName])) {
                 $args[] = $input[$paramName];
             } elseif ($param->isDefaultValueAvailable()) {

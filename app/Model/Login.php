@@ -12,15 +12,12 @@ class Login
         foreach ($mobiles as $mobile) {
             $sendCode->addHandle('http://practice.test/send_code', $mobile, [CURLOPT_HEADER => true], 'POST');
         }
-
         $login = new HttpClient;
         foreach ($sendCode->multiRequest() as $val) {
-            preg_match('/Set-Cookie:\s(PHPSESSID=.+);/', curl_multi_getcontent($val['handle']), $matches);
             $response = json_decode(
                 $login->request(
                     'http://practice.test/login',
                     ['code' => \Src\Redis::get($val['params']['mobile'])] + $val['params'],
-                    [CURLOPT_COOKIE => $matches[1]]
                 )
             );
             if (isset($response->data)) {

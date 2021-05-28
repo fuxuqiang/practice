@@ -123,7 +123,7 @@ CREATE TABLE `order` (
     `address` VARCHAR(255) NOT NULL,
     `status` TINYINT NOT NULL DEFAULT 0,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `expire_at` TIMESTAMP
+    `pay_expire_at` TIMESTAMP
 );
 
 DROP TABLE IF EXISTS `order_sku`;

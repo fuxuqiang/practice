@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use Src\Mysql;
 use Fuxuqiang\Framework\Request;
-use App\Model\Region;
+use App\Model\{Region, Sku};
 
 class OrderController
 {
@@ -30,7 +30,7 @@ class OrderController
         Mysql::begin();
         try {
             // sku详情
-            $skuModels = \App\Model\Sku::where('stock', '>', 0)->lock()->find($skuIds, ['id', 'name', 'price', 'stock']);
+            $skuModels = Sku::where('stock', '>', 0)->lock()->find($skuIds, ['id', 'name', 'price', 'stock']);
             if (!$skuModels || count($skuIds) > count($skuModels)) {
                 throw new \Exception('商品不存在或已售罄');
             }
@@ -39,7 +39,7 @@ class OrderController
                 'user_id' => $userId,
                 'region_code' => $address->code,
                 'address' => $address->address,
-                'expire_at' => timestamp($_SERVER['REQUEST_TIME'] + 600)
+                'pay_expire_at' => timestamp($_SERVER['REQUEST_TIME'] + 600)
             ]);
 
             foreach ($skuModels as $skuModel) {

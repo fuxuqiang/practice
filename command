@@ -9,7 +9,12 @@ try {
     $method = new ReflectionMethod($command, 'handle');
     $args = [];
     foreach ($method->getParameters() as $param) {
-        $args[] = ($class = $param->getClass()) ? $class->newInstance() : $argv[2] ?? null;
+        if ($type = $param->getType()) {
+            $class = $type->getName();
+            $args[] = new $class;
+        } else {
+            $args[] = $argv[2] ?? null;
+        }
     }
     $method->invokeArgs(new $command, $args);
 } catch (ErrorException $e) {
