@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command\Yunding;
+namespace App\Command;
 
 use App\Model\{Yunding, Region};
 
