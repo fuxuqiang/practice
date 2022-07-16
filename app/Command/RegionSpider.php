@@ -6,7 +6,7 @@ use Fuxuqiang\Framework\HttpClient;
 
 class RegionSpider
 {
-    const ROOT_URL = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2019/index.html',
+    const ROOT_URL = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2021/index.html',
 
         FILE = __DIR__ . '/../../runtime/spiderQueue.log';
 
@@ -144,7 +144,7 @@ class RegionSpider
     private function domXpath($content)
     {
         $doc = new \DOMDocument;
-        @$doc->loadHTML(str_replace('gb2312', 'utf-8', iconv('GB2312', 'UTF-8//IGNORE', $content)));
+        @$doc->loadHTML($content);
         return new \DOMXPath($doc);
     }
 

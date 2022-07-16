@@ -102,7 +102,7 @@ CREATE TABLE `sku` (
     `name` VARCHAR(255) NOT NULL,
     `price` SMALLINT UNSIGNED NOT NULL,
     `num` TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    `deleted_at` TIMESTAMP,
+    `deleted_at` TIMESTAMP
 );
 
 DROP TABLE IF EXISTS `sku_record`;
