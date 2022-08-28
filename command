@@ -3,22 +3,18 @@
 
 require __DIR__ . '/src/app.php';
 
-try {
-    // 执行
-    $command = '\App\Command\\' . str_replace('/', '\\', $argv[1]);
-    $method = new ReflectionMethod($command, 'handle');
-    $args = [];
-    foreach ($method->getParameters() as $param) {
-        if ($type = $param->getType()) {
-            $class = $type->getName();
-            $args[] = new $class;
-        } else {
-            $args[] = $argv[2] ?? null;
-        }
+// 执行
+$command = '\App\Command\\' . str_replace('/', '\\', $argv[1]);
+$method = new ReflectionMethod($command, 'handle');
+$args = [];
+foreach ($method->getParameters() as $param) {
+    if ($type = $param->getType()) {
+        $class = $type->getName();
+        $args[] = new $class;
+    } elseif ($param->isDefaultValueAvailable()) {
+        $args[] = $param->getDefaultValue();
+    } else {
+        $args[] = $argv[2] ?? null;
     }
-    $method->invokeArgs(new $command, $args);
-} catch (ErrorException $e) {
-    handleErrorException($e);
-} catch (Exception $e) {
-    echo $e->getMessage(), PHP_EOL;
 }
+$method->invokeArgs(new $command, $args);

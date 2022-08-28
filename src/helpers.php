@@ -62,7 +62,7 @@ function handleErrorException($e)
 {
     http_response_code(500);
     if (env('debug')) {
-        echo $e, PHP_EOL;
+        echo $e;
     } else {
         logError($e);
     }

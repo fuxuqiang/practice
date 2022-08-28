@@ -13,7 +13,7 @@ class Order
             JOIN `address` `a` ON `u`.`id`=`a`.`user_id` ORDER BY RAND() LIMIT 5'
         );
         $skus = Mysql::table('sku')->col('id');
-        $http = new \Fuxuqiang\Framework\HttpClient;
+        $http = new \Fuxuqiang\Framework\Http\HttpClient;
         foreach (\App\Model\Login::getToken($users) as $user) {
             $http->request(
                 'http://practice.test/order',

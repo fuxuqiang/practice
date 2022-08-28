@@ -40,7 +40,7 @@ class Mysql implements Connector
         if (!self::$mysqli) {
             $config = env('mysql');
             self::$mysqli = new \mysqli($config['host'], $config['user'], $config['pwd'] ?? null, $config['db']);
-            self::$mysqli->set_charset('utf8');
+            self::$mysqli->set_charset('utf8mb4');
         }
         return new Query(self::$mysqli);
     }
