@@ -17,4 +17,9 @@ foreach ($method->getParameters() as $param) {
         $args[] = $argv[2] ?? null;
     }
 }
-$method->invokeArgs(new $command, $args);
+
+try {
+    $method->invokeArgs(new $command, $args);
+} catch (Throwable $th) {
+    handleThrowable($th);
+}

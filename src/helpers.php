@@ -58,9 +58,8 @@ function msg($msg)
 /**
  * 处理错误
  */
-function handleErrorException($e)
+function handleThrowable($e)
 {
-    http_response_code(500);
     if (env('debug')) {
         echo $e;
     } else {

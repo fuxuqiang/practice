@@ -10,7 +10,7 @@ class RegionSpider
 
         COUNTY_EXPRESSION = '//tr[@class="countytr"]';
 
-    private $queue, $failedQueue, $count, $http,
+    private $queue, $failedQueue, $count, $http, $rootlen,
 
         $expressions = [
             '//tr[@class="provincetr"]/td/a',
@@ -27,22 +27,13 @@ class RegionSpider
     {
         $this->queue = new \SplQueue;
         $this->failedQueue = new \SplQueue;
-        $this->http = new \Fuxuqiang\Framework\Http\HttpClient(true);
-
+        $this->http = new \Fuxuqiang\Framework\Http\HttpClient;
+        $this->rootlen = strlen(dirname(self::ROOT_URL)) + 1;
         if (file_exists(self::FILE)) {
             $this->queue->unserialize(file_get_contents(self::FILE));
             $this->count = $this->getQuery()->count();
         }
-
-        pcntl_signal(SIGINT, function () {
-            foreach ($this->http->getChs() as $ch) {
-                $this->failedQueue->enqueue($this->getUri(curl_getinfo($ch->handle, CURLINFO_EFFECTIVE_URL)));
-            }
-            foreach ($this->queue as $url) {
-                $this->failedQueue->enqueue($url);
-            }
-            exit;
-        });
+        pcntl_signal(SIGINT, function () { exit; });
     }
 
     /**
@@ -51,11 +42,12 @@ class RegionSpider
     public function handle($url = self::ROOT_URL)
     {
         if ($this->queue->isEmpty()) {
-            $this->crawl($url, $this->domXpath(file_get_contents($url)));
+            $this->addUrl($url);
+            $this->multiRequest();
         } else {
             for ($i = 1; !$this->queue->isEmpty(); $i++) {
-                $this->http->addHandle($this->getChildUrl($url, $this->queue->dequeue()));
-                if (!($i % 100) || $this->queue->isEmpty()) {
+                $this->addUrl($this->getChildUrl($url, $this->queue->dequeue()));
+                if (!($i % 9) || $this->queue->isEmpty()) {
                     $this->multiRequest();
                 }
             }
@@ -83,15 +75,13 @@ class RegionSpider
                     $data[] = $this->getDataAndAddHandle($dom, $url);
                 }
             }
-            $this->insert($data);
-            $this->multiRequest();
         } else {
             foreach ($doms as $dom) {
                 $childNodes = $dom->childNodes;
                 $data[] = [$childNodes[0]->nodeValue, $childNodes[2]->nodeValue];
             }
-            $this->insert($data);
         }
+        $this->insert($data);
     }
 
     /**
@@ -99,29 +89,20 @@ class RegionSpider
      */
     private function multiRequest()
     {
-        foreach ($this->http->multiRequest() as $val) {
-            $this->getCurlInfoAndContinueCrawl($val->handle);
+        foreach ($this->http->multiRequest(30) as $val) {
+            $url = curl_getinfo($val->handle, CURLINFO_EFFECTIVE_URL);
+            if (
+                200 == curl_getinfo($val->handle, CURLINFO_HTTP_CODE)
+                && ($xpath = $this->domXpath(curl_multi_getcontent($val->handle)))
+                && $xpath->query('//table')->length
+            ) {
+                $this->crawl($url, $xpath);
+            } else{
+                $this->failedQueue->enqueue($this->getUri($url));
+            }
             pcntl_signal_dispatch();
         }
-    }
-
-    /**
-     * 解析响应页面并继续爬取子页面
-     */
-    private function getCurlInfoAndContinueCrawl($ch)
-    {
-        $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-        if (
-            200 == curl_getinfo($ch, CURLINFO_HTTP_CODE)
-            && ($xpath = $this->domXpath(curl_multi_getcontent($ch)))
-            && $xpath->query('//table')->length
-        ) {
-            echo "\x0d\x1b[2k爬取：$url\n";
-            $this->crawl($url, $xpath);
-        } else{
-            $this->failedQueue->enqueue($this->getUri($url));
-        }
-    }
+    }  
 
     /**
      * 获取加载了内容的DOMXPath
@@ -129,7 +110,7 @@ class RegionSpider
     private function domXpath($content)
     {
         $doc = new \DOMDocument;
-        $doc->loadHTML($content);
+        @$doc->loadHTML($content);
         return new \DOMXPath($doc);
     }
 
@@ -139,8 +120,16 @@ class RegionSpider
     private function getDataAndAddHandle(\DOMNode $dom, $url)
     {
         $uri = $dom->attributes['href']->nodeValue;
-        $this->http->addHandle($this->getChildUrl($url, $uri));
+        $this->addUrl($this->getChildUrl($url, $uri));
         return [substr(basename($uri), 0, -5), $dom->nodeValue];
+    }
+
+    /**
+     * 添加url至HttpClient
+     */
+    private function addUrl($url)
+    {
+        $this->http->addHandle($url, [CURLOPT_ENCODING => 'gzip']);
     }
 
     /**
@@ -184,7 +173,7 @@ class RegionSpider
      */
     private function getUri($url)
     {
-        return ltrim($url, dirname(self::ROOT_URL) . '/');
+        return substr($url, $this->rootlen);
     }
 
     /**
@@ -200,6 +189,12 @@ class RegionSpider
      */
     public function __destruct()
     {
+        foreach ($this->http->getHandles() as $ch) {
+            $this->failedQueue->enqueue($this->getUri(curl_getinfo($ch->handle, CURLINFO_EFFECTIVE_URL)));
+        }
+        foreach ($this->queue as $url) {
+            $this->failedQueue->enqueue($url);
+        }
         if ($this->failedQueue->count()) {
             file_put_contents(self::FILE, $this->failedQueue->serialize());
         } elseif (file_exists(self::FILE)) {

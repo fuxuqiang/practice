@@ -18,7 +18,8 @@ try {
     $response = (\Fuxuqiang\Framework\Container::newInstance($concrete))->$method(...$args);
 // 错误处理
 } catch (ErrorException $e) {
-    handleErrorException($e);
+    http_response_code(500);
+    handleThrowable($e);
 // 异常处理
 } catch (Exception $e) {
     http_response_code($e->getCode());
