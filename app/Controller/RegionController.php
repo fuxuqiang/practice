@@ -2,20 +2,24 @@
 
 namespace App\Controller;
 
+use App\Model\Region;
+use Fuxuqiang\Framework\Route\Route;
+
 class RegionController
 {
-    public function list($p_code = 0)
+    #[Route('regions')]
+    public function list($pCode = 0)
     {
-        $factor = $p_code > 99999 ? 1000 : (in_array($p_code, [4419, 4420]) ? 100000 : 100);
+        $factor = $pCode > 99999 ? 1000 : (in_array($pCode, [4419, 4420]) ? 100000 : 100);
         return [
-            'data' => \Src\Mysql::table('region')
-                ->whereBetween('code', [$p_code * $factor, ($p_code + 1) * $factor])->all()
+            'data' => Region::whereBetween('code', [$pCode * $factor, ($pCode + 1) * $factor])->all()
         ];
     }
 
+    #[Route('getRegionCode')]
     public function getCode($address)
     {
-        if ($regions = \App\Model\Region::getCode($address)) {
+        if ($regions = Region::getCode($address)) {
             return $regions;
         } else {
             return error('未查询到');

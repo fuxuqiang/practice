@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/src/app.php';
+$routeFile = require __DIR__ . '/src/app.php';
 
 // 处理跨域
 if ($cors = env('cors')) {
@@ -14,7 +14,7 @@ if ($cors = env('cors')) {
 
 // 处理请求
 try {
-    [$concrete, $method, $args] = (new \Src\Http)->handle($_SERVER, $_GET + $_POST);
+    [$concrete, $method, $args] = (new \Src\Http)->handle($_SERVER, $_GET + $_POST, $routeFile);
     $response = (\Fuxuqiang\Framework\Container::newInstance($concrete))->$method(...$args);
 // 错误处理
 } catch (ErrorException $e) {

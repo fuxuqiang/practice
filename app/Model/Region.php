@@ -2,8 +2,10 @@
 
 namespace App\Model;
 
-class Region
+class Region extends \Fuxuqiang\Framework\Model
 {
+    const CODE = 'code', NAME = 'name';
+
     public static function getAllCode($code)
     {
         return [
@@ -22,7 +24,7 @@ class Region
 
     public static function find($name)
     {
-        return \Src\Mysql::table('region')->where('name', 'LIKE', $name . '%')->get();
+        return self::where('name', 'LIKE', $name . '%')->get();
     }
 
     public static function getCode($address, $returnType = 'array')

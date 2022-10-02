@@ -2,15 +2,17 @@
 
 namespace App\Command;
 
+use App\Model\Region;
+
 class RegionSpider
 {
     const ROOT_URL = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2021/index.html',
 
-        FILE = __DIR__ . '/../../runtime/spiderQueue.log',
-
         COUNTY_EXPRESSION = '//tr[@class="countytr"]';
 
-    private $queue, $failedQueue, $count, $http, $rootlen,
+    private readonly string $file;
+    
+    private $count, $rootlen,
 
         $expressions = [
             '//tr[@class="provincetr"]/td/a',
@@ -23,15 +25,16 @@ class RegionSpider
     /**
      * 初始化队列和计数
      */
-    public function __construct()
-    {
-        $this->queue = new \SplQueue;
-        $this->failedQueue = new \SplQueue;
-        $this->http = new \Fuxuqiang\Framework\Http\HttpClient;
+    public function __construct(
+        private $queue = new \SplQueue,
+        private $failedQueue = new \SplQueue,
+        private $http = new \Fuxuqiang\Framework\Http\HttpClient,
+    ) {
+        $this->file = runtimePath('spiderQueue.log');
         $this->rootlen = strlen(dirname(self::ROOT_URL)) + 1;
-        if (file_exists(self::FILE)) {
-            $this->queue->unserialize(file_get_contents(self::FILE));
-            $this->count = $this->getQuery()->count();
+        if (file_exists($this->file)) {
+            $this->queue->unserialize(file_get_contents($this->file));
+            $this->count = Region::count();
         }
         pcntl_signal(SIGINT, function () { exit; });
     }
@@ -89,7 +92,7 @@ class RegionSpider
      */
     private function multiRequest()
     {
-        foreach ($this->http->multiRequest(30) as $val) {
+        foreach ($this->http->multiRequest(30, 2) as $val) {
             $url = curl_getinfo($val->handle, CURLINFO_EFFECTIVE_URL);
             if (
                 200 == curl_getinfo($val->handle, CURLINFO_HTTP_CODE)
@@ -99,6 +102,7 @@ class RegionSpider
                 $this->crawl($url, $xpath);
             } else{
                 $this->failedQueue->enqueue($this->getUri($url));
+                sleep(5);
             }
             pcntl_signal_dispatch();
         }
@@ -151,20 +155,11 @@ class RegionSpider
     }
 
     /**
-     * 获取数据库查询实例
-     * @return \Fuxuqiang\Framework\Mysql
-     */
-    private function getQuery()
-    {
-        return \Src\Mysql::table('region');
-    }
-
-    /**
      * 写入数据
      */
     private function insert($data)
     {
-        $this->getQuery()->cols('code', 'name')->insert($data);
+        Region::cols(Region::CODE, Region::NAME)->insert($data);
         echo "\x0d\x1b[2k", '数据量：', $this->count += count($data);
     }
 
@@ -196,9 +191,9 @@ class RegionSpider
             $this->failedQueue->enqueue($url);
         }
         if ($this->failedQueue->count()) {
-            file_put_contents(self::FILE, $this->failedQueue->serialize());
-        } elseif (file_exists(self::FILE)) {
-            unlink(self::FILE);
+            file_put_contents($this->file, $this->failedQueue->serialize());
+        } elseif (file_exists($this->file)) {
+            unlink($this->file);
             echo PHP_EOL, '爬取完成';
         }
         echo PHP_EOL;
