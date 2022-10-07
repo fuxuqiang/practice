@@ -10,11 +10,11 @@ date_default_timezone_set(env('timezone'));
 //         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 //     }
 // });
-// register_shutdown_function(function () {
-//     if ($error = error_get_last()) {
-//         handleErrorException(new ErrorException($error['message'], 0, 1, $error['file'], $error['line']));
-//     }
-// });
+register_shutdown_function(function () {
+    if ($error = error_get_last()) {
+        handleThrowable(new ErrorException($error['message'], 0, 1, $error['file'], $error['line']));
+    }
+});
 
 // 设置模型的数据库连接
 \Fuxuqiang\Framework\Model::setConnector(\Src\Mysql::getInstance());

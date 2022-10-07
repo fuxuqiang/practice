@@ -24,7 +24,7 @@ class Http
             return \Src\Mysql::table($table)->exists($col, $val);
         }, env('per_page'));
 
-        $route = (new Router($routeFile))->get($server['REQUEST_METHOD'], $request->uri());
+        $route = (new Router($routeFile))->get($server['REQUEST_METHOD'], $request->url());
 
         Container::instance(Request::class, $request);
 
