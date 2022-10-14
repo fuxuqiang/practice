@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-class Region extends \Fuxuqiang\Framework\Model
+class Region extends \Fuxuqiang\Framework\Model\Model
 {
     const CODE = 'code', NAME = 'name';
 

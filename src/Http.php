@@ -20,9 +20,12 @@ class Http
     public function handle($server, $input, $routeFile)
     {
         // 实例化请求类
-        $request = new Request($server, $input, function ($val, $table, $col) {
-            return \Src\Mysql::table($table)->exists($col, $val);
-        }, env('per_page'));
+        $request = new Request(
+            $server,
+            $input,
+            fn($val, $table, $col) => \Src\Mysql::table($table)->exists($col, $val),
+            env('per_page')
+        );
 
         $route = (new Router($routeFile))->get($server['REQUEST_METHOD'], $request->url());
 

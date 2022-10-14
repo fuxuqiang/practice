@@ -14,14 +14,14 @@ if ($cors = env('cors')) {
 try {
     [$concrete, $method, $args] = (new \Src\Http)->handle($_SERVER, $_GET + $_POST, $routeFile);
     $response = (\Fuxuqiang\Framework\Container::newInstance($concrete))->$method(...$args);
-// 错误处理
-} catch (ErrorException $e) {
+// 异常响应
+} catch (\Fuxuqiang\Framework\ResponseException $e) {
+    http_response_code($e->getCode());
+    $response = ($msg = $e->getMessage()) ? error($msg) : '';
+// 其他异常处理
+} catch (Exception $e) {
     http_response_code(500);
     handleThrowable($e);
-// 异常处理
-} catch (Exception $e) {
-    http_response_code($e->getCode());
-    $response = $msg = $e->getMessage() ? error($msg) : '';
 }
 
 // 响应
