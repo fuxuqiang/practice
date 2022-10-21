@@ -4,6 +4,8 @@ require __DIR__ . '/../vendor/autoload.php';
 
 date_default_timezone_set(env('timezone'));
 
+error_reporting(-1);
+
 // 报错处理
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     if (error_reporting() & $errno) {

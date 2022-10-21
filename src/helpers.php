@@ -40,6 +40,14 @@ function sessionStart()
 }
 
 /**
+ * 响应的数据格式
+ */
+function data($data)
+{
+    return ['data' => $data];
+}
+
+/**
  * 获取错误信息格式
  */
 function error($msg)

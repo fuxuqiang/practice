@@ -20,7 +20,7 @@ class UserController
     /**
      * 交易
      */
-    public function trade($code, $price, $num, $date, $note = '', Request $request)
+    public function trade($code, $price, $num, $date, Request $request, $note = '')
     {
         $request->validate(['price' => 'int|min:1', 'num' => 'int|nq:0']);
 

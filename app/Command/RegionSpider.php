@@ -2,7 +2,9 @@
 
 namespace App\Command;
 
+use SplQueue;
 use App\Model\Region;
+use Fuxuqiang\Framework\Http\HttpClient;
 
 class RegionSpider
 {
@@ -26,9 +28,9 @@ class RegionSpider
      * 初始化队列和计数
      */
     public function __construct(
-        private $queue = new \SplQueue,
-        private $failedQueue = new \SplQueue,
-        private $http = new \Fuxuqiang\Framework\Http\HttpClient,
+        private SplQueue $queue = new SplQueue,
+        private SplQueue $failedQueue = new SplQueue,
+        private HttpClient $http = new HttpClient,
     ) {
         $this->file = runtimePath('spiderQueue.log');
         $this->rootlen = strlen(dirname(self::ROOT_URL)) + 1;
@@ -133,7 +135,7 @@ class RegionSpider
      */
     private function addUrl($url)
     {
-        $this->http->addHandle($url, [CURLOPT_ENCODING => 'gzip']);
+        $this->http->addHandle($url, [], [CURLOPT_ENCODING => 'gzip']);
     }
 
     /**
