@@ -6,8 +6,12 @@ use Fuxuqiang\Framework\{Container, JWT, Request, Route\Router};
 
 class Http
 {
-    public function __construct()
+    private $router;
+
+    public function __construct($routeFile)
     {
+        $this->router = new Router($routeFile);
+        // 注册JWT实例
         Container::bind(JWT::class, function () {
             $config = env('jwt');
             return new JWT($config['exp'], $config['key']);
@@ -17,21 +21,21 @@ class Http
     /**
      * 处理请求
      */
-    public function handle($server, $input, $routeFile)
+    public function handle($server, $input)
     {
         // 实例化请求类
-        $request = new Request(
-            $server,
-            $input,
-            fn($val, $table, $col) => \Src\Mysql::table($table)->exists($col, $val),
-            env('per_page')
+        Container::instance(
+            Request::class,
+            $request = new Request(
+                $server,
+                $input,
+                fn($val, $table, $col) => \Src\Mysql::table($table)->exists($col, $val),
+                env('per_page')
+            )
         );
 
-        $route = (new Router($routeFile))->get($server['REQUEST_METHOD'], $request->url());
-
-        Container::instance(Request::class, $request);
-
         // 解析方法参数
+        $route = $this->router->get($server['REQUEST_METHOD'], $request->url());
         $args = [];
         $input = $request->get();
         foreach ((new \ReflectionMethod($route['class'], $route['method']))->getParameters() as $param) {

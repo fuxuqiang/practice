@@ -22,7 +22,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     public static function setUpBeforeClass(): void
     {
         if (!self::$http) {
-            self::$http = new Http;
+            self::$http = new Http(require __DIR__ . '/app.php');
         }
     }
 

@@ -86,7 +86,12 @@ class RegionSpider
                 $data[] = [$childNodes[0]->nodeValue, $childNodes[2]->nodeValue];
             }
         }
-        $this->insert($data);
+        try {
+            $this->insert($data);
+        } catch (\Throwable $th) {
+            $this->failedQueue->enqueue($this->getUri($url));
+            throw $th;
+        }
     }
 
     /**

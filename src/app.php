@@ -4,7 +4,10 @@ require __DIR__ . '/../vendor/autoload.php';
 
 date_default_timezone_set(env('timezone'));
 
-error_reporting(-1);
+if (env('debug')) {
+    ini_set('display_errors', 'On');
+    error_reporting(-1);
+}
 
 // 报错处理
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
