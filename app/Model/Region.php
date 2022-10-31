@@ -37,31 +37,4 @@ class Region extends \Fuxuqiang\Framework\Model\Model
     {
         return self::where('name', 'LIKE', $name . '%')->get();
     }
-
-    /**
-     * 根据地址搜索区域
-     */
-    public static function getCode($address, $returnType = 'array')
-    {
-        $getRegionName = function ($offset) use ($address) {
-            return mb_substr($address, $offset, 3);
-        };
-        if ($province = self::search($getRegionName(0))) {
-            $provinceNameLen = mb_strlen($province->name);
-            if (
-                ($cityName = $getRegionName($provinceNameLen))
-                && ($city = self::search($cityName))
-                && $districtName = $getRegionName($provinceNameLen + mb_strlen($city->name))
-            ) {
-                $district = self::search($districtName);
-            } else {
-                return self::find(self::getAllCode($province->code));
-            }
-            return $returnType == 'array' ? 
-                [$province, $city ?? null, $district ?? null] :
-                $district ?? $city ?? $province;
-        } else {
-            return false;
-        }
-    }
 }

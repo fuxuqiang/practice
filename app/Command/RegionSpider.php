@@ -52,7 +52,7 @@ class RegionSpider
         } else {
             for ($i = 1; !$this->queue->isEmpty(); $i++) {
                 $this->addUrl($this->getChildUrl($url, $this->queue->dequeue()));
-                if (!($i % 9) || $this->queue->isEmpty()) {
+                if (!($i % 99) || $this->queue->isEmpty()) {
                     $this->multiRequest();
                 }
             }

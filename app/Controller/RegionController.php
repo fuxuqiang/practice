@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Model\Region;
+use App\Model\{Region, Address};
 use Fuxuqiang\Framework\Route\Route;
 
 class RegionController
@@ -14,7 +14,7 @@ class RegionController
     public function list($pCode = 0)
     {
         $factor = $pCode > 99999 ? 1000 : (in_array($pCode, [4419, 4420]) ? 100000 : 100);
-        return data(Region::whereBetween('code', [$pCode * $factor, ($pCode + 1) * $factor])->all());
+        return Region::whereBetween('code', [$pCode * $factor, ($pCode + 1) * $factor])->all();
     }
 
     /**
@@ -23,10 +23,6 @@ class RegionController
     #[Route('getRegionCode')]
     public function getCode($address)
     {
-        if ($regions = Region::getCode($address)) {
-            return $regions;
-        } else {
-            return error('未查询到');
-        }
+        return (new Address($address))->getCode();
     }
 }
