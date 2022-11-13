@@ -37,4 +37,13 @@ class Region extends \Fuxuqiang\Framework\Model\Model
     {
         return self::where('name', 'LIKE', $name . '%')->get();
     }
+
+    /**
+     * 获取下级区域
+     */
+    public static function getChild($code)
+    {
+        $factor = $code > 99999 ? 1000 : (in_array($code, [4419, 4420]) ? 100000 : 100);
+        return self::whereBetween('code', [$code * $factor, ($code + 1) * $factor])->all();
+    }
 }

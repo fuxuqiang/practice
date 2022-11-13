@@ -6,12 +6,12 @@ class RegionControllerTest extends \Src\TestCase
 {
     public function testList()
     {
-        echo $this->get('regions', ['pCode' => 3417])->assertOk();
+        echo $this->get('regions', ['code' => 3417])->assertOk();
     }
 
-    public function testGetRegionCode()
+    public function testParseRegion()
     {
-        echo $this->get('getRegionCode', ['address' => '安徽省池州市贵池区殷汇镇'])->assertOk();
-        echo $this->get('getRegionCode', ['address' => '沛县'])->assertOk();
+        echo $this->get('parseRegion', ['address' => '安徽省池州市贵池区秀山巷'])->assertOk();
+        echo $this->get('parseRegion', ['address' => '沛县'])->assertOk();
     }
 }

@@ -11,18 +11,17 @@ class RegionController
      * 查询下级区域
      */
     #[Route('regions')]
-    public function list($pCode = 0)
+    public function list($code)
     {
-        $factor = $pCode > 99999 ? 1000 : (in_array($pCode, [4419, 4420]) ? 100000 : 100);
-        return Region::whereBetween('code', [$pCode * $factor, ($pCode + 1) * $factor])->all();
+        return Region::getChild($code);
     }
 
     /**
      * 根据地址获取区域代码
      */
-    #[Route('getRegionCode')]
-    public function getCode($address)
+    #[Route('parseRegion')]
+    public function parseRegion($address)
     {
-        return (new Address($address))->getCode();
+        return (new Address($address))->parseRegion();
     }
 }

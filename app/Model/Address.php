@@ -23,14 +23,17 @@ class Address
     /**
      * 获取地址的详细行政区
      */
-    public function getCode()
+    public function parseRegion()
     {
         if ($province = $this->getRegion(0)) {
-            if ($city = $this->getRegion($foundRegionLen = mb_strlen($province->name))) {
-                if ($district = $this->getRegion($foundRegionLen += mb_strlen($city->name))) {
-                    $town = $this->getRegion($foundRegionLen += mb_strlen($district->name));
+            if ($city = $this->getRegion($regionLen = mb_strlen($province->name))) {
+                if ($district = $this->getRegion($regionLen += mb_strlen($city->name))) {
+                    $town = $this->getRegion($regionLen += mb_strlen($district->name));
                 }
-                return [$province, $city, $district, $town ?? null];
+                return [
+                    'region' => [$province, $city, $district, $town ?? null],
+                    'address' => mb_substr($this->address, $regionLen + mb_strlen($town->name)),
+                ];
             } else {
                 return Region::find(Region::getAllCode($province->code));
             }

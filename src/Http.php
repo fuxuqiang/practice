@@ -2,7 +2,7 @@
 
 namespace Src;
 
-use Fuxuqiang\Framework\{Container, JWT, Request, Route\Router};
+use Fuxuqiang\Framework\{Container, JWT, Request, Route\Router, ResponseException};
 
 class Http
 {
@@ -46,7 +46,7 @@ class Http
             } elseif ($param->isDefaultValueAvailable()) {
                 $args[] = $param->getDefaultValue();
             } else {
-                throw new \Exception(env('debug') ? '缺少参数：' . $paramName : '', 400);
+                throw new ResponseException(env('debug') ? '缺少参数：' . $paramName : '', 400);
             }
         }
 
