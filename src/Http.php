@@ -29,7 +29,7 @@ class Http
             $request = new Request(
                 $server,
                 $input,
-                fn($val, $table, $col) => \Src\Mysql::table($table)->exists($col, $val),
+                fn($val, $table, $col) => Mysql::table($table)->exists($col, $val),
                 env('per_page')
             )
         );

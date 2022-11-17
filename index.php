@@ -1,5 +1,7 @@
 <?php
 
+use Fuxuqiang\Framework\{Container, ResponseException};
+
 // 加载公共脚本，获取路由文件
 $routeFile = require __DIR__ . '/src/app.php';
 
@@ -14,9 +16,9 @@ if ($cors = env('cors')) {
 // 处理请求
 try {
     [$concrete, $method, $args] = (new \Src\Http($routeFile))->handle($_SERVER, $_GET + $_POST);
-    $response = (\Fuxuqiang\Framework\Container::newInstance($concrete))->$method(...$args);
+    $response = (Container::newInstance($concrete))->$method(...$args);
 // 异常响应
-} catch (\Fuxuqiang\Framework\ResponseException $e) {
+} catch (ResponseException $e) {
     http_response_code($e->getCode());
     $response = ($msg = $e->getMessage()) ? error($msg) : '';
 // 其他异常处理

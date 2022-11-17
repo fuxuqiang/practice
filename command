@@ -11,8 +11,7 @@ if ($argv[1] == 'route') {
     $method = new ReflectionMethod($command, 'handle');
     foreach ($method->getParameters() as $key => $param) {
         if ($type = $param->getType()) {
-            $class = $type->getName();
-            $args[] = new $class;
+            $args[] = new $type->getName();
         } elseif ($param->isDefaultValueAvailable()) {
             $args[] = $param->getDefaultValue();
         } else {
