@@ -13,7 +13,7 @@ class RegionController
     #[Route('regions')]
     public function list($code)
     {
-        return Region::getChild($code);
+        return Region::child($code)->all();
     }
 
     /**

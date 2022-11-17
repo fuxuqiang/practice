@@ -46,7 +46,10 @@ class Http
             } elseif ($param->isDefaultValueAvailable()) {
                 $args[] = $param->getDefaultValue();
             } else {
-                throw new ResponseException(env('debug') ? '缺少参数：' . $paramName : '', 400);
+                throw new ResponseException(
+                    env('debug') ? '缺少参数：' . $paramName : '',
+                    ResponseException::BAD_REQUEST
+                );
             }
         }
 

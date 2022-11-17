@@ -2,7 +2,9 @@
 
 namespace App\Model;
 
-class Region extends \Fuxuqiang\Framework\Model\Model
+use Fuxuqiang\Framework\{Mysql, Model\Model};
+
+class Region extends Model
 {
     const CODE = 'code', NAME = 'name';
 
@@ -33,17 +35,17 @@ class Region extends \Fuxuqiang\Framework\Model\Model
     /**
      * 根据名称搜索区域
      */
-    public static function search($name)
+    public function scopeLike(Mysql $query, $name)
     {
-        return self::where('name', 'LIKE', $name . '%')->get();
+        return $query->where('name', 'LIKE', $name . '%');
     }
 
     /**
      * 获取下级区域
      */
-    public static function getChild($code)
+    public function scopeChild(Mysql $query, $code)
     {
         $factor = $code > 99999 ? 1000 : (in_array($code, [4419, 4420]) ? 100000 : 100);
-        return self::whereBetween('code', [$code * $factor, ($code + 1) * $factor])->all();
+        return $query->whereBetween('code', [$code * $factor, ($code + 1) * $factor]);
     }
 }

@@ -32,22 +32,17 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected function request($requestMethod, $uri, $params = [], $token = null)
     {
         $token = $token ?: $this->token;
-        try {
-            [$concrete, $method, $args] = self::$http->handle([
-                'REQUEST_METHOD' => $requestMethod,
-                'REQUEST_URI' => $uri,
-                'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
-            ], $params);
-            if (!$controller = Container::get($concrete)) {
-                $controller = Container::newInstance($concrete);
-                Container::instance($concrete, $controller);
-            }
-            $response = $controller->$method(...$args);
-            $status = 200;
-        } catch (\Exception $e) {
-            $response = error($e->getMessage());
-            $status = $e->getCode();
+        [$concrete, $method, $args] = self::$http->handle([
+            'REQUEST_METHOD' => $requestMethod,
+            'REQUEST_URI' => $uri,
+            'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
+        ], $params);
+        if (!$controller = Container::get($concrete)) {
+            $controller = Container::newInstance($concrete);
+            Container::instance($concrete, $controller);
         }
+        $response = $controller->$method(...$args);
+        $status = 200;
         $this->token = null;
         return new TestResponse($response, $status);
     }
