@@ -15,7 +15,7 @@ if ($cors = env('cors')) {
 
 // 处理请求
 try {
-    [$concrete, $method, $args] = (new \Src\Http($routeFile))->handle($_SERVER, $_GET + $_POST);
+    [$concrete, $method, $args] = (new \Src\Http($routeFile))->handle($_SERVER, $_REQUEST);
     $response = (Container::newInstance($concrete))->$method(...$args);
 // 异常响应
 } catch (ResponseException $e) {
@@ -23,7 +23,7 @@ try {
     $response = ($msg = $e->getMessage()) ? error($msg) : '';
 // 其他异常处理
 } catch (Exception $e) {
-    http_response_code(500);
+    http_response_code(ResponseException::INTERNAL_SERVER_ERROR);
     handleThrowable($e);
 }
 

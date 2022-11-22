@@ -39,18 +39,12 @@ class Http
         $args = [];
         $input = $request->get();
         foreach ((new \ReflectionMethod($route['class'], $route['method']))->getParameters() as $param) {
-            if ($class = $param->getType()) {
-                $args[] = Container::get($class);
-            } elseif (($paramName = $param->getName()) && isset($input[$paramName])) {
-                $args[] = $input[$paramName];
-            } elseif ($param->isDefaultValueAvailable()) {
-                $args[] = $param->getDefaultValue();
-            } else {
-                throw new ResponseException(
-                    env('debug') ? '缺少参数：' . $paramName : '',
-                    ResponseException::BAD_REQUEST
-                );
-            }
+            $args[] = match (true) {
+                !is_null($class = $param->getType()) => Container::get($class),
+                isset($input[$paramName = $param->getName()]) => $input[$paramName],
+                $param->isDefaultValueAvailable() => $param->getDefaultValue(),
+                default => throw new ResponseException('缺少参数：' . $paramName, ResponseException::BAD_REQUEST),
+            };
         }
 
         return [$route['class'], $route['method'], $args];

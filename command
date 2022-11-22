@@ -9,14 +9,12 @@ if ($argv[1] == 'route') {
     $command = '\App\Command\\' . str_replace('/', '\\', $argv[1]);
     $args = [];
     $method = new ReflectionMethod($command, 'handle');
-    foreach ($method->getParameters() as $key => $param) {
-        if ($type = $param->getType()) {
-            $args[] = new $type->getName();
-        } elseif ($param->isDefaultValueAvailable()) {
-            $args[] = $param->getDefaultValue();
-        } else {
-            $args[] = $argv[2] ?? null;
-        }
+    foreach ($method->getParameters() as $param) {
+        $args[] = match (true) {
+            !is_null($type = $param->getType()) => new $type->getName(),
+            $param->isDefaultValueAvailable() => $param->getDefaultValue(),
+            default => $argv[2] ?? null,
+        };
     }
     try {
         $method->invokeArgs(new $command, $args);
