@@ -35,9 +35,9 @@ class Http
         );
 
         // 解析方法参数
-        $route = $this->router->get($server['REQUEST_METHOD'], $request->url());
+        $route = $this->router->get($server['REQUEST_METHOD'], $request->uri);
         $args = [];
-        $input = $request->get();
+        $input = $request->getData();
         foreach ((new \ReflectionMethod($route['class'], $route['method']))->getParameters() as $param) {
             $args[] = match (true) {
                 !is_null($class = $param->getType()) => Container::get($class),

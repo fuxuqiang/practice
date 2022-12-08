@@ -10,34 +10,36 @@ class Region extends Model
 
     protected $primaryKey = self::CODE;
 
+    public $code, $name;
+
     /**
      * 获取所有级联区域代码
      */
-    public static function getAllCode($code)
+    public function getAllCode()
     {
         return [
-            (int) substr($code, 0, 2),
-            self::getParentCode($code, 4),
-            self::getParentCode($code, 6),
-            self::getParentCode($code, 9),
-            strlen($code) == 12 ? $code : 0
+            (int) substr($this->code, 0, 2),
+            self::getParentCode(4),
+            self::getParentCode(6),
+            self::getParentCode(9),
+            $this->code > 99999999999 ? $this->code : 0,
         ];
     }
 
     /**
      * 获取上级区域代码
      */
-    private static function getParentCode($code, $len)
+    private function getParentCode($len)
     {
-        return strlen($code) >= $len ? (int) substr($code, 0, $len) : 0;
+        return strlen($this->code) >= $len ? (int) substr($this->code, 0, $len) : 0;
     }
 
     /**
      * 根据名称搜索区域
      */
-    public function scopeLike(Mysql $query, $name)
+    public function scopeSearch(Mysql $query, $name)
     {
-        return $query->where('name', 'LIKE', $name . '%');
+        return $query->where(self::NAME, 'LIKE', $name.'%');
     }
 
     /**
@@ -46,6 +48,6 @@ class Region extends Model
     public function scopeChild(Mysql $query, $code)
     {
         $factor = $code > 99999 ? 1000 : (in_array($code, [4419, 4420]) ? 100000 : 100);
-        return $query->whereBetween('code', [$code * $factor, ($code + 1) * $factor]);
+        return $query->whereBetween(self::CODE, [$code * $factor, ($code + 1) * $factor]);
     }
 }

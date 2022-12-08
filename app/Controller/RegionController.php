@@ -19,9 +19,9 @@ class RegionController
     /**
      * 根据地址获取区域代码
      */
-    #[Route('parseRegion')]
-    public function parseRegion($address)
+    #[Route('parseAddress')]
+    public function parseAddress($address)
     {
-        return (new Address($address))->parseRegion();
+        return (new Address($address))->getParsedAddress();
     }
 }
