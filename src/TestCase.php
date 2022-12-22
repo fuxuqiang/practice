@@ -35,7 +35,9 @@ class TestCase extends \PHPUnit\Framework\TestCase
         [$concrete, $method, $args] = self::$http->handle([
             'REQUEST_METHOD' => $requestMethod,
             'REQUEST_URI' => $uri,
-            'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null
+            'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null,
+            'REMOTE_ADDR' => '127.0.0.1',
+            'REQUEST_TIME' => time(),
         ], $params);
         if (!$controller = Container::get($concrete)) {
             $controller = Container::newInstance($concrete);

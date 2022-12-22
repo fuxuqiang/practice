@@ -34,16 +34,22 @@ class Http
             )
         );
 
-        // 解析方法参数
+        // 获取路由
         $route = $this->router->get($server['REQUEST_METHOD'], $request->uri);
+        // 执行中间件
+        foreach ($route['middlewares'] as $middleware) {
+            (new $middleware)->handle($request);
+        }
+        // 解析方法参数
         $args = [];
         $input = $request->getData();
         foreach ((new \ReflectionMethod($route['class'], $route['method']))->getParameters() as $param) {
+            $type = $param->getType();
             $args[] = match (true) {
-                !is_null($class = $param->getType()) => Container::get($class),
-                isset($input[$paramName = $param->getName()]) => $input[$paramName],
+                class_exists($type) => Container::get($type),
+                isset($input[$paramName = $param->getName()]) && (!$type || ('is_'.$type)($input[$paramName])) => $input[$paramName],
                 $param->isDefaultValueAvailable() => $param->getDefaultValue(),
-                default => throw new ResponseException('缺少参数：' . $paramName, ResponseException::BAD_REQUEST),
+                default => throw new ResponseException($paramName.'参数存在问题', ResponseException::BAD_REQUEST),
             };
         }
 

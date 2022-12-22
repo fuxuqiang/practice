@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Test;
 
 class RegionControllerTest extends \Src\TestCase
 {

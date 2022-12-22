@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Test;
 
 use Src\{Redis, Mysql};
 use Fuxuqiang\Framework\{Container, JWT};
