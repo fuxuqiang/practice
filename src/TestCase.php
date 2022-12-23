@@ -14,7 +14,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * @var string
      */
-    protected $token;
+    protected $token, $ip = '127.0.0.1';
 
     /**
      * 设置测试基境
@@ -32,13 +32,16 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected function request($requestMethod, $uri, $params = [], $token = null)
     {
         $token = $token ?: $this->token;
-        [$concrete, $method, $args] = self::$http->handle([
-            'REQUEST_METHOD' => $requestMethod,
-            'REQUEST_URI' => $uri,
-            'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null,
-            'REMOTE_ADDR' => '127.0.0.1',
-            'REQUEST_TIME' => time(),
-        ], $params);
+        [$concrete, $method, $args] = self::$http->handle(
+            [
+                'REQUEST_METHOD' => $requestMethod,
+                'REQUEST_URI' => $uri,
+                'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null,
+                'REMOTE_ADDR' => $this->ip,
+                'REQUEST_TIME' => time(),
+            ],
+            $params
+        );
         if (!$controller = Container::get($concrete)) {
             $controller = Container::newInstance($concrete);
             Container::instance($concrete, $controller);
@@ -47,6 +50,15 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $status = 200;
         $this->token = null;
         return new TestResponse($response, $status);
+    }
+
+    /**
+     * 使用指定ip地址
+     */
+    public function withIP($ip)
+    {
+        $this->ip = $ip;
+        return $this;
     }
 
     /**

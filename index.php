@@ -22,9 +22,9 @@ try {
     http_response_code($e->getCode());
     $response = ($msg = $e->getMessage()) ? error($msg) : '';
 // 其他异常处理
-} catch (Exception $e) {
+} catch (\Throwable $th) {
     http_response_code(ResponseException::INTERNAL_SERVER_ERROR);
-    handleThrowable($e);
+    handleThrowable($th);
 }
 
 // 响应
@@ -32,4 +32,3 @@ if (!empty($response)) {
     header('Content-Type: application/json');
     echo is_string($response) ? $response : json_encode($response);
 }
-
