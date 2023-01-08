@@ -166,7 +166,7 @@ class RegionSpider
      */
     private function insert($data)
     {
-        Region::cols(Region::CODE, Region::NAME)->insert($data);
+        Region::fields(Region::CODE, Region::NAME)->insert($data);
         echo "\x0d\x1b[2k", '数据量：', $this->count += count($data);
     }
 

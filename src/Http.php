@@ -46,7 +46,7 @@ class Http
         foreach ((new \ReflectionMethod($route['class'], $route['method']))->getParameters() as $param) {
             $type = $param->getType();
             $args[] = match (true) {
-                class_exists($type) => Container::get($type),
+                $type && class_exists($type) => Container::get($type),
                 isset($input[$paramName = $param->getName()]) && (!$type || ('is_'.$type)($input[$paramName])) => $input[$paramName],
                 $param->isDefaultValueAvailable() => $param->getDefaultValue(),
                 default => throw new ResponseException($paramName.'参数存在问题', ResponseException::BAD_REQUEST),

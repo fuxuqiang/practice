@@ -4,7 +4,7 @@ namespace App\Controller;
 use Fuxuqiang\Framework\{Request, ResponseException, Route\Route};
 use Src\{Mysql, Redis};
 
-#[Route(middlewares:[\App\Middleware\RecordRequest::class])]
+#[Route(middlewares:[\App\Middleware\RequestRecorder::class])]
 class UserController
 {
     #[Route('sendCode', 'POST')]

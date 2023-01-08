@@ -6,7 +6,7 @@ use Fuxuqiang\Framework\{Mysql, Model\Model};
 
 class Region extends Model
 {
-    const CODE = 'code', NAME = 'name';
+    const CODE = 'code', NAME = 'name', EN_NAME = 'en_name', SHORT_EN_NAME = 'short_en_name';
 
     protected $primaryKey = self::CODE;
 
@@ -39,7 +39,7 @@ class Region extends Model
      */
     public function scopeSearch(Mysql $query, $name)
     {
-        return $query->where(self::NAME, 'LIKE', $name.'%');
+        return $query->whereLike(self::NAME, $name.'%');
     }
 
     /**

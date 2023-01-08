@@ -14,4 +14,9 @@ class RegionControllerTest extends \Src\TestCase
         echo $this->get('parseAddress', ['address' => '安徽省池州市贵池区池阳街道秀山巷'])->assertOk();
         echo $this->get('parseAddress', ['address' => '沛县人民路'])->assertOk();
     }
+
+    public function testSearch()
+    {
+        echo $this->get('searchCity', ['name' => 'cz'])->assertOk();
+    }
 }

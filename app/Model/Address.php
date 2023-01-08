@@ -38,7 +38,7 @@ class Address
         if (
             strlen($regionName) > 1
             && ($child = Region::search($regionName)->child($region->code)->first())
-            && $region->code < 999999
+            && $child->code < 999999999
         ) {
             $this->regions[] = $child;
             $this->findChild($child);

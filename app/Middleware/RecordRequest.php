@@ -4,7 +4,7 @@ namespace App\Middleware;
 
 use Fuxuqiang\Framework\{Request, ResponseException};
 
-class RecordRequest
+class RequestRecorder
 {
     public function handle(Request $request)
     {

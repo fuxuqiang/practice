@@ -69,7 +69,7 @@ function msg($msg)
 function handleThrowable($e)
 {
     if (env('debug')) {
-        echo $e;
+        echo $e . PHP_EOL;
     } else {
         logError($e);
     }
