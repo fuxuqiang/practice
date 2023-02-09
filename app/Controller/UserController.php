@@ -20,4 +20,10 @@ class UserController
         }
         Redis::setex($mobile, 99, mt_rand(1000, 9999));
     }
+
+    #[Route('login', 'POST')]
+    public function login(string $mobile, int $code)
+    {
+        
+    }
 }
