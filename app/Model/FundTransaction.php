@@ -2,17 +2,21 @@
 
 namespace App\Model;
 
-class FundTransaction extends \Fuxuqiang\Framework\Model\Model
+use Fuxuqiang\Framework\{Mysql, Model\Model};
+
+class FundTransaction extends Model
 {
-    const USER_ID = 'user_id',
-        DATE = 'date',
+    const BOUGHT_AT = 'bought_at',
+        CONFIRM_AT = 'confirm_at',
         AMOUNT = 'amount',
         PORTION = 'portion',
-        IS_FOLLOWED = 'is_followed';
+        PER_WORTH = 'per_worth',
+        IS_SOLD = 'is_sold';
 
-    public $id,
-        $user_id,
-        $date,
-        $amount,
-        $portion;
+    public $id, $portion;
+
+    public function scopeCanSold(Mysql $query)
+    {
+        return $query->where(self::IS_SOLD, 0);
+    }
 }

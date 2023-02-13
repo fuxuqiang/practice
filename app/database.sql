@@ -19,11 +19,21 @@ CREATE TABLE `fund_worth` (
 DROP TABLE IF EXISTS `fund_transaction`;
 CREATE TABLE `fund_transaction` (
     `id` SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    `user_id` TINYINT UNSIGNED NOT NULL,
-    `date` DATE NOT NULL,
+    `bought_at` DATE NOT NULL,
+    `confirm_at` DATE NOT NULL,
     `amount` INT NOT NULL,
     `portion` INT NOT NULL,
-    `is_followed` TINYINT NOT NULL DEFAULT 0
+    `per_worth` MEDIUMINT UNSIGNED NOT NULL,
+    `is_sold` TINYINT
+);
+
+DROP TABLE IF EXISTS `fund_profit`;
+CREATE TABLE `fund_profit` (
+    `date` DATE NOT NULL,
+    `portion` INT UNSIGNED NOT NULL,
+    `worth` INT UNSIGNED NOT NULL,
+    `profit` MEDIUMINT NOT NULL,
+    `total_profit` MEDIUMINT NOT NULL
 );
 
 DROP TABLE IF EXISTS `request_log`;
