@@ -4,7 +4,8 @@ namespace App\Model;
 
 class FundProfit extends \Fuxuqiang\Framework\Model\Model
 {
-    const DATE = 'date',
+    const FUND_ID = 'fund_id',
+        DATE = 'date',
         WORTH = 'worth',
         PORTION = 'portion',
         PROFIT = 'profit',

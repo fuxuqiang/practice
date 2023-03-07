@@ -3,7 +3,11 @@
     "description": "简易PHP框架（自己练习造轮子用的）",
     "require": {
         "fuxuqiang/practice-framework": "dev-master",
-        "overtrue/pinyin": "^5.0"
+        "overtrue/pinyin": "^5.0",
+        "ext-pcntl": "*",
+        "ext-dom": "*",
+        "ext-curl": "*",
+        "ext-mbstring": "*"
     },
     "autoload": {
         "psr-4": {

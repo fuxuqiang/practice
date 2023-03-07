@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c6cbe5a97746d2ecaab7a6c42cdf03ba",
+    "content-hash": "7731320e3d3cf5887adb3c93c0edfa8d",
     "packages": [
         {
             "name": "fuxuqiang/practice-framework",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fuxuqiang/practice-framework.git",
-                "reference": "39d9fc76a0e5f253666e4c49fbfb091fe6620757"
+                "reference": "8721a9167e9002584c8b8de0cc125e86fc1c351e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fuxuqiang/practice-framework/zipball/39d9fc76a0e5f253666e4c49fbfb091fe6620757",
-                "reference": "39d9fc76a0e5f253666e4c49fbfb091fe6620757",
+                "url": "https://api.github.com/repos/fuxuqiang/practice-framework/zipball/8721a9167e9002584c8b8de0cc125e86fc1c351e",
+                "reference": "8721a9167e9002584c8b8de0cc125e86fc1c351e",
                 "shasum": ""
             },
             "require": {
@@ -39,7 +39,7 @@
                 "issues": "https://github.com/fuxuqiang/practice-framework/issues",
                 "source": "https://github.com/fuxuqiang/practice-framework/tree/master"
             },
-            "time": "2023-02-13T15:30:26+00:00"
+            "time": "2023-03-07T14:31:58+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -102,16 +102,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v4.15.3",
+            "version": "v4.15.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "570e980a201d8ed0236b0a62ddf2c9cbb2034039"
+                "reference": "6bb5176bc4af8bcb7d926f88718db9b96a2d4290"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/570e980a201d8ed0236b0a62ddf2c9cbb2034039",
-                "reference": "570e980a201d8ed0236b0a62ddf2c9cbb2034039",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/6bb5176bc4af8bcb7d926f88718db9b96a2d4290",
+                "reference": "6bb5176bc4af8bcb7d926f88718db9b96a2d4290",
                 "shasum": ""
             },
             "require": {
@@ -152,9 +152,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v4.15.3"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v4.15.4"
             },
-            "time": "2023-01-16T22:05:37+00:00"
+            "time": "2023-03-05T19:49:14+00:00"
         },
         {
             "name": "overtrue/pinyin",
@@ -340,23 +340,23 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "10.0.0",
+            "version": "10.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "bf4fbc9c13af7da12b3ea807574fb460f255daba"
+                "reference": "20800e84296ea4732f9a125e08ce86b4004ae3e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/bf4fbc9c13af7da12b3ea807574fb460f255daba",
-                "reference": "bf4fbc9c13af7da12b3ea807574fb460f255daba",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/20800e84296ea4732f9a125e08ce86b4004ae3e4",
+                "reference": "20800e84296ea4732f9a125e08ce86b4004ae3e4",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
                 "ext-xmlwriter": "*",
-                "nikic/php-parser": "^4.14",
+                "nikic/php-parser": "^4.15",
                 "php": ">=8.1",
                 "phpunit/php-file-iterator": "^4.0",
                 "phpunit/php-text-template": "^3.0",
@@ -371,8 +371,8 @@
                 "phpunit/phpunit": "^10.0"
             },
             "suggest": {
-                "ext-pcov": "*",
-                "ext-xdebug": "*"
+                "ext-pcov": "PHP extension that provides line coverage",
+                "ext-xdebug": "PHP extension that provides line coverage as well as branch and path coverage"
             },
             "type": "library",
             "extra": {
@@ -405,7 +405,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/10.0.0"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/10.0.2"
             },
             "funding": [
                 {
@@ -413,7 +413,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-03T07:14:34+00:00"
+            "time": "2023-03-06T13:00:19+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -658,16 +658,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.0.7",
+            "version": "10.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "a6f61c5629dd95db79af72f1e94d56702187479a"
+                "reference": "7065dbebcb0f66cf16a45fc9cfc28c2351e06169"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a6f61c5629dd95db79af72f1e94d56702187479a",
-                "reference": "a6f61c5629dd95db79af72f1e94d56702187479a",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/7065dbebcb0f66cf16a45fc9cfc28c2351e06169",
+                "reference": "7065dbebcb0f66cf16a45fc9cfc28c2351e06169",
                 "shasum": ""
             },
             "require": {
@@ -738,7 +738,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.0.7"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.0.14"
             },
             "funding": [
                 {
@@ -754,7 +754,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-08T15:16:31+00:00"
+            "time": "2023-03-01T05:37:49+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1723,7 +1723,12 @@
     },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "ext-pcntl": "*",
+        "ext-dom": "*",
+        "ext-curl": "*",
+        "ext-mbstring": "*"
+    },
     "platform-dev": [],
     "plugin-api-version": "2.3.0"
 }

@@ -7,7 +7,7 @@ use Overtrue\Pinyin\Pinyin;
 
 class RegionToPinyin
 {
-    public function handle()
+    public function handle(): void
     {
         $regions = Region::whereRaw(
             '(`code` IN (?,?,?,?) OR `code` BETWEEN ? AND ?) AND `name` NOT IN (?,?,?,?)',

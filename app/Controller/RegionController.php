@@ -11,7 +11,7 @@ class RegionController
      * 查询下级区域
      */
     #[Route('regions')]
-    public function list(int $code)
+    public function list(int $code): array
     {
         return Region::child($code)->all();
     }
@@ -20,7 +20,7 @@ class RegionController
      * 根据地址获取区域代码
      */
     #[Route('parseAddress')]
-    public function parseAddress(string $address)
+    public function parseAddress(string $address): array
     {
         return (new Address($address))->getParsedAddress();
     }
@@ -29,7 +29,7 @@ class RegionController
      * 搜索城市
      */
     #[Route('searchCity')]
-    public function search(string $name)
+    public function search(string $name): array
     {
         return Region::whereLike(
                 [Region::NAME, Region::EN_NAME, Region::SHORT_EN_NAME],

@@ -2,13 +2,13 @@
 
 namespace App\Model;
 
-use App\Model\Region;
-
 class Address
 {
-    private $regionLen, $regions;
+    private int $regionLen;
 
-    public function __construct(private string $address)
+    private array $regions;
+
+    public function __construct(private readonly string $address)
     {
         if ($province = Region::search($this->getRegionName(0))->first()) {
             $this->regions[] = $province;
@@ -21,7 +21,7 @@ class Address
     /**
      * 获取地址的详细行政区
      */
-    public function getParsedAddress()
+    public function getParsedAddress(): array
     {
         return [
             'region' => $this->regions,
@@ -32,7 +32,7 @@ class Address
     /**
      * 获取行政区model
      */
-    private function findChild(Region $region)
+    private function findChild(Region $region): bool
     {
         $regionName = $this->getRegionName($this->regionLen += mb_strlen($region->name));
         if (
@@ -50,7 +50,7 @@ class Address
     /**
      * 获取行政区名称
      */
-    private function getRegionName($offset)
+    private function getRegionName($offset): string
     {
         return mb_substr($this->address, $offset, 2);
     }

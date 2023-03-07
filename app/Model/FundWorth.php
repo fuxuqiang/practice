@@ -4,7 +4,11 @@ namespace App\Model;
 
 class FundWorth extends \Fuxuqiang\Framework\Model\Model
 {
-    const DATE = 'date', VALUE = 'value', RATE = 'rate';
+    const FUND_ID = 'fund_id',
+        DATE = 'date',
+        VALUE = 'value';
 
-    public $date, $value, $rate;
+    public string $date;
+
+    public int $value;
 }

@@ -2,9 +2,12 @@
 
 namespace App\Command;
 
+use Exception;
 use SplQueue;
 use App\Model\Region;
 use Fuxuqiang\Framework\Http\HttpClient;
+use Throwable;
+use DOMXPath;
 
 class RegionSpider
 {
@@ -14,23 +17,24 @@ class RegionSpider
 
     private readonly string $file;
     
-    private $count, $rootlen,
+    private $count;
 
-        $expressions = [
+    private array $expressions = [
             '//tr[@class="provincetr"]/td/a',
             '//tr[@class="citytr"]/td[2]/a',
             self::COUNTY_EXPRESSION,
             '//tr[@class="towntr"]/td[2]/a',
             '//tr[@class="villagetr"]'
         ];
+    private int $rootlen;
 
     /**
      * 初始化队列和计数
      */
     public function __construct(
-        private SplQueue $queue = new SplQueue,
-        private SplQueue $failedQueue = new SplQueue,
-        private HttpClient $http = new HttpClient,
+        private readonly SplQueue   $queue = new SplQueue,
+        private readonly SplQueue   $failedQueue = new SplQueue,
+        private readonly HttpClient $http = new HttpClient,
     ) {
         $this->file = runtimePath('spiderQueue.log');
         $this->rootlen = strlen(dirname(self::ROOT_URL)) + 1;
@@ -43,8 +47,9 @@ class RegionSpider
 
     /**
      * 执行
+     * @throws Throwable
      */
-    public function handle($url = self::ROOT_URL)
+    public function handle($url = self::ROOT_URL): void
     {
         if ($this->queue->isEmpty()) {
             $this->addUrl($url);
@@ -61,8 +66,9 @@ class RegionSpider
 
     /**
      * 爬取行政区划数据
+     * @throws Throwable
      */
-    private function crawl($url, $xpath)
+    private function crawl($url, $xpath): void
     {
         [$expression, $expressions, $doms] = $this->query($xpath, $this->expressions);
         if (next($expressions)) {
@@ -88,7 +94,7 @@ class RegionSpider
         }
         try {
             $this->insert($data);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->failedQueue->enqueue($this->getUri($url));
             throw $th;
         }
@@ -96,14 +102,15 @@ class RegionSpider
 
     /**
      * 并发请求并解析curl句柄
+     * @throws Throwable
      */
-    private function multiRequest()
+    private function multiRequest(): void
     {
         foreach ($this->http->multiRequest(30, 2) as $val) {
             $url = curl_getinfo($val->handle, CURLINFO_EFFECTIVE_URL);
             if (
                 200 == curl_getinfo($val->handle, CURLINFO_HTTP_CODE)
-                && ($xpath = $this->domXpath(curl_multi_getcontent($val->handle)))
+                && ($xpath = $this->domXpath($val->getContent()))
                 && $xpath->query('//table')->length
             ) {
                 $this->crawl($url, $xpath);
@@ -118,17 +125,17 @@ class RegionSpider
     /**
      * 获取加载了内容的DOMXPath
      */
-    private function domXpath($content)
+    private function domXpath($content): DOMXPath
     {
         $doc = new \DOMDocument;
         @$doc->loadHTML($content);
-        return new \DOMXPath($doc);
+        return new DOMXPath($doc);
     }
 
     /**
      * 获取节点数据并添加url至队列
      */
-    private function getDataAndAddHandle(\DOMNode $dom, $url)
+    private function getDataAndAddHandle(\DOMNode $dom, $url): array
     {
         $uri = $dom->attributes['href']->nodeValue;
         $this->addUrl($this->getChildUrl($url, $uri));
@@ -138,15 +145,16 @@ class RegionSpider
     /**
      * 添加url至HttpClient
      */
-    private function addUrl($url)
+    private function addUrl($url): void
     {
         $this->http->addHandle($url, [], [CURLOPT_ENCODING => 'gzip']);
     }
 
     /**
      * 解析html节点
+     * @throws Exception
      */
-    private function query(\DOMXPath $xpath, $expressions)
+    private function query(\DOMXPath $xpath, $expressions): array
     {
         $expression = current($expressions);
         $doms = $xpath->query($expression);
@@ -156,7 +164,7 @@ class RegionSpider
             if (next($expressions)) {
                 return $this->query($xpath, $expressions);
             } else {
-                throw new \Exception('html解析失败');
+                throw new Exception('html解析失败');
             }
         }
     }
@@ -164,7 +172,7 @@ class RegionSpider
     /**
      * 写入数据
      */
-    private function insert($data)
+    private function insert($data): void
     {
         Region::fields([Region::CODE, Region::NAME])->insert($data);
         echo "\x0d\x1b[2k", '数据量：', $this->count += count($data);
@@ -173,7 +181,7 @@ class RegionSpider
     /**
      * 获取链接的URI
      */
-    private function getUri($url)
+    private function getUri($url): string
     {
         return substr($url, $this->rootlen);
     }
@@ -181,7 +189,7 @@ class RegionSpider
     /**
      * 获取子链接
      */
-    public function getChildUrl($url, $uri)
+    public function getChildUrl($url, $uri): string
     {
         return dirname($url) . '/' . $uri;
     }
