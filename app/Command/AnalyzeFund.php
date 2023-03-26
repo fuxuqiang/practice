@@ -16,6 +16,7 @@ class AnalyzeFund
         $list = [4, 6, 10, 20, 60, 100, 200, 600],
         
         $fields = [
+            FundTransaction::FUND_ID,
             FundTransaction::AMOUNT,
             FundTransaction::PORTION,
             FundTransaction::BOUGHT_AT,
@@ -23,14 +24,15 @@ class AnalyzeFund
             FundTransaction::PER_WORTH,
             FundTransaction::IS_SOLD,
         ];
+    private int $fundId = 2;
 
     public function __construct()
     {
         array_walk($this->list, fn(&$item) => $item *= 10000);
-        $this->fundWorth = FundWorth::all();
+        $this->fundWorth = FundWorth::where(FundWorth::FUND_ID, $this->fundId)->all();
     }
 
-    public function handle()
+    public function handle(): void
     {
         $this->findBuyingPoint();
 
@@ -46,15 +48,16 @@ class AnalyzeFund
                 if ($rate < -0.003) {
                     $portion += $this->buy($item, $nextWorth->date);
                 // 卖出
-                } elseif (
-                    $rate > 0.003 &&
-                    $this->getAmount($portion, $item->value) > FundTransaction::canSold()->sum(FundTransaction::AMOUNT)
-                ) {
-                    $portion -= $this->sell($item, $nextWorth->date);
+                } elseif ($rate > 0.003) {
+                    $currentAmount = FundTransaction::canSold($this->fundId)->sum(FundTransaction::AMOUNT);
+                    if ($this->getAmount($portion, $item->value) > $currentAmount) {
+                        $portion -= $this->sell($item, $nextWorth->date);
+                    }
                 }
             }
             // 记录持仓及盈亏
             FundProfit::fields([
+                    FundProfit::FUND_ID,
                     FundProfit::DATE,
                     FundProfit::PORTION,
                     FundProfit::WORTH,
@@ -62,6 +65,7 @@ class AnalyzeFund
                     FundProfit::TOTAL_PROFIT
                 ])
                 ->insert([[
+                    $this->fundId,
                     $item->date,
                     $portion,
                     $this->getAmount($portion, $item->value),
@@ -94,7 +98,7 @@ class AnalyzeFund
     {
         $portion = 0;
         $list = $this->list;
-        foreach (FundTransaction::canSold()->column(FundTransaction::AMOUNT) as $amount) {
+        foreach (FundTransaction::canSold($this->fundId)->column(FundTransaction::AMOUNT) as $amount) {
             if (($key = array_search($amount, $list)) !== false) {
                 unset($list[$key]);
             }
@@ -105,7 +109,7 @@ class AnalyzeFund
             $portion = round($amount * $this->factor / $this->currWorthValue);
             FundTransaction::fields($this->fields)
                 ->insert([
-                    [$amount, $portion, $item->date, $confirmAt, $this->currWorthValue, 0]
+                    [$this->fundId, $amount, $portion, $item->date, $confirmAt, $this->currWorthValue, 0]
                 ]);
         }
         return $portion;
@@ -117,7 +121,7 @@ class AnalyzeFund
     private function sell(FundWorth $item, $confirmAt)
     {
         // 查询可以卖出的份额
-        $canSolds = FundTransaction::canSold()
+        $canSolds = FundTransaction::canSold($this->fundId)
             ->where(FundTransaction::CONFIRM_AT, '<=', date('Y-m-d', strtotime($confirmAt) - 7*24*3600))
             ->all();
 
@@ -133,6 +137,7 @@ class AnalyzeFund
                 $this->currWorthValue = $item->value;
                 FundTransaction::fields(array_slice($this->fields, 0, -1))
                     ->insert([[
+                        $this->fundId,
                         -$this->getAmount($portion, $this->currWorthValue),
                         -$portion,
                         $item->date,

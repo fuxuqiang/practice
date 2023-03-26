@@ -3,18 +3,17 @@
 namespace Src;
 
 use Fuxuqiang\Framework\{Connector, Mysql as Query};
+use mysqli;
 
+/**
+ * @method static Query table(string $name)
+ */
 class Mysql implements Connector
 {
     /**
-     * @var \mysqli
+     * @var mysqli
      */
     private static $mysqli;
-
-    /**
-     * @var self
-     */
-    private static $instance;
 
     /**
      * 动态调用\Fuxuqiang\Framework\Mysql的方法
@@ -27,9 +26,10 @@ class Mysql implements Connector
     /**
      * 获取自身实例
      */
-    public static function getInstance()
+    public static function getInstance(): Mysql
     {
-        return self::$instance ?: self::$instance = new self;
+        static $instance;
+        return $instance ?: $instance = new self;
     }
     
     /**
@@ -39,7 +39,7 @@ class Mysql implements Connector
     {
         if (!self::$mysqli) {
             $config = env('mysql');
-            self::$mysqli = new \mysqli($config['host'], $config['user'], $config['pwd'] ?? null, $config['db']);
+            self::$mysqli = new mysqli($config['host'], $config['user'], $config['pwd'] ?? null, $config['db']);
             self::$mysqli->set_charset('utf8mb4');
         }
         return new Query(self::$mysqli);
@@ -48,7 +48,7 @@ class Mysql implements Connector
     /**
      * 获取mysqli实例
      */
-    public static function getMysqli()
+    public static function getMysqli(): mysqli
     {
         return self::$mysqli;
     }

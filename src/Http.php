@@ -6,7 +6,12 @@ use Fuxuqiang\Framework\{Container, JWT, Request, Route\Router, ResponseExceptio
 
 class Http
 {
-    private $router;
+    private Router $router;
+
+    private array $types = [
+        'int' => 'is_numeric',
+        'float' => 'is_numeric'
+    ];
 
     public function __construct($routeFile)
     {
@@ -20,8 +25,9 @@ class Http
 
     /**
      * 处理请求
+     * @throws ResponseException|\ReflectionException
      */
-    public function handle($server, $input)
+    public function handle($server, $input): array
     {
         // 实例化请求类
         Container::instance(
@@ -47,12 +53,25 @@ class Http
             $type = $param->getType();
             $args[] = match (true) {
                 $type && class_exists($type) => Container::get($type),
-                isset($input[$paramName = $param->getName()]) && (!$type || ('is_'.$type)($input[$paramName])) => $input[$paramName],
+                isset($input[$paramName = $param->getName()]) && $this->isType($type, $input[$paramName]) => $input[$paramName],
                 $param->isDefaultValueAvailable() => $param->getDefaultValue(),
                 default => throw new ResponseException($paramName.'参数存在问题', ResponseException::BAD_REQUEST),
             };
         }
 
         return [$route['class'], $route['method'], $args];
+    }
+
+    /**
+     * 判断指定值是否是指定类型
+     */
+    private function isType(\ReflectionNamedType $type, $val): bool
+    {
+        $name = $type->getName();
+        if (in_array($type, array_keys($this->types))) {
+            return $this->types[$name]($val);
+        } else {
+            return ('is_'.$name)($val);
+        }
     }
 }

@@ -7,8 +7,11 @@ use Src\{Mysql, Redis};
 #[Route(middlewares:[\App\Middleware\RequestRecorder::class])]
 class UserController
 {
+    /**
+     * @throws ResponseException
+     */
     #[Route('sendCode', 'POST')]
-    public function sendCode(int $mobile, Request $request)
+    public function sendCode(int $mobile, Request $request): void
     {
         $server = $request->server;
         $isFrequently = Mysql::table('request_log')

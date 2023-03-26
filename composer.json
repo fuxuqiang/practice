@@ -7,7 +7,8 @@
         "ext-pcntl": "*",
         "ext-dom": "*",
         "ext-curl": "*",
-        "ext-mbstring": "*"
+        "ext-mbstring": "*",
+        "ext-mysqli": "*"
     },
     "autoload": {
         "psr-4": {

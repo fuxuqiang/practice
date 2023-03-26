@@ -26,6 +26,7 @@ class RegionSpider
             '//tr[@class="towntr"]/td[2]/a',
             '//tr[@class="villagetr"]'
         ];
+
     private int $rootlen;
 
     /**
@@ -200,7 +201,9 @@ class RegionSpider
     public function __destruct()
     {
         foreach ($this->http->getHandles() as $ch) {
-            $this->failedQueue->enqueue($this->getUri(curl_getinfo($ch->handle, CURLINFO_EFFECTIVE_URL)));
+            $this->failedQueue->enqueue(
+                $this->getUri(curl_getinfo($ch->handle, CURLINFO_EFFECTIVE_URL))
+            );
         }
         foreach ($this->queue as $url) {
             $this->failedQueue->enqueue($url);

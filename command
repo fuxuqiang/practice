@@ -8,15 +8,15 @@ if ($argv[1] == 'route') {
 } else {
     $command = '\App\Command\\' . str_replace('/', '\\', $argv[1]);
     $args = [];
-    $method = new ReflectionMethod($command, 'handle');
-    foreach ($method->getParameters() as $param) {
-        $args[] = match (true) {
-            !is_null($type = $param->getType()) => new $type->getName(),
-            $param->isDefaultValueAvailable() => $param->getDefaultValue(),
-            default => $argv[2] ?? null,
-        };
-    }
     try {
+        $method = new ReflectionMethod($command, 'handle');
+        foreach ($method->getParameters() as $key => $param) {
+            $args[] = match (true) {
+                !is_null($type = $param->getType()) => new ($type->getName()),
+                $param->isDefaultValueAvailable() => $param->getDefaultValue(),
+                default => $argv[$key+2] ?? null,
+            };
+        }
         $method->invokeArgs(new $command, $args);
     } catch (Throwable $th) {
         handleThrowable($th);

@@ -4,7 +4,7 @@ namespace App\Model;
 
 class Address
 {
-    private int $regionLen;
+    private int $regionLen = 0;
 
     private array $regions;
 

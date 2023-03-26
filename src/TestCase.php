@@ -2,8 +2,11 @@
 
 namespace Src;
 
-use Fuxuqiang\Framework\{Container, TestResponse};
+use Fuxuqiang\Framework\{Container, ResponseException, TestResponse};
 
+/**
+ * @method TestResponse get($uri, $param)
+ */
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
@@ -14,7 +17,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * @var string
      */
-    protected $token, $ip = '127.0.0.1';
+    protected string $token = '', $ip = '127.0.0.1';
 
     /**
      * 设置测试基境
@@ -28,8 +31,9 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * 调用测试请求
+     * @throws \ReflectionException|ResponseException
      */
-    protected function request($requestMethod, $uri, $params = [], $token = null)
+    protected function request($requestMethod, $uri, $params = [], $token = null): TestResponse
     {
         $token = $token ?: $this->token;
         [$concrete, $method, $args] = self::$http->handle(
@@ -55,7 +59,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * 使用指定ip地址
      */
-    public function withIP($ip)
+    public function withIP($ip): static
     {
         $this->ip = $ip;
         return $this;
@@ -63,6 +67,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * 根据方法名调用request方法
+     * @throws \ReflectionException|ResponseException
      */
     public function __call($name, $args)
     {
@@ -74,6 +79,6 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     public function assertDatabaseHas($table, $data)
     {
-        return $this->assertTrue(Mysql::table($table)->where($data)->count() > 0);
+        $this->assertTrue(Mysql::table($table)->where($data)->count() > 0);
     }
 }
