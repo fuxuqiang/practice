@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c85d42345d56ac2fd2d94d81a01b0964",
+    "content-hash": "27facd0ec99e99eced59daf5661ce0fe",
     "packages": [
         {
             "name": "fuxuqiang/practice-framework",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fuxuqiang/practice-framework.git",
-                "reference": "b18f6417510364fedaec27b97e9c8486f34e1dab"
+                "reference": "7f3335406f541071e00107c24d54acaace5e9dd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fuxuqiang/practice-framework/zipball/b18f6417510364fedaec27b97e9c8486f34e1dab",
-                "reference": "b18f6417510364fedaec27b97e9c8486f34e1dab",
+                "url": "https://api.github.com/repos/fuxuqiang/practice-framework/zipball/7f3335406f541071e00107c24d54acaace5e9dd8",
+                "reference": "7f3335406f541071e00107c24d54acaace5e9dd8",
                 "shasum": ""
             },
             "require": {
@@ -39,7 +39,7 @@
                 "issues": "https://github.com/fuxuqiang/practice-framework/issues",
                 "source": "https://github.com/fuxuqiang/practice-framework/tree/master"
             },
-            "time": "2023-03-26T09:00:01+00:00"
+            "time": "2023-04-02T08:16:46+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -658,16 +658,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.0.18",
+            "version": "10.0.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "582563ed2edc62d1455cdbe00ea49fe09428eef3"
+                "reference": "20c23e85c86e5c06d63538ba464e8054f4744e62"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/582563ed2edc62d1455cdbe00ea49fe09428eef3",
-                "reference": "582563ed2edc62d1455cdbe00ea49fe09428eef3",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/20c23e85c86e5c06d63538ba464e8054f4744e62",
+                "reference": "20c23e85c86e5c06d63538ba464e8054f4744e62",
                 "shasum": ""
             },
             "require": {
@@ -739,7 +739,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.0.18"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.0.19"
             },
             "funding": [
                 {
@@ -755,7 +755,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-22T06:15:31+00:00"
+            "time": "2023-03-27T11:46:33+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1730,7 +1730,8 @@
         "ext-dom": "*",
         "ext-curl": "*",
         "ext-mbstring": "*",
-        "ext-mysqli": "*"
+        "ext-mysqli": "*",
+        "ext-redis": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.3.0"

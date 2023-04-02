@@ -32,16 +32,15 @@ CREATE TABLE `fund_transaction` (
     `confirm_at` DATE NOT NULL,
     `amount` INT NOT NULL,
     `portion` INT NOT NULL,
-    `per_worth` MEDIUMINT UNSIGNED NOT NULL,
-    `is_sold` TINYINT
+    `is_sold` TINYINT DEFAULT 0
 );
 
-DROP TABLE IF EXISTS `fund_profit`;
-CREATE TABLE `fund_profit` (
+DROP TABLE IF EXISTS `fund_amount`;
+CREATE TABLE `fund_amount` (
     `fund_id` TINYINT UNSIGNED,
     `date` DATE NOT NULL,
     `portion` INT UNSIGNED NOT NULL,
-    `worth` INT UNSIGNED NOT NULL,
+    `amount` INT UNSIGNED NOT NULL,
     `profit` MEDIUMINT NOT NULL,
     `total_profit` MEDIUMINT NOT NULL
 );

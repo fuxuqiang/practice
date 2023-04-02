@@ -5,19 +5,25 @@ namespace Src;
 use Fuxuqiang\Framework\{Container, ResponseException, TestResponse};
 
 /**
- * @method TestResponse get($uri, $param)
+ * @method TestResponse get($uri, $param = [])
+ * @method TestResponse post($uri, $param = [])
  */
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var Http
+     * @var ?Http
      */
-    protected static $http;
+    protected static ?Http $http = null;
+
+    /**
+     * @var ?string
+     */
+    protected ?string $token = null;
 
     /**
      * @var string
      */
-    protected string $token = '', $ip = '127.0.0.1';
+    protected string $ip = '127.0.0.1';
 
     /**
      * 设置测试基境

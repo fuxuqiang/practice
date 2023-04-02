@@ -7,13 +7,21 @@ use mysqli;
 
 /**
  * @method static Query table(string $name)
+ * @method static bool begin()
+ * @method static bool commit()
+ * @method static bool rollback()
  */
 class Mysql implements Connector
 {
     /**
-     * @var mysqli
+     * @var ?mysqli
      */
-    private static $mysqli;
+    private static ?mysqli $mysqli = null;
+
+    /**
+     * @var ?self
+     */
+    private static ?self $instance = null;
 
     /**
      * 动态调用\Fuxuqiang\Framework\Mysql的方法
@@ -26,10 +34,9 @@ class Mysql implements Connector
     /**
      * 获取自身实例
      */
-    public static function getInstance(): Mysql
+    public static function getInstance(): self
     {
-        static $instance;
-        return $instance ?: $instance = new self;
+        return self::$instance ?: self::$instance = new self;
     }
     
     /**
