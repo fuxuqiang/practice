@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fuxuqiang/practice-framework.git",
-                "reference": "7f3335406f541071e00107c24d54acaace5e9dd8"
+                "reference": "01bd1c578a351b75bee0950bfc0f7e0fa70004c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fuxuqiang/practice-framework/zipball/7f3335406f541071e00107c24d54acaace5e9dd8",
-                "reference": "7f3335406f541071e00107c24d54acaace5e9dd8",
+                "url": "https://api.github.com/repos/fuxuqiang/practice-framework/zipball/01bd1c578a351b75bee0950bfc0f7e0fa70004c1",
+                "reference": "01bd1c578a351b75bee0950bfc0f7e0fa70004c1",
                 "shasum": ""
             },
             "require": {
@@ -39,7 +39,7 @@
                 "issues": "https://github.com/fuxuqiang/practice-framework/issues",
                 "source": "https://github.com/fuxuqiang/practice-framework/tree/master"
             },
-            "time": "2023-04-02T08:16:46+00:00"
+            "time": "2023-04-07T15:13:23+00:00"
         },
         {
             "name": "myclabs/deep-copy",

@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-use Fuxuqiang\Framework\{Request, ResponseException, Route\Route};
+use Fuxuqiang\Framework\{Request, ResponseCode, ResponseException, Route\Route};
 use Src\{Mysql, Redis};
 
 #[Route(middlewares:[\App\Middleware\RequestRecorder::class])]
@@ -19,7 +19,7 @@ class UserController
             ->where('ip', $server['REMOTE_ADDR'])
             ->exists('uri', 'sendCode');
         if ($isFrequently) {
-            throw new ResponseException('请勿频繁发送验证码', ResponseException::BAD_REQUEST);
+            throw new ResponseException('请勿频繁发送验证码', ResponseCode::BadRequest);
         }
         Redis::setex($mobile, 99, mt_rand(1000, 9999));
     }

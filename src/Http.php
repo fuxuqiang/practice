@@ -2,7 +2,7 @@
 
 namespace Src;
 
-use Fuxuqiang\Framework\{Container, JWT, Request, Route\Router, ResponseException};
+use Fuxuqiang\Framework\{Container, JWT, Request, ResponseCode, Route\Router, ResponseException};
 
 class Http
 {
@@ -53,9 +53,9 @@ class Http
             $type = $param->getType();
             $args[] = match (true) {
                 $type && class_exists($type) => Container::get($type),
-                isset($input[$paramName = $param->getName()]) && $this->isType($type, $input[$paramName]) => $input[$paramName],
+                isset($input[$paramName = $param->name]) && $this->isType($type, $input[$paramName]) => $input[$paramName],
                 $param->isDefaultValueAvailable() => $param->getDefaultValue(),
-                default => throw new ResponseException($paramName.'参数存在问题', ResponseException::BAD_REQUEST),
+                default => throw new ResponseException($paramName.'参数类型不符', ResponseCode::BadRequest),
             };
         }
 

@@ -2,11 +2,11 @@
 
 namespace App\Middleware;
 
-use Fuxuqiang\Framework\{Request, ResponseException};
+use Fuxuqiang\Framework\{Request, ResponseCode, ResponseException};
 
 class RequestRecorder
 {
-    public function handle(Request $request)
+    public function handle(Request $request): void
     {
         $input = $request->getData();
         ksort($input);
@@ -21,7 +21,7 @@ class RequestRecorder
         try {
             \Src\Mysql::table('request_log')->insert($data + ['key' => md5(json_encode($data))]);
         } catch (\Throwable $th) {
-            throw new ResponseException('请勿频繁请求', ResponseException::BAD_REQUEST);
+            throw new ResponseException('请勿频繁请求', ResponseCode::BadRequest);
         }
     }
 }

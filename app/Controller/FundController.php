@@ -3,23 +3,39 @@
 namespace App\Controller;
 
 use App\Model\{FundTransaction, FundWorth, FundAmount};
-use Fuxuqiang\Framework\{ResponseException, Route\Route};
+use Fuxuqiang\Framework\{ResponseCode, ResponseException, Route\Route};
 
+#[Route('fund')]
 class FundController
 {
     #[Route('getData')]
-    public function next(int $id, string $date = null): array
+    public function index(int $id): array
     {
-        $fundWorthQuery = FundWorth::where(FundWorth::FUND_ID, $id);
-        if ($date) {
-            $fundWorth = $fundWorthQuery->where('date', '>', $date)->first();
-            $fundAmount = FundAmount::update($fundWorth, 0, 0);
+        $amount = FundAmount::orderByDesc(FundAmount::DATE)->first();
+        if ($amount) {
+            $worth3 = FundWorth::get3Worth($id, $amount->date);
+            $worthList = array_merge(
+                FundWorth::fundId($id)->where(FundWorth::DATE, '<', $amount->date)->all(),
+                array_slice($worth3, 0, 2)
+            );
+            $confirmAt = $worth3[2]->date;
         } else {
-            $fundWorth = $fundWorthQuery->first();
-            $fundAmount = null;
+            $worthList = [FundWorth::fundId($id)->firstOrFail()];
+            $confirmAt = null;
+        }
+        return $this->getData($id, $amount, $confirmAt) + ['worth' => $worthList];
+    }
+
+    #[Route('next')]
+    public function next(int $id, string $date): array
+    {
+        $worth = FundWorth::get3Worth($id, $date);
+        $amount = null;
+        if (FundAmount::exists(FundWorth::DATE, '<', $date)) {
+            $amount = FundAmount::newData($worth[0], 0);
         }
 
-        return $this->getData($fundWorth, $fundAmount);
+        return $this->getNextData($worth[1], $amount, $worth[2]->date);
     }
 
     /**
@@ -28,18 +44,32 @@ class FundController
     #[Route('buy', 'POST')]
     public function buy(int $id, int $amount, string $date): array
     {
-        $worth = FundWorth::where(FundWorth::DATE, '>=', $date)
-            ->where(FundWorth::FUND_ID, $id)
-            ->limit(2)
-            ->all();
-        if (count($worth) != 2) {
-            throw new ResponseException('没有该日期的数据', ResponseException::BAD_REQUEST);
-        }
+        $worth = FundWorth::get3Worth($id, $date);
 
-        return $this->getData($worth[1], $worth[0]->buy($amount, $worth[1]->date));
+        return $this->getNextData($worth[1], $worth[0]->buy($amount, $worth[1]->date), $worth[2]->date);
     }
 
-    private function getData(FundWorth $worth, ?FundAmount $amount): array
+    /**
+     * @throws ResponseException
+     */
+    #[Route('sell', 'POST')]
+    public function sell(array $transactionIds, int $id, string $date): array
+    {
+        $worth = FundWorth::get3Worth($id, $date);
+        $transactions = FundTransaction::canSold($id, $worth[1]->date)
+            ->whereIn(FundTransaction::ID, $transactionIds)
+            ->all();
+        if (count($transactions) != count($transactionIds)) {
+            throw new ResponseException('存在不可卖出的份额', ResponseCode::BadRequest);
+        }
+
+        return $this->getNextData($worth[1], $worth[0]->sell($transactions, $worth[1]->date), $worth[2]->date);
+    }
+
+    /**
+     * 获取图表数据
+     */
+    private function getData(int $id, ?FundAmount $amount, ?string $confirmAt): array
     {
         if ($amount) {
             $data = [
@@ -50,10 +80,14 @@ class FundController
         } else {
             $data = ['amount' => 0, 'profit' => 0, 'portion' => 0];
         }
-        return [
+        return $data + ['canSold' => $confirmAt ? FundTransaction::canSold($id, $confirmAt)->all() : []];
+    }
+
+    private function getNextData(FundWorth $worth, ?FundAmount $amount, string $confirmAt): array
+    {
+        return $this->getData($worth->fundId, $amount, $confirmAt) + [
             'date' => $worth->date,
-            'worth' => $worth->value,
-            'can_sold' => FundTransaction::canSold($worth->fund_id, $worth->date)->all(),
-        ] + $data;
+            'value' => $worth->value
+        ];
     }
 }

@@ -13,4 +13,9 @@ class FundControllerTest extends \Src\TestCase
     {
         $this->post('buy', ['id' => 1, 'amount' => 40000, 'date' => '2019-12-27'])->assertOk()->print();
     }
+
+    public function testSell()
+    {
+        $this->post('sell', ['transactionIds' => [1], 'id' => 1, 'date' => '2020-01-06']);
+    }
 }

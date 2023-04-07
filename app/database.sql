@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS `personal` CHARACTER SET `utf8mb4`;
+CREATE DATABASE IF NOT EXISTS `personal`;
 USE `personal`;
 
 DROP TABLE IF EXISTS `region`;
@@ -32,7 +32,7 @@ CREATE TABLE `fund_transaction` (
     `confirm_at` DATE NOT NULL,
     `amount` INT NOT NULL,
     `portion` INT NOT NULL,
-    `is_sold` TINYINT DEFAULT 0
+    `is_sold` TINYINT
 );
 
 DROP TABLE IF EXISTS `fund_amount`;

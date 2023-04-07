@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Model\{FundProfit, FundTransaction, FundWorth};
+use App\Model\{FundAmount, FundTransaction, FundWorth};
 use Src\Mysql;
 
 class AnalyzeFund
@@ -56,13 +56,13 @@ class AnalyzeFund
                 }
             }
             // 记录持仓及盈亏
-            FundProfit::fields([
-                    FundProfit::FUND_ID,
-                    FundProfit::DATE,
-                    FundProfit::PORTION,
-                    FundProfit::WORTH,
-                    FundProfit::PROFIT,
-                    FundProfit::TOTAL_PROFIT
+            FundAmount::fields([
+                    FundAmount::FUND_ID,
+                    FundAmount::DATE,
+                    FundAmount::PORTION,
+                    FundAmount::AMOUNT,
+                    FundAmount::PROFIT,
+                    FundAmount::TOTAL_PROFIT
                 ])
                 ->insert([[
                     $this->fundId,

@@ -11,11 +11,11 @@ class FundAmount extends \Fuxuqiang\Framework\Model\Model
         PROFIT = 'profit',
         TOTAL_PROFIT = 'total_profit';
 
-    public int $fund_id, $amount, $portion, $profit, $total_profit;
+    public int $fundId, $amount, $portion, $profit, $totalProfit;
 
     public string $date;
     
-    public static function update(FundWorth $worth, int $portion): self
+    public static function newData(FundWorth $worth, int $portion): self
     {
         $lastAmount = self::where(self::DATE, '<', $worth->date)
             ->orderByDesc(self::DATE)
@@ -25,15 +25,15 @@ class FundAmount extends \Fuxuqiang\Framework\Model\Model
         if ($lastAmount) {
             $portion += $lastAmount->portion;
             $profit = Fund::getAmount($lastAmount->portion, $worth->value) - $lastAmount->amount;
-            $totalProfit = $lastAmount->total_profit + $profit;
+            $totalProfit = $lastAmount->totalProfit + $profit;
         }
         $fundAmount = new self;
-        $fundAmount->fund_id = $worth->fund_id;
+        $fundAmount->fundId = $worth->fundId;
         $fundAmount->date = $worth->date;
         $fundAmount->portion = $portion;
         $fundAmount->amount = Fund::getAmount($portion, $worth->value);
         $fundAmount->profit = $profit;
-        $fundAmount->total_profit = $totalProfit;
+        $fundAmount->totalProfit = $totalProfit;
         $fundAmount->save();
 
         return $fundAmount;

@@ -3,7 +3,7 @@
 /**
  * 获取配置的环境变量
  */
-function env($name)
+function env(string $name)
 {
     static $env;
     $env || $env = parse_ini_file(__DIR__ . '/../.env', true);
@@ -13,7 +13,7 @@ function env($name)
 /**
  * 记录日志
  */
-function logError($content)
+function logError(Throwable $content): void
 {
     file_put_contents(
         __DIR__ . '/../runtime/error.log',
@@ -25,7 +25,7 @@ function logError($content)
 /**
  * 获取时间
  */
-function timestamp($time = null)
+function timestamp(int $time = null): string
 {
     return date('Y-m-d H:i:s', $time ?: time());
 }
@@ -33,7 +33,7 @@ function timestamp($time = null)
 /**
  * 启动会话
  */
-function sessionStart()
+function sessionStart(): bool
 {
     static $started;
     return $started || $started = session_start();
@@ -42,7 +42,7 @@ function sessionStart()
 /**
  * 响应的数据格式
  */
-function data($data)
+function data($data): array
 {
     return ['data' => $data];
 }
@@ -50,7 +50,7 @@ function data($data)
 /**
  * 获取错误信息格式
  */
-function error($msg)
+function error($msg): array
 {
     return ['error' => $msg];
 }
@@ -58,27 +58,15 @@ function error($msg)
 /**
  * 获取信息提示格式
  */
-function msg($msg)
+function msg($msg): array
 {
     return ['msg' => $msg];
 }
 
 /**
- * 处理错误
- */
-function handleThrowable($e)
-{
-    if (env('debug')) {
-        echo $e . PHP_EOL;
-    } else {
-        logError($e);
-    }
-}
-
-/**
  * 获取runtime文件夹中的文件路径
  */
-function runtimePath($file)
+function runtimePath($file): string
 {
     return __DIR__ . '/../runtime/' . $file;
 }

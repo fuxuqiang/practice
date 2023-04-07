@@ -14,15 +14,15 @@ set_error_handler(
     /**
      * @throws ErrorException
      */
-    function ($errno, $errstr, $errfile, $errline) {
-        if (error_reporting() & $errno) {
-            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    function ($no, $str, $file, $line) {
+        if (error_reporting() & $no) {
+            throw new ErrorException($str, 0, $no, $file, $line);
         }
     }
 );
 register_shutdown_function(function () {
     if ($error = error_get_last()) {
-        handleThrowable(new ErrorException($error['message'], 0, 1, $error['file'], $error['line']));
+        logError(new ErrorException($error['message'], 0, 1, $error['file'], $error['line']));
     }
 });
 

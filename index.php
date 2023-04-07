@@ -1,6 +1,6 @@
 <?php
 
-use Fuxuqiang\Framework\{Container, ResponseException};
+use Fuxuqiang\Framework\{Container, ResponseException, Model\ModelNotFoundException, ResponseCode};
 
 try {
     // 加载公共脚本，获取路由文件
@@ -15,14 +15,23 @@ try {
     // 处理请求
     [$concrete, $method, $args] = (new \Src\Http($routeFile))->handle($_SERVER, $_REQUEST);
     $response = (Container::newInstance($concrete))->$method(...$args);
-// 异常响应
-} catch (ResponseException $e) {
-    http_response_code($e->getCode());
-    $response = ($msg = $e->getMessage()) ? error($msg) : '';
-// 其他异常处理
+// 异常处理
 } catch (\Throwable $th) {
-    http_response_code(ResponseException::INTERNAL_SERVER_ERROR);
-    handleThrowable($th);
+    $code = match (true) {
+        $th instanceof ResponseException => $th->getCode(),
+        $th instanceof ModelNotFoundException => ResponseCode::BadRequest,
+        default => ResponseCode::InternalServerError,
+    };
+    http_response_code($code->value);
+    if (!$th instanceof RuntimeException) {
+        if (env('debug')) {
+            $response = ['error' => $th->getMessage(), 'trace' => $th->getTrace()];
+        } else {
+            logError($th);
+        }
+    } else {
+        $response = error($th->getMessage());
+    }
 }
 
 // 响应

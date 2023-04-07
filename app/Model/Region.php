@@ -2,13 +2,16 @@
 
 namespace App\Model;
 
-use Fuxuqiang\Framework\{Mysql, Model\Model};
+use Fuxuqiang\Framework\Model\{ModelQuery, Model};
 
+/**
+ * @method static ModelQuery search(string $name)
+ */
 class Region extends Model
 {
     const CODE = 'code', NAME = 'name', EN_NAME = 'en_name', SHORT_EN_NAME = 'short_en_name';
 
-    protected $primaryKey = self::CODE;
+    protected string $primaryKey = self::CODE;
 
     public int $code;
 
@@ -39,7 +42,7 @@ class Region extends Model
     /**
      * 根据名称搜索区域
      */
-    public function scopeSearch(Mysql $query, $name): Mysql
+    public function scopeSearch(ModelQuery $query, string $name): ModelQuery
     {
         return $query->whereLike(self::NAME, $name.'%');
     }
@@ -47,7 +50,7 @@ class Region extends Model
     /**
      * 获取下级区域
      */
-    public function scopeChild(Mysql $query, $code): Mysql
+    public function scopeChild(ModelQuery $query, int $code): ModelQuery
     {
         $factor = $code > 99999 ? 1000 : (in_array($code, [4419, 4420]) ? 100000 : 100);
         return $query->whereBetween(self::CODE, [$code * $factor, ($code + 1) * $factor]);

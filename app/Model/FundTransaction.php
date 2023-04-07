@@ -2,14 +2,15 @@
 
 namespace App\Model;
 
-use Fuxuqiang\Framework\{Mysql, Model\Model};
+use Fuxuqiang\Framework\{Model\ModelQuery, Mysql, Model\Model};
 
 /**
- * @method static Mysql canSold(int $id, string $date)
+ * @method static ModelQuery canSold(int $id, string $date)
  */
 class FundTransaction extends Model
 {
-    const FUND_ID = 'fund_id',
+    const ID = 'id',
+        FUND_ID = 'fund_id',
         BOUGHT_AT = 'bought_at',
         CONFIRM_AT = 'confirm_at',
         AMOUNT = 'amount',
@@ -17,11 +18,13 @@ class FundTransaction extends Model
         PER_WORTH = 'per_worth',
         IS_SOLD = 'is_sold';
 
-    public int $id, $fund_id, $amount, $portion;
+    public int $id, $fundId, $amount, $portion;
 
-    public string $bought_at, $confirm_at;
+    public ?int $isSold;
 
-    public function scopeCanSold(Mysql $query, int $fundId, string $date): Mysql
+    public string $boughtAt, $confirmAt;
+
+    public function scopeCanSold(ModelQuery $query, int $fundId, string $date): ModelQuery
     {
         return $query->where(self::IS_SOLD, 0)
             ->where(self::FUND_ID, $fundId)
