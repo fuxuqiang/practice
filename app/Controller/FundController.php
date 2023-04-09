@@ -18,12 +18,23 @@ class FundController
                 FundWorth::fundId($id)->where(FundWorth::DATE, '<', $amount->date)->all(),
                 array_slice($worth3, 0, 2)
             );
-            $confirmAt = $worth3[2]->date;
+            $canSold = FundTransaction::canSold($id, $worth3[2]->date)->all();
         } else {
             $worthList = [FundWorth::fundId($id)->firstOrFail()];
-            $confirmAt = null;
+            $canSold = [];
         }
-        return $this->getData($id, $amount, $confirmAt) + ['worth' => $worthList];
+
+        return [
+            'worth' => $worthList,
+            'profits' => array_map(
+                fn($item) => ['date' => $item->date, 'profit' => $item->totalProfit],
+                FundAmount::where(FundAmount::FUND_ID, $id)
+                    ->all([FundAmount::DATE, FundAmount::TOTAL_PROFIT])
+            ),
+            'canSold' => $canSold,
+            'transactions' => FundTransaction::where(FundTransaction::FUND_ID, $id)
+                ->column(FundTransaction::AMOUNT, FundTransaction::BOUGHT_AT)
+        ];
     }
 
     #[Route('next')]
@@ -46,7 +57,11 @@ class FundController
     {
         $worth = FundWorth::get3Worth($id, $date);
 
-        return $this->getNextData($worth[1], $worth[0]->buy($amount, $worth[1]->date), $worth[2]->date);
+        return $this->getNextData(
+            $worth[1],
+            $worth[0]->buy($amount, $worth[1]->date),
+            $worth[2]->date
+        );
     }
 
     /**
@@ -63,31 +78,23 @@ class FundController
             throw new ResponseException('存在不可卖出的份额', ResponseCode::BadRequest);
         }
 
-        return $this->getNextData($worth[1], $worth[0]->sell($transactions, $worth[1]->date), $worth[2]->date);
+        return $this->getNextData(
+            $worth[1],
+            $worth[0]->sell($transactions, $worth[1]->date),
+            $worth[2]->date
+        );
     }
 
     /**
-     * 获取图表数据
+     * 获取下一个日期的数据
      */
-    private function getData(int $id, ?FundAmount $amount, ?string $confirmAt): array
-    {
-        if ($amount) {
-            $data = [
-                'amount' => $amount->amount,
-                'profit' => $amount->profit,
-                'portion' => $amount->portion
-            ];
-        } else {
-            $data = ['amount' => 0, 'profit' => 0, 'portion' => 0];
-        }
-        return $data + ['canSold' => $confirmAt ? FundTransaction::canSold($id, $confirmAt)->all() : []];
-    }
-
     private function getNextData(FundWorth $worth, ?FundAmount $amount, string $confirmAt): array
     {
-        return $this->getData($worth->fundId, $amount, $confirmAt) + [
+        return [
+            'profit' => $amount ? ['profit' => $amount->totalProfit, 'date' => $amount->date] : [],
             'date' => $worth->date,
-            'value' => $worth->value
+            'value' => $worth->value,
+            'canSold' => FundTransaction::canSold($worth->fundId, $confirmAt)->all()
         ];
     }
 }

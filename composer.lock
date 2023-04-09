@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "27facd0ec99e99eced59daf5661ce0fe",
+    "content-hash": "6d9f34ff759b538ea99a33e4f8379c42",
     "packages": [
         {
             "name": "fuxuqiang/practice-framework",
-            "version": "dev-master",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fuxuqiang/practice-framework.git",
-                "reference": "01bd1c578a351b75bee0950bfc0f7e0fa70004c1"
+                "reference": "6908a87bcd539e6bbb43f42175ab3741ac8e2027"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fuxuqiang/practice-framework/zipball/01bd1c578a351b75bee0950bfc0f7e0fa70004c1",
-                "reference": "01bd1c578a351b75bee0950bfc0f7e0fa70004c1",
+                "url": "https://api.github.com/repos/fuxuqiang/practice-framework/zipball/6908a87bcd539e6bbb43f42175ab3741ac8e2027",
+                "reference": "6908a87bcd539e6bbb43f42175ab3741ac8e2027",
                 "shasum": ""
             },
             "require": {
@@ -37,9 +37,9 @@
             "description": "简易PHP框架（自己练习造轮子用的）",
             "support": {
                 "issues": "https://github.com/fuxuqiang/practice-framework/issues",
-                "source": "https://github.com/fuxuqiang/practice-framework/tree/master"
+                "source": "https://github.com/fuxuqiang/practice-framework/tree/main"
             },
-            "time": "2023-04-07T15:13:23+00:00"
+            "time": "2023-04-09T14:19:23+00:00"
         },
         {
             "name": "myclabs/deep-copy",
