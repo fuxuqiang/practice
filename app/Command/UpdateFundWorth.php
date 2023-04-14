@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Model\{Fund, FundWorth};
-use Fuxuqiang\Framework\Http\HttpClient;
 
 class UpdateFundWorth
 {
@@ -11,12 +10,13 @@ class UpdateFundWorth
 
     public function handle(): void
     {
-        $http = new HttpClient();
+        $http = new \Fuxuqiang\Framework\Http\HttpClient;
         foreach (Fund::all() as $fund) {
             $http->addHandle(self::PATH . $fund->code . '.js', ['id' => $fund->id]);
         }
         FundWorth::truncate();
         foreach ($http->multiRequest() as $item) {
+            $data = [];
             preg_match('/ACWorthTrend = (.+?);/', $item->getContent(), $matches);
             foreach (json_decode($matches[1]) as $value) {
                 $data[] = [

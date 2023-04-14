@@ -8,10 +8,7 @@ class Http
 {
     private Router $router;
 
-    private array $types = [
-        'int' => 'is_numeric',
-        'float' => 'is_numeric'
-    ];
+    private array $types = ['int' => 'is_numeric', 'float' => 'is_numeric'];
 
     public function __construct($routeFile)
     {

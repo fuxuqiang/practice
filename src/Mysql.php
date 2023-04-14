@@ -2,7 +2,7 @@
 
 namespace Src;
 
-use Fuxuqiang\Framework\{Connector, Mysql as Query};
+use Fuxuqiang\Framework\{Model\Connector, Mysql as Query};
 use mysqli;
 
 /**
@@ -50,14 +50,6 @@ class Mysql implements Connector
             self::$mysqli->set_charset('utf8mb4');
         }
         return new Query(self::$mysqli);
-    }
-
-    /**
-     * 获取mysqli实例
-     */
-    public static function getMysqli(): mysqli
-    {
-        return self::$mysqli;
     }
 
     /**

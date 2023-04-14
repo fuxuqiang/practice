@@ -28,5 +28,3 @@ register_shutdown_function(function () {
 
 // 设置模型的数据库连接
 \Fuxuqiang\Framework\Model\Model::setConnector(\Src\Mysql::getInstance());
-
-return runtimePath('route.php');

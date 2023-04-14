@@ -3,8 +3,8 @@
 use Fuxuqiang\Framework\{Container, ResponseException, Model\ModelNotFoundException, ResponseCode};
 
 try {
-    // 加载公共脚本，获取路由文件
-    $routeFile = require __DIR__ . '/src/app.php';
+    // 加载公共文件
+    require __DIR__ . '/src/app.php';
     // 处理跨域
     if ($cors = env('cors')) {
         header('Access-Control-Allow-Origin: ' . $cors);
@@ -13,7 +13,7 @@ try {
         if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') exit;
     }
     // 处理请求
-    [$concrete, $method, $args] = (new \Src\Http($routeFile))->handle($_SERVER, $_REQUEST);
+    [$concrete, $method, $args] = (new \Src\Http(runtimePath('route.php')))->handle($_SERVER, $_REQUEST);
     $response = (Container::newInstance($concrete))->$method(...$args);
 // 异常处理
 } catch (\Throwable $th) {

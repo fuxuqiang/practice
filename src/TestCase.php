@@ -2,7 +2,8 @@
 
 namespace Src;
 
-use Fuxuqiang\Framework\{Container, ResponseException, TestResponse};
+use Fuxuqiang\Framework\{Container, Model\Model, ResponseCode, ResponseException, TestResponse};
+use ReflectionException;
 
 /**
  * @method TestResponse get($uri, $param = [])
@@ -30,14 +31,15 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     public static function setUpBeforeClass(): void
     {
+        Model::setConnector(Mysql::getInstance());
         if (!self::$http) {
-            self::$http = new Http(require __DIR__ . '/app.php');
+            self::$http = new Http(runtimePath('route.php'));
         }
     }
 
     /**
      * 调用测试请求
-     * @throws \ReflectionException|ResponseException
+     * @throws ReflectionException|ResponseException
      */
     protected function request($requestMethod, $uri, $params = [], $token = null): TestResponse
     {
@@ -46,7 +48,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             [
                 'REQUEST_METHOD' => $requestMethod,
                 'REQUEST_URI' => $uri,
-                'HTTP_AUTHORIZATION' => $token ? 'Bearer ' . $token : null,
+                'HTTP_AUTHORIZATION' => $token ? 'Bearer '.$token : null,
                 'REMOTE_ADDR' => $this->ip,
                 'REQUEST_TIME' => time(),
             ],
@@ -56,10 +58,8 @@ class TestCase extends \PHPUnit\Framework\TestCase
             $controller = Container::newInstance($concrete);
             Container::instance($concrete, $controller);
         }
-        $response = $controller->$method(...$args);
-        $status = 200;
         $this->token = null;
-        return new TestResponse($response, $status);
+        return new TestResponse($controller->$method(...$args), ResponseCode::OK);
     }
 
     /**
@@ -73,7 +73,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * 根据方法名调用request方法
-     * @throws \ReflectionException|ResponseException
+     * @throws ReflectionException|ResponseException
      */
     public function __call($name, $args)
     {
@@ -83,7 +83,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * 断言数据库中数据是否存在
      */
-    public function assertDatabaseHas($table, $data)
+    public function assertDatabaseHas($table, $data): void
     {
         $this->assertTrue(Mysql::table($table)->where($data)->count() > 0);
     }
