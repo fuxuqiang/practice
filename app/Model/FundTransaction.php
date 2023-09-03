@@ -2,10 +2,11 @@
 
 namespace App\Model;
 
-use Fuxuqiang\Framework\{Model\ModelQuery, Mysql, Model\Model};
+use Fuxuqiang\Framework\Model\{ModelQuery, Model};
 
 /**
  * @method static ModelQuery canSold(int $id, string $date)
+ * @method static ModelQuery fundId(int $fundId)
  */
 class FundTransaction extends Model
 {
@@ -33,5 +34,10 @@ class FundTransaction extends Model
                 '<=', date('Y-m-d',
                 strtotime($date) - 7*24*3600)
             );
+    }
+
+    public function scopeFundId(ModelQuery $query, int $fundId): ModelQuery
+    {
+        return $query->where(self::FUND_ID, $fundId);
     }
 }

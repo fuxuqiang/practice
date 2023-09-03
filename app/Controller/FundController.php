@@ -32,7 +32,7 @@ class FundController
                     ->all([FundAmount::DATE, FundAmount::TOTAL_PROFIT])
             ),
             'canSold' => $canSold,
-            'transactions' => FundTransaction::where(FundTransaction::FUND_ID, $id)
+            'transactions' => FundTransaction::fundId($id)
                 ->column(FundTransaction::AMOUNT, FundTransaction::BOUGHT_AT)
         ];
     }

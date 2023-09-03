@@ -6,9 +6,6 @@ class FundAmount extends \Fuxuqiang\Framework\Model\Model
 {
     const FUND_ID = 'fund_id',
         DATE = 'date',
-        AMOUNT = 'amount',
-        PORTION = 'portion',
-        PROFIT = 'profit',
         TOTAL_PROFIT = 'total_profit';
 
     public int $fundId, $amount, $portion, $profit, $totalProfit;
@@ -18,8 +15,8 @@ class FundAmount extends \Fuxuqiang\Framework\Model\Model
     public static function newData(FundWorth $worth, int $portion): self
     {
         $lastAmount = self::where(self::DATE, '<', $worth->date)
+            ->where(self::FUND_ID, $worth->fundId)
             ->orderByDesc(self::DATE)
-            ->fields([self::PORTION, self::PROFIT, self::AMOUNT, self::FUND_ID])
             ->first();
         $profit = $totalProfit = 0;
         if ($lastAmount) {
