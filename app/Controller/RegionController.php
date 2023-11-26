@@ -11,7 +11,7 @@ class RegionController
      * 查询下级区域
      */
     #[Route('regions')]
-    public function list(int $code): array
+    public function list(int $code = 0): array
     {
         return Region::child($code)->all();
     }

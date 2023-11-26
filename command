@@ -1,7 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-$routeFile = require __DIR__ . '/src/app.php';
+require __DIR__ . '/src/initError.php';
+
+$routeFile = require __DIR__ . '/src/setting.php';
 
 if ($argv[1] == 'route') {
     (new \Fuxuqiang\Framework\Route\Router($routeFile))->handle('App\Controller');

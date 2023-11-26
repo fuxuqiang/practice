@@ -3,9 +3,11 @@
 namespace App\Model;
 
 use Fuxuqiang\Framework\Model\{ModelQuery, Model};
+use Overtrue\Pinyin\Pinyin;
 
 /**
  * @method static ModelQuery search(string $name)
+ * @method static ModelQuery child(int $code)
  */
 class Region extends Model
 {
@@ -15,7 +17,22 @@ class Region extends Model
 
     public int $code;
 
-    public string $name;
+    public string $name, $enName = '', $shortEnName = '';
+
+    public static function newInstance(int $code, string $name): self
+    {
+        $self = new self;
+        $self->code = $code;
+        $self->name = $name;
+        if (
+            (in_array($code, [11, 12, 31, 50]) || $code > 1000 && $code < 999999) &&
+            !in_array($name, ['县', '自治区直辖县级行政区划', '省直辖县级行政区划', '市辖区'])
+        ) {
+            $self->enName = Pinyin::permalink($name, '');
+            $self->shortEnName = Pinyin::abbr($name)->join('');
+        }
+        return $self;
+    }
 
     /**
      * 获取所有级联区域代码

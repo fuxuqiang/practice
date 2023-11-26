@@ -1,10 +1,10 @@
 <?php
 
-use Fuxuqiang\Framework\{Container, ResponseException, Model\ModelNotFoundException, ResponseCode};
+use Fuxuqiang\Framework\{Container, ResponseCode};
 
 try {
     // 加载公共文件
-    require __DIR__ . '/src/app.php';
+    require __DIR__ . '/src/initError.php';
     // 处理跨域
     if ($cors = env('cors')) {
         header('Access-Control-Allow-Origin: ' . $cors);
@@ -13,16 +13,11 @@ try {
         if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') exit;
     }
     // 处理请求
-    [$concrete, $method, $args] = (new \Src\Http(runtimePath('route.php')))->handle($_SERVER, $_REQUEST);
+    [$concrete, $method, $args] = (new \Src\Http(require __DIR__ . '/src/setting.php'))->handle($_SERVER, $_REQUEST);
     $response = (Container::newInstance($concrete))->$method(...$args);
 // 异常处理
 } catch (\Throwable $th) {
-    $code = match (true) {
-        $th instanceof ResponseException => $th->getCode(),
-        $th instanceof ModelNotFoundException => ResponseCode::BadRequest,
-        default => ResponseCode::InternalServerError,
-    };
-    http_response_code($code->value);
+    http_response_code($th->getCode() ?: ResponseCode::InternalServerError->value);
     if (!$th instanceof RuntimeException) {
         if (env('debug')) {
             $response = ['error' => $th->getMessage(), 'trace' => $th->getTrace()];

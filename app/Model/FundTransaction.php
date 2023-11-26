@@ -7,6 +7,7 @@ use Fuxuqiang\Framework\Model\{ModelQuery, Model};
 /**
  * @method static ModelQuery canSold(int $id, string $date)
  * @method static ModelQuery fundId(int $fundId)
+ * @method static ModelQuery unSold(int $fundId)
  */
 class FundTransaction extends Model
 {
@@ -15,8 +16,6 @@ class FundTransaction extends Model
         BOUGHT_AT = 'bought_at',
         CONFIRM_AT = 'confirm_at',
         AMOUNT = 'amount',
-        PORTION = 'portion',
-        PER_WORTH = 'per_worth',
         IS_SOLD = 'is_sold';
 
     public int $id, $fundId, $amount, $portion;
@@ -39,5 +38,10 @@ class FundTransaction extends Model
     public function scopeFundId(ModelQuery $query, int $fundId): ModelQuery
     {
         return $query->where(self::FUND_ID, $fundId);
+    }
+
+    public function scopeUnsold(ModelQuery $query, int $fundId): ModelQuery
+    {
+        return $this->scopeFundId($query, $fundId)->where(self::IS_SOLD, 0);
     }
 }

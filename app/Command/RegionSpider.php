@@ -11,13 +11,13 @@ use DOMXPath;
 
 class RegionSpider
 {
-    const ROOT_URL = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2021/index.html',
+    const ROOT_URL = 'http://www.stats.gov.cn/sj/tjbz/tjyqhdmhcxhfdm/2023/index.html',
 
         COUNTY_EXPRESSION = '//tr[@class="countytr"]';
 
     private readonly string $file;
     
-    private $count;
+    private int $count = 0, $interval = 2;
 
     private array $expressions = [
             '//tr[@class="provincetr"]/td/a',
@@ -27,7 +27,7 @@ class RegionSpider
             '//tr[@class="villagetr"]'
         ];
 
-    private int $rootlen;
+    private int $rootLen;
 
     /**
      * 初始化队列和计数
@@ -38,7 +38,7 @@ class RegionSpider
         private readonly HttpClient $http = new HttpClient,
     ) {
         $this->file = runtimePath('spiderQueue.log');
-        $this->rootlen = strlen(dirname(self::ROOT_URL)) + 1;
+        $this->rootLen = strlen(dirname(self::ROOT_URL)) + 1;
         if (file_exists($this->file)) {
             $this->queue->unserialize(file_get_contents($this->file));
             $this->count = Region::count();
@@ -58,7 +58,7 @@ class RegionSpider
         } else {
             for ($i = 1; !$this->queue->isEmpty(); $i++) {
                 $this->addUrl($this->getChildUrl($url, $this->queue->dequeue()));
-                if (!($i % 99) || $this->queue->isEmpty()) {
+                if (!($i % 9) || $this->queue->isEmpty()) {
                     $this->multiRequest();
                 }
             }
@@ -71,34 +71,42 @@ class RegionSpider
      */
     private function crawl($url, $xpath): void
     {
-        [$expression, $expressions, $doms] = $this->query($xpath, $this->expressions);
+        [$expression, $expressions, $domes] = $this->query($xpath, $this->expressions);
         if (next($expressions)) {
             if ($expression == self::COUNTY_EXPRESSION) {
-                foreach ($doms as $dom) {
-                    $firstNodes = $dom->childNodes;
-                    if ($firstNodes[0]->firstChild instanceof \DOMText) {
-                        $data[] = [rtrim($firstNodes[0]->nodeValue, 0), $firstNodes[1]->nodeValue];
+                foreach ($domes as $dom) {
+                    $childNodes = $dom->childNodes;
+                    if ($childNodes[0]->firstChild instanceof \DOMText) {
+                        $data[] = Region::newInstance($this->trimCode($childNodes[0]->nodeValue), $childNodes[1]->nodeValue);
                     } else {
-                        $data[] = $this->getDataAndAddHandle($dom->childNodes[1]->firstChild, $url);
+                        $data[] = $this->getDataAndAddHandle($childNodes[1]->firstChild, $url);
                     }
                 }
             } else {
-                foreach ($doms as $dom) {
-                    $data[] = $this->getDataAndAddHandle($dom, $url);
+                foreach ($domes as $dom) {
+                    if ($dom->attributes['href']) {
+                        $data[] = $this->getDataAndAddHandle($dom, $url);
+                    } else {
+                        $data[] = Region::newInstance(
+                            $this->trimCode($dom->parentNode->previousSibling->childNodes[0]->nodeValue),
+                            $dom->nodeValue
+                        );
+                    }
                 }
             }
         } else {
-            foreach ($doms as $dom) {
+            foreach ($domes as $dom) {
                 $childNodes = $dom->childNodes;
-                $data[] = [$childNodes[0]->nodeValue, $childNodes[2]->nodeValue];
+                $data[] = Region::newInstance($childNodes[0]->nodeValue, $childNodes[2]->nodeValue);
             }
         }
         try {
-            $this->insert($data);
+            Region::batchSave($data);
         } catch (Throwable $th) {
             $this->failedQueue->enqueue($this->getUri($url));
             throw $th;
         }
+        echo "\x0d\x1b[2k", '数据量：', $this->count += count($data);
     }
 
     /**
@@ -107,7 +115,7 @@ class RegionSpider
      */
     private function multiRequest(): void
     {
-        foreach ($this->http->multiRequest(30, 2) as $val) {
+        foreach ($this->http->multiRequest($this->interval) as $val) {
             $url = curl_getinfo($val->handle, CURLINFO_EFFECTIVE_URL);
             if (
                 200 == curl_getinfo($val->handle, CURLINFO_HTTP_CODE)
@@ -117,7 +125,7 @@ class RegionSpider
                 $this->crawl($url, $xpath);
             } else{
                 $this->failedQueue->enqueue($this->getUri($url));
-                sleep(5);
+                sleep($this->interval * 5);
             }
             pcntl_signal_dispatch();
         }
@@ -136,11 +144,11 @@ class RegionSpider
     /**
      * 获取节点数据并添加url至队列
      */
-    private function getDataAndAddHandle(\DOMNode $dom, $url): array
+    private function getDataAndAddHandle(\DOMNode $node, $url): Region
     {
-        $uri = $dom->attributes['href']->nodeValue;
+        $uri = $node->attributes['href']->nodeValue;
         $this->addUrl($this->getChildUrl($url, $uri));
-        return [substr(basename($uri), 0, -5), $dom->nodeValue];
+        return Region::newInstance(substr(basename($uri), 0, -5), $node->nodeValue);
     }
 
     /**
@@ -158,25 +166,14 @@ class RegionSpider
     private function query(\DOMXPath $xpath, $expressions): array
     {
         $expression = current($expressions);
-        $doms = $xpath->query($expression);
-        if ($doms->length) {
-            return [$expression, $expressions, $doms];
+        $domes = $xpath->query($expression);
+        if ($domes->length) {
+            return [$expression, $expressions, $domes];
+        } elseif (next($expressions)) {
+            return $this->query($xpath, $expressions);
         } else {
-            if (next($expressions)) {
-                return $this->query($xpath, $expressions);
-            } else {
-                throw new Exception('html解析失败');
-            }
+            throw new Exception('html解析失败');
         }
-    }
-
-    /**
-     * 写入数据
-     */
-    private function insert($data): void
-    {
-        Region::fields([Region::CODE, Region::NAME])->insert($data);
-        echo "\x0d\x1b[2k", '数据量：', $this->count += count($data);
     }
 
     /**
@@ -184,7 +181,15 @@ class RegionSpider
      */
     private function getUri($url): string
     {
-        return substr($url, $this->rootlen);
+        return substr($url, $this->rootLen);
+    }
+
+    /**
+     * 去除行政编码尾处的0
+     */
+    private function trimCode(string $code): string
+    {
+        return rtrim($code, 0);
     }
 
     /**
@@ -201,9 +206,7 @@ class RegionSpider
     public function __destruct()
     {
         foreach ($this->http->getHandles() as $ch) {
-            $this->failedQueue->enqueue(
-                $this->getUri(curl_getinfo($ch->handle, CURLINFO_EFFECTIVE_URL))
-            );
+            $this->failedQueue->enqueue($this->getUri(curl_getinfo($ch->handle, CURLINFO_EFFECTIVE_URL)));
         }
         foreach ($this->queue as $url) {
             $this->failedQueue->enqueue($url);

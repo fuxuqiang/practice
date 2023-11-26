@@ -2,10 +2,17 @@
 
 namespace Src;
 
+/**
+ * @method static bool|\Redis setex(string $key, int $expire, $value)
+ * @method static get(string $key)
+ */
 class Redis
 {
-    private static $redis;
+    private static \Redis $redis;
 
+    /**
+     * @throws \RedisException
+     */
     public static function __callStatic($name, $args)
     {
         if (!self::$redis) {

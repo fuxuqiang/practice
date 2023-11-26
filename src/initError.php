@@ -2,8 +2,6 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-date_default_timezone_set(env('timezone'));
-
 if (env('debug')) {
     ini_set('display_errors', 'On');
     error_reporting(-1);
@@ -25,6 +23,3 @@ register_shutdown_function(function () {
         logError(new ErrorException($error['message'], 0, 1, $error['file'], $error['line']));
     }
 });
-
-// 设置模型的数据库连接
-\Fuxuqiang\Framework\Model\Model::setConnector(\Src\Mysql::getInstance());

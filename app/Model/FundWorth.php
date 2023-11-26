@@ -2,13 +2,13 @@
 
 namespace App\Model;
 
-use Fuxuqiang\Framework\{Model\ModelQuery, ResponseCode, ResponseException};
+use Fuxuqiang\Framework\{Model\Model, Model\ModelQuery, ResponseCode, ResponseException};
 use Src\Mysql;
 
 /**
  * @method static ModelQuery fundId(int $id)
  */
-class FundWorth extends \Fuxuqiang\Framework\Model\Model
+class FundWorth extends Model
 {
     const FUND_ID = 'fund_id',
         DATE = 'date',
