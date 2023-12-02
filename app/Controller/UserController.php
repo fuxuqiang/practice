@@ -1,7 +1,8 @@
 <?php
 namespace App\Controller;
 
-use Fuxuqiang\Framework\{Request, ResponseCode, ResponseException, Route\Route};
+use App\Model\User;
+use Fuxuqiang\Framework\{JWT, Request, ResponseCode, ResponseException, Route\Route};
 use Src\{Mysql, Redis};
 
 #[Route(middlewares:[\App\Middleware\RequestRecorder::class])]
@@ -25,8 +26,19 @@ class UserController
     }
 
     #[Route('login', 'POST')]
-    public function login(string $mobile, int $code)
+    public function login(string $mobile, int $code, JWT $jwt, Request $request): array
     {
-        
+        if (($existingCode = Redis::get($mobile)) && $existingCode == $code) {
+            $userId = User::where(User::MOBILE, $mobile)->value(User::ID);
+            if (!$userId) {
+                $user = new User;
+                $user->mobile = $mobile;
+                $user->createdAt = $request->server['REQUEST_TIME'];
+                $user->save();
+                $userId = $user->id;
+            }
+            return data($jwt->encode($userId));
+        }
+        return error('验证码错误');
     }
 }

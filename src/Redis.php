@@ -8,7 +8,7 @@ namespace Src;
  */
 class Redis
 {
-    private static \Redis $redis;
+    private static ?\Redis $redis = null;
 
     /**
      * @throws \RedisException

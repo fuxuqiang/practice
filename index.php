@@ -1,6 +1,6 @@
 <?php
 
-use Fuxuqiang\Framework\{Container, ResponseCode};
+use Fuxuqiang\Framework\{Container, ResponseCode, ResponseException};
 
 try {
     // 加载公共文件
@@ -17,7 +17,7 @@ try {
     $response = (Container::newInstance($concrete))->$method(...$args);
 // 异常处理
 } catch (\Throwable $th) {
-    http_response_code($th->getCode() ?: ResponseCode::InternalServerError->value);
+    http_response_code($th instanceof ResponseException ? $th->getCode() : ResponseCode::InternalServerError->value);
     if (!$th instanceof RuntimeException) {
         if (env('debug')) {
             $response = ['error' => $th->getMessage(), 'trace' => $th->getTrace()];

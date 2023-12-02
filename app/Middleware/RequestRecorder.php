@@ -10,16 +10,16 @@ class RequestRecorder
     {
         $input = $request->getData();
         ksort($input);
-        $data = [
-            'method' => $request->server['REQUEST_METHOD'],
-            'uri' => $request->uri,
-            'ip' => $request->server['REMOTE_ADDR'],
-            'input' => json_encode($input),
-            'token' => $request->token() ?: '',
-            'created_at' => $request->server['REQUEST_TIME']
-        ];
+        $log = new \App\Model\RequestLog;
+        $log->method = $request->server['REQUEST_METHOD'];
+        $log->uri = $request->uri;
+        $log->ip = $request->server['REMOTE_ADDR'];
+        $log->input = json_encode($input);
+        $log->token = $request->token();
+        $log->createdAt = $request->server['REQUEST_TIME'];
+        $log->key = md5(json_encode($log));
         try {
-            \Src\Mysql::table('request_log')->insert($data + ['key' => md5(json_encode($data))]);
+            $log->save();
         } catch (\Throwable $th) {
             throw new ResponseException('请勿频繁请求', ResponseCode::BadRequest);
         }

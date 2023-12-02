@@ -5,8 +5,8 @@ DROP TABLE IF EXISTS `region`;
 CREATE TABLE `region` (
     `code` BIGINT UNSIGNED PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
-    `en_name` VARCHAR(255) NOT NULL DEFAULT '',
-    `short_en_name` VARCHAR(255) NOT NULL DEFAULT ''
+    `en_name` VARCHAR(255),
+    `short_en_name` VARCHAR(255)
 );
 
 DROP TABLE IF EXISTS `fund`;
@@ -52,6 +52,14 @@ CREATE TABLE `request_log` (
     `uri` VARCHAR(255) NOT NULL,
     `ip` VARCHAR(255) NOT NULL,
     `input` TINYTEXT,
-    `token` VARCHAR(255) NOT NULL DEFAULT '',
+    `token` VARCHAR(255),
+    `created_at` INT NOT NULL
+);
+
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user` (
+    `id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    `mobile` CHAR(11) NOT NULL UNIQUE,
+    `name` VARCHAR(255),
     `created_at` INT NOT NULL
 );
