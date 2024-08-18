@@ -8,14 +8,14 @@ namespace Src;
  */
 class Redis
 {
-    private static ?\Redis $redis = null;
+    private static \Redis $redis;
 
     /**
      * @throws \RedisException
      */
     public static function __callStatic($name, $args)
     {
-        if (!self::$redis) {
+        if (!isset(self::$redis)) {
             self::$redis = new \Redis;
             self::$redis->connect('127.0.0.1');
         }

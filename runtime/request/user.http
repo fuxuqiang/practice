@@ -1,0 +1,18 @@
+POST http://practice.test/login
+Content-Type: application/json
+
+{
+  "code": 6304,
+  "mobile": 18005661486
+}
+
+### 发送验证码
+POST http://practice.test/sendCode
+Content-Type: application/json
+
+{
+  "mobile": 18005661486
+}
+
+###
+GET http://practice.test/regions

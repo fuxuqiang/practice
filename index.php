@@ -17,16 +17,18 @@ try {
     $response = (Container::newInstance($concrete))->$method(...$args);
 // 异常处理
 } catch (\Throwable $th) {
-    http_response_code($th instanceof ResponseException ? $th->getCode() : ResponseCode::InternalServerError->value);
-    if (!$th instanceof RuntimeException) {
+    if ($th instanceof ResponseException) {
+        $status = $th->getCode();
+        $response = error($th->getMessage());
+    } else {
+        $status = ResponseCode::InternalServerError->value;
         if (env('debug')) {
             $response = ['error' => $th->getMessage(), 'trace' => $th->getTrace()];
         } else {
             logError($th);
         }
-    } else {
-        $response = error($th->getMessage());
     }
+    http_response_code($status);
 }
 
 // 响应

@@ -65,9 +65,7 @@ class Http
     private function isType(\ReflectionNamedType $type, $val): bool
     {
         $name = $type->getName();
-        if ($name == 'string' && is_numeric($val)) {
-            return true;
-        } elseif (in_array($name, array_keys($this->types))) {
+        if (in_array($name, array_keys($this->types))) {
             return $this->types[$name]($val);
         } else {
             return ('is_'.$name)($val);

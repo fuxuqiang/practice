@@ -5,11 +5,11 @@
         "fuxuqiang/practice-framework": "dev-main",
         "overtrue/pinyin": "^5.0",
         "ext-pcntl": "*",
-        "ext-xml": "*",
         "ext-curl": "*",
         "ext-mbstring": "*",
         "ext-mysqli": "*",
-        "ext-redis": "*"
+        "ext-redis": "*",
+        "ext-dom": "*"
     },
     "autoload": {
         "psr-4": {

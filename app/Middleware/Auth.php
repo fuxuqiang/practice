@@ -7,11 +7,12 @@ use Fuxuqiang\Framework\{Request, JWT, Model};
 
 class Auth
 {
-    public function handle(Request $request, JWT $jwt, $table)
+    public function handle(Request $request, JWT $jwt, $table): void
     {
-        $server = $request->server();
+        $server = $request->server;
+        $token = $request->token();
         if (
-            ($token = $request->token()) && ($payload = $jwt->decode($token))
+            ($payload = $jwt->decode($token))
             && (
                 (
                     $table == 'user'

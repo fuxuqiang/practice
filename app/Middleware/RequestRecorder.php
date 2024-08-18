@@ -2,7 +2,7 @@
 
 namespace App\Middleware;
 
-use Fuxuqiang\Framework\{Request, ResponseCode, ResponseException};
+use Fuxuqiang\Framework\{Request, ResponseException};
 
 class RequestRecorder
 {
@@ -20,8 +20,8 @@ class RequestRecorder
         $log->key = md5(json_encode($log));
         try {
             $log->save();
-        } catch (\Throwable $th) {
-            throw new ResponseException('请勿频繁请求', ResponseCode::BadRequest);
+        } catch (\Throwable) {
+            throw new ResponseException('请勿频繁请求');
         }
     }
 }

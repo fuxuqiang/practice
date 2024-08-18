@@ -1,9 +1,9 @@
 <?php
 namespace App\Controller;
 
-use App\Model\User;
+use App\Model\{RequestLog, User};
 use Fuxuqiang\Framework\{JWT, Request, ResponseCode, ResponseException, Route\Route};
-use Src\{Mysql, Redis};
+use Src\Redis;
 
 #[Route(middlewares:[\App\Middleware\RequestRecorder::class])]
 class UserController
@@ -15,10 +15,10 @@ class UserController
     public function sendCode(int $mobile, Request $request): void
     {
         $server = $request->server;
-        $isFrequently = Mysql::table('request_log')
-            ->whereBetween('created_at', [$server['REQUEST_TIME'] - 60, $server['REQUEST_TIME'] - 1])
-            ->where('ip', $server['REMOTE_ADDR'])
-            ->exists('uri', 'sendCode');
+        $isFrequently = RequestLog::whereBetween(RequestLog::CREATED_AT, [$server['REQUEST_TIME'] - 60, $server['REQUEST_TIME'] - 1])
+            ->where(RequestLog::IP, $server['REMOTE_ADDR'])
+            ->where(RequestLog::URI, 'sendCode')
+            ->exists();
         if ($isFrequently) {
             throw new ResponseException('请勿频繁发送验证码', ResponseCode::BadRequest);
         }
